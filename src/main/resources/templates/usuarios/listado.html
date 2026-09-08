@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Usuarios · Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/usuarios.css}">
+</head>
+<body>
+
+<header class="barra-admin">
+    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
+    <nav>
+        <a th:href="@{/usuarios}"><i class="ti ti-arrow-left"></i> Volver a Mantenimiento de Usuarios</a>
+    </nav>
+</header>
+
+<main class="contenedor">
+    <h1>Listado de Usuarios</h1>
+
+    <p th:if="${param.creado}" class="mensaje-ok">Usuario creado correctamente.</p>
+    <p th:if="${param.actualizado}" class="mensaje-ok">Usuario actualizado correctamente.</p>
+    <p th:if="${param.eliminado}" class="mensaje-ok">El usuario ha sido eliminado correctamente.</p>
+    <p th:if="${param.errorAutoeliminar}" class="mensaje-error">
+        No puede eliminar su propia cuenta mientras tiene la sesion iniciada.
+    </p>
+
+    <form th:action="@{/usuarios/listado}" method="get" class="barra-busqueda">
+        <select name="campo">
+            <option value="usuario" th:selected="${campo == 'usuario'}">Nombre de Usuario</option>
+            <option value="nombre" th:selected="${campo == 'nombre'}">Nombre</option>
+            <option value="nit" th:selected="${campo == 'nit'}">NIT</option>
+            <option value="rol" th:selected="${campo == 'rol'}">Rol</option>
+            <option value="sucursal" th:selected="${campo == 'sucursal'}">Sucursal</option>
+        </select>
+        <input type="text" name="valor" th:value="${valor}" maxlength="25" placeholder="Buscar...">
+        <button type="submit"><i class="ti ti-search"></i></button>
+    </form>
+
+    <p th:if="${usuarios.totalElements == 0}" class="mensaje-error">
+        No se encontraron resultados para los criterios de busqueda ingresados. Por favor, modifique los filtros e intente nuevamente.
+    </p>
+
+    <table th:if="${usuarios.totalElements > 0}" class="tabla">
+        <thead>
+        <tr>
+            <th>Usuario</th><th>Nombre</th><th>Rol</th><th>NIT</th>
+            <th>Estado</th><th>Sucursal</th><th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="u : ${usuarios.content}">
+            <td th:text="${u.username}"></td>
+            <td th:text="${u.nombreCompleto}"></td>
+            <td th:text="${u.nombreRol}"></td>
+            <td th:text="${u.nit}"></td>
+            <td th:text="${u.state == 1 ? 'Activo' : (u.state == 0 ? 'Inactivo' : 'Eliminado')}"></td>
+            <td th:text="${u.sucursal != null ? u.sucursal.nombre : '-'}"></td>
+            <td class="acciones">
+                <a th:href="@{'/usuarios/' + ${u.id} + '/editar'}">Editar</a>
+                <button type="button" class="link-eliminar"
+                        th:unless="${u.username == #authentication.name}"
+                        th:attr="data-id=${u.id}, data-nombre=${u.username}"
+                        onclick="confirmarEliminar(this)">Eliminar</button>
+                <span th:if="${u.username == #authentication.name}"
+                      class="etiqueta-yo" title="No puedes eliminar tu propia cuenta">(Tu cuenta)</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="paginacion" th:if="${usuarios.totalPages > 1}">
+        <a th:each="p : ${#numbers.sequence(0, usuarios.totalPages - 1)}"
+           th:href="@{/usuarios/listado(campo=${campo}, valor=${valor}, page=${p})}"
+           th:text="${p + 1}"
+           th:classappend="${p == usuarios.number} ? 'pagina-activa'"></a>
+    </div>
+</main>
+
+<div class="velo" id="veloEliminar">
+    <div class="modal">
+        <h2><i class="ti ti-alert-triangle"></i> Confirmar eliminacion</h2>
+        <p id="textoConfirmacion"></p>
+        <form id="formEliminar" method="post">
+            <button type="button" onclick="cerrarModalEliminar()" class="boton-secundario">Cancelar</button>
+            <button type="submit" class="boton-peligro">Eliminar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function confirmarEliminar(boton) {
+        const id = boton.dataset.id, nombre = boton.dataset.nombre;
+        document.getElementById('textoConfirmacion').textContent =
+            'Esta seguro que desea eliminar el usuario "' + nombre + '"? Esta accion no se puede deshacer.';
+        document.getElementById('formEliminar').action = '/usuarios/' + id + '/eliminar';
+        document.getElementById('veloEliminar').classList.add('visible');
+    }
+    function cerrarModalEliminar() {
+        document.getElementById('veloEliminar').classList.remove('visible');
+    }
+</script>
+</body>
+</html>

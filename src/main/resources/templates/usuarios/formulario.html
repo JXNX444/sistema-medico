@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${editando} ? 'Editar Usuario' : 'Crear Usuario'">Usuario</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/usuarios.css}">
+</head>
+<body>
+
+<header class="barra-admin">
+    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
+    <nav>
+        <a th:href="@{/usuarios}"><i class="ti ti-arrow-left"></i> Volver a Mantenimiento de Usuarios</a>
+    </nav>
+</header>
+
+<main class="contenedor">
+    <h1 th:text="${editando} ? 'Editar Usuario' : 'Crear Usuario'"></h1>
+
+    <form th:action="${editando} ? @{'/usuarios/' + ${form.id} + '/editar'} : @{/usuarios/nuevo}"
+          th:object="${form}" method="post" class="formulario">
+
+        <label>Nombre Completo</label>
+        <input type="text" th:field="*{nombreCompleto}">
+        <p class="error" th:if="${errores.get('nombreCompleto')} != null" th:text="${errores.get('nombreCompleto')}"></p>
+
+        <label>Correo Electronico</label>
+        <input type="email" th:field="*{correo}">
+        <p class="error" th:if="${errores.get('correo')} != null" th:text="${errores.get('correo')}"></p>
+
+        <label>Nombre de Usuario</label>
+        <input type="text" th:field="*{username}">
+        <p class="error" th:if="${errores.get('username')} != null" th:text="${errores.get('username')}"></p>
+
+        <label th:text="${editando} ? 'Nueva Contrasena (opcional)' : 'Contrasena'"></label>
+        <input type="password" th:field="*{password}">
+        <p class="error" th:if="${errores.get('password')} != null" th:text="${errores.get('password')}"></p>
+
+        <label>Documento de Identificacion (opcional)</label>
+        <input type="text" th:field="*{dpi}" maxlength="13">
+        <p class="error" th:if="${errores.get('dpi')} != null" th:text="${errores.get('dpi')}"></p>
+
+        <label>Numero de Telefono (opcional)</label>
+        <input type="text" th:field="*{telefono}" maxlength="8">
+        <p class="error" th:if="${errores.get('telefono')} != null" th:text="${errores.get('telefono')}"></p>
+
+        <label>Rol</label>
+        <select th:field="*{rolId}" id="rolSelect" onchange="mostrarEspecialidad()">
+            <option value="">-- Seleccione --</option>
+            <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.nombre}"></option>
+        </select>
+        <p class="error" th:if="${errores.get('rolId')} != null" th:text="${errores.get('rolId')}"></p>
+
+        <label>NIT (opcional)</label>
+        <input type="text" th:field="*{nit}" maxlength="9">
+        <p class="error" th:if="${errores.get('nit')} != null" th:text="${errores.get('nit')}"></p>
+
+        <label>Numero de Seguro (opcional)</label>
+        <input type="text" th:field="*{numeroSeguro}" maxlength="50">
+        <p class="error" th:if="${errores.get('numeroSeguro')} != null" th:text="${errores.get('numeroSeguro')}"></p>
+
+        <label th:text="${editando} ? 'Sucursal (opcional)' : 'Sucursal'"></label>
+        <select th:field="*{sucursalId}">
+            <option value="">-- Seleccione --</option>
+            <option th:each="s : ${sucursales}" th:value="${s.id}" th:text="${s.nombre}"></option>
+        </select>
+        <p class="error" th:if="${errores.get('sucursalId')} != null" th:text="${errores.get('sucursalId')}"></p>
+
+        <div id="campoEspecialidad">
+            <label>Especialidad</label>
+            <select th:field="*{especialidadId}">
+                <option value="">-- Seleccione --</option>
+                <option th:each="e : ${especialidades}" th:value="${e.id}" th:text="${e.nombre}"></option>
+            </select>
+            <p class="error" th:if="${errores.get('especialidadId')} != null" th:text="${errores.get('especialidadId')}"></p>
+        </div>
+
+        <label>Estado</label>
+        <select th:field="*{state}">
+            <option value="1">Activo</option>
+            <option value="0">Inactivo</option>
+        </select>
+        <p class="error" th:if="${errores.get('state')} != null" th:text="${errores.get('state')}"></p>
+
+        <div class="acciones-formulario">
+            <a th:href="@{/usuarios/listado}" class="boton-secundario">Cancelar</a>
+            <button type="submit" class="boton-principal"
+                    th:text="${editando} ? 'Actualizar' : 'Crear'"></button>
+        </div>
+    </form>
+</main>
+
+<script th:inline="javascript">
+    const roles = /*[[${roles}]]*/ [];
+    function mostrarEspecialidad() {
+        const rolId = document.getElementById('rolSelect').value;
+        const rol = roles.find(r => r.id == rolId);
+        document.getElementById('campoEspecialidad').style.display =
+            (rol && rol.nombre === 'Medico') ? 'block' : 'none';
+    }
+    document.addEventListener('DOMContentLoaded', mostrarEspecialidad);
+</script>
+</body>
+</html>

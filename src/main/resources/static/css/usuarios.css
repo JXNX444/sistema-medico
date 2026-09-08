@@ -1,0 +1,207 @@
+/* =====================================================================
+   Modulo Usuarios - CU-01
+   ===================================================================== */
+
+:root {
+    --teal-900: #04342C;
+    --teal-800: #085041;
+    --teal-700: #0F6E56;
+    --teal-400: #1D9E75;
+    --teal-200: #5DCAA5;
+    --teal-100: #9FE1CB;
+    --teal-50:  #E1F5EE;
+
+    --ambar:      #EF9F27;
+    --ambar-osc:  #412402;
+
+    --hueso:    #F1EFE8;
+    --gris-300: #D3D1C7;
+    --gris-400: #B4B2A9;
+    --gris-600: #5F5E5A;
+    --gris-900: #2C2C2A;
+
+    --rojo:  #E24B4A;
+    --radio: 6px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--hueso);
+    color: var(--gris-900);
+    line-height: 1.6;
+}
+
+.contenedor { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+/* ---------- Barra superior admin ---------- */
+.barra-admin {
+    background: var(--teal-700);
+    padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    color: var(--teal-50); font-size: 15px; font-weight: 600;
+}
+.barra-admin span { display: flex; align-items: center; gap: 10px; }
+.barra-admin nav { display: flex; gap: 20px; }
+.barra-admin nav a {
+    color: var(--teal-100); text-decoration: none; font-size: 14px; font-weight: 400;
+    display: flex; align-items: center; gap: 6px;
+}
+.barra-admin nav a:hover { color: #fff; }
+
+h1 { font-family: Georgia, 'Times New Roman', serif; font-size: 28px; font-weight: 400; margin-bottom: 22px; }
+
+/* ---------- Mensajes ---------- */
+.mensaje-ok {
+    background: #E7F6EF; color: var(--teal-800);
+    border: 1px solid #B9E4D2; border-radius: var(--radio);
+    padding: 12px 14px; font-size: 13px; margin-bottom: 18px;
+}
+.mensaje-error {
+    display: block;
+    background: #FDECEC; color: #B02A2A;
+    border: 1px solid #F5C6C6; border-radius: var(--radio);
+    padding: 12px 14px; font-size: 13px; margin: 12px 0;
+}
+
+/* ---------- Menu principal (tarjetas) ---------- */
+.menu-sub { color: var(--gris-600); font-size: 14px; margin-bottom: 24px; }
+
+.menu-tarjetas {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.tarjeta-menu {
+    background: #fff; border: 1px solid var(--gris-300); border-radius: 8px;
+    padding: 1.5rem 1.25rem; text-align: center; text-decoration: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    transition: border-color .2s, box-shadow .2s;
+    display: block;
+}
+.tarjeta-menu:hover {
+    border-color: var(--teal-700); box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+.tarjeta-menu i {
+    font-size: 32px; color: var(--teal-700);
+}
+.tarjeta-titulo {
+    font-weight: 600; font-size: 16px; margin: 12px 0 4px; color: var(--gris-900);
+}
+.tarjeta-desc {
+    font-size: 13px; color: var(--gris-600); margin: 0;
+}
+
+/* ---------- Barra de busqueda ---------- */
+.barra-busqueda {
+    display: flex; gap: 10px; margin-bottom: 20px; max-width: 600px;
+}
+.barra-busqueda select,
+.barra-busqueda input {
+    border: 1px solid var(--gris-300); border-radius: var(--radio);
+    padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none;
+}
+.barra-busqueda input { flex: 1; }
+.barra-busqueda select:focus,
+.barra-busqueda input:focus { border-color: var(--teal-700); }
+.barra-busqueda button {
+    background: var(--teal-700); color: #fff; border: none; border-radius: var(--radio);
+    padding: 0 16px; cursor: pointer; font-size: 16px;
+}
+.barra-busqueda button:hover { background: var(--teal-800); }
+
+/* ---------- Tabla ---------- */
+.tabla {
+    width: 100%; border-collapse: collapse;
+    background: #fff; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.tabla th {
+    background: var(--teal-50); color: var(--teal-900);
+    text-align: left; font-size: 12px; letter-spacing: .4px;
+    text-transform: uppercase; padding: 12px 14px;
+}
+.tabla td { padding: 12px 14px; font-size: 14px; border-top: 1px solid var(--gris-300); }
+.tabla tbody tr:hover { background: var(--hueso); }
+.tabla .acciones { display: flex; gap: 10px; align-items: center; }
+.tabla .acciones a { color: var(--teal-700); text-decoration: none; font-size: 13px; font-weight: 600; }
+.tabla .acciones a:hover { text-decoration: underline; }
+.link-eliminar {
+    background: none; border: none; color: var(--rojo);
+    font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; padding: 0;
+}
+.link-eliminar:hover { text-decoration: underline; }
+.etiqueta-yo { font-size: 12px; color: var(--gris-400); font-style: italic; }
+
+/* ---------- Paginacion ---------- */
+.paginacion { display: flex; gap: 6px; margin-top: 18px; }
+.paginacion a {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: var(--radio);
+    background: #fff; border: 1px solid var(--gris-300);
+    color: var(--gris-900); text-decoration: none; font-size: 13px;
+}
+.paginacion a:hover { border-color: var(--teal-700); }
+.paginacion a.pagina-activa { background: var(--teal-700); color: #fff; border-color: var(--teal-700); }
+
+/* ---------- Formulario crear/editar ---------- */
+.formulario { max-width: 560px; }
+.formulario label {
+    display: block; font-size: 13px; font-weight: 600;
+    margin: 16px 0 6px;
+}
+.formulario input,
+.formulario select {
+    width: 100%; border: 1px solid var(--gris-300); border-radius: var(--radio);
+    padding: 11px 14px; font-size: 15px; font-family: inherit; outline: none;
+    transition: border-color .2s;
+}
+.formulario input:focus,
+.formulario select:focus { border-color: var(--teal-700); }
+.error { color: var(--rojo); font-size: 12px; margin-top: 5px; }
+
+.acciones-formulario {
+    display: flex; gap: 12px; margin-top: 28px;
+}
+.boton-principal {
+    background: var(--teal-700); color: #fff; border: none; border-radius: var(--radio);
+    padding: 12px 22px; font-size: 15px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: background .2s;
+}
+.boton-principal:hover { background: var(--teal-800); }
+.boton-secundario {
+    background: #fff; color: var(--gris-900); border: 1px solid var(--gris-300);
+    border-radius: var(--radio); padding: 12px 22px; font-size: 15px; font-weight: 600;
+    font-family: inherit; text-decoration: none; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: border-color .2s;
+}
+.boton-secundario:hover { border-color: var(--gris-600); }
+.boton-peligro {
+    background: var(--rojo); color: #fff; border: none; border-radius: var(--radio);
+    padding: 12px 22px; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer;
+}
+.boton-peligro:hover { filter: brightness(0.92); }
+
+/* ---------- Modal de confirmacion ---------- */
+.velo {
+    position: fixed; inset: 0; background: rgba(4, 52, 44, .55);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px; z-index: 50;
+}
+.velo.visible { display: flex; }
+
+.modal {
+    background: #fff; border-radius: 10px;
+    width: 100%; max-width: 420px; padding: 26px;
+}
+.modal h2 { display: flex; align-items: center; gap: 8px; font-size: 18px; margin-bottom: 12px; }
+.modal h2 i { color: var(--ambar); font-size: 22px; }
+.modal p { font-size: 14px; color: var(--gris-600); margin-bottom: 20px; }
+.modal form { display: flex; gap: 10px; justify-content: flex-end; }
+
+@media (max-width: 700px) {
+    .barra-admin { flex-direction: column; gap: 10px; align-items: flex-start; }
+    .tabla { font-size: 12px; }
+    .acciones-formulario { flex-direction: column; }
+    .menu-tarjetas { grid-template-columns: 1fr; }
+}

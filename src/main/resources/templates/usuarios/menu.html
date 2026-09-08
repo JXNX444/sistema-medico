@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mantenimiento de Usuarios · Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/usuarios.css}">
+</head>
+<body>
+
+<header class="barra-admin">
+    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
+    <nav>
+        <a th:href="@{/panel/inicio}"><i class="ti ti-arrow-left"></i> Volver al panel</a>
+    </nav>
+</header>
+
+<main class="contenedor">
+    <h1>Mantenimiento de usuarios</h1>
+    <p class="menu-sub">Elige que deseas hacer</p>
+
+    <div class="menu-tarjetas">
+        <a th:href="@{/usuarios/listado}" class="tarjeta-menu">
+            <i class="ti ti-list-details"></i>
+            <p class="tarjeta-titulo">Listar usuarios</p>
+            <p class="tarjeta-desc">Ver, buscar, editar o eliminar usuarios existentes</p>
+        </a>
+        <a th:href="@{/usuarios/nuevo}" class="tarjeta-menu">
+            <i class="ti ti-user-plus"></i>
+            <p class="tarjeta-titulo">Crear usuario</p>
+            <p class="tarjeta-desc">Registrar un nuevo usuario en el sistema</p>
+        </a>
+    </div>
+</main>
+
+</body>
+</html>
