@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Recepcion · Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/recepcion.css}">
+</head>
+<body>
+
+<header class="barra-admin">
+    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
+    <nav>
+<span style="color:var(--teal-100);font-size:14px;font-weight:400;">
+<i class="ti ti-user-circle" style="vertical-align:-2px;"></i>
+<span th:text="${nombre}">Recepcionista</span>
+</span>
+        <a th:href="@{/panel/inicio}"><i class="ti ti-arrow-left"></i> Volver al panel</a>
+    </nav>
+</header>
+
+<main class="contenedor">
+    <h1>Recepcion y verificacion de cita</h1>
+    <p class="menu-sub">Busque al paciente por DPI o numero de cita para registrar su llegada</p>
+
+    <div class="tarjeta-buscador">
+        <div class="alternancia">
+            <button type="button" id="btnModoDpi" class="alternancia-boton activa">
+                <i class="ti ti-id"></i> Por DPI
+            </button>
+            <button type="button" id="btnModoNumero" class="alternancia-boton">
+                <i class="ti ti-ticket"></i> Por No. Cita
+            </button>
+        </div>
+
+        <div class="fila-busqueda">
+            <input type="text" id="campoValor" placeholder="1234567890101" autocomplete="off">
+            <button type="button" id="btnBuscar" class="boton-principal" style="width:auto;">
+                <i class="ti ti-search"></i> Buscar
+            </button>
+        </div>
+
+        <p class="error-busqueda" id="errorBusqueda"></p>
+    </div>
+
+    <p class="cargando oculto" id="cargando">Buscando...</p>
+
+    <div id="zonaResultado"></div>
+</main>
+
+<script th:inline="javascript">
+    const CTX = /*[[@{/}]]*/ '/';
+</script>
+<script th:src="@{/js/recepcion.js}"></script>
+
+</body>
+</html>

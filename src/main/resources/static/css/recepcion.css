@@ -1,0 +1,173 @@
+/* =====================================================================
+   Modulo Recepcion - CU-05 (Recepcion y Verificacion de Cita)
+   Reutiliza la misma paleta de colores que citas.css / usuarios.css
+   ===================================================================== */
+
+:root {
+    --teal-900: #04342C;
+    --teal-800: #085041;
+    --teal-700: #0F6E56;
+    --teal-400: #1D9E75;
+    --teal-200: #5DCAA5;
+    --teal-100: #9FE1CB;
+    --teal-50:  #E1F5EE;
+
+    --ambar:      #EF9F27;
+
+    --hueso:    #F1EFE8;
+    --gris-300: #D3D1C7;
+    --gris-400: #B4B2A9;
+    --gris-600: #5F5E5A;
+    --gris-900: #2C2C2A;
+
+    --rojo:  #E24B4A;
+    --verde: #1D9E75;
+    --radio: 6px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--hueso);
+    color: var(--gris-900);
+    line-height: 1.6;
+}
+
+.contenedor { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+
+/* ---------- Barra superior (identica a citas.css) ---------- */
+.barra-admin {
+    background: var(--teal-700);
+    padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    color: var(--teal-50); font-size: 15px; font-weight: 600;
+}
+.barra-admin span { display: flex; align-items: center; gap: 10px; }
+.barra-admin nav a {
+    color: var(--teal-100); text-decoration: none; font-size: 14px; font-weight: 400;
+    display: flex; align-items: center; gap: 6px;
+}
+.barra-admin nav a:hover { color: #fff; }
+
+h1 { font-family: Georgia, 'Times New Roman', serif; font-size: 28px; font-weight: 400; margin-bottom: 6px; }
+.menu-sub { color: var(--gris-600); font-size: 14px; margin-bottom: 24px; }
+
+/* ---------- Buscador con alternancia DPI / No. Cita ---------- */
+.tarjeta-buscador {
+    background: #fff; border-radius: 8px; padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06); margin-bottom: 24px;
+}
+
+.alternancia { display: flex; gap: 8px; margin-bottom: 16px; }
+.alternancia-boton {
+    flex: 1; background: #fff; border: 1px solid var(--gris-300);
+    border-radius: var(--radio); padding: 12px; font-size: 14px; font-weight: 600;
+    font-family: inherit; color: var(--gris-600); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: border-color .2s, background .2s, color .2s;
+}
+.alternancia-boton i { font-size: 18px; }
+.alternancia-boton.activa {
+    border-color: var(--teal-700); border-width: 2px;
+    background: var(--teal-50); color: var(--teal-800);
+}
+
+.fila-busqueda { display: flex; gap: 10px; }
+.fila-busqueda input {
+    flex: 1; border: 1px solid var(--gris-300); border-radius: var(--radio);
+    padding: 12px 14px; font-size: 15px; font-family: inherit; outline: none;
+}
+.fila-busqueda input:focus { border-color: var(--teal-700); }
+
+.error-busqueda { color: var(--rojo); font-size: 13px; margin-top: 10px; min-height: 1em; }
+
+/* ---------- Tarjeta de resultado ---------- */
+.tarjeta-resultado {
+    background: #fff; border: 1px solid var(--gris-300); border-radius: 8px;
+    padding: 20px 22px; margin-bottom: 16px;
+}
+.resultado-encabezado {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 14px; gap: 12px; flex-wrap: wrap;
+}
+.resultado-nombre { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+.resultado-subtitulo { font-size: 13px; color: var(--gris-600); }
+
+.badge-estado {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+    color: #fff; white-space: nowrap;
+}
+.badge-emergencia {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+    color: #fff; background: var(--rojo); white-space: nowrap; margin-left: 8px;
+}
+
+.resultado-detalle {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px 20px; font-size: 14px; margin-bottom: 18px;
+    padding-top: 14px; border-top: 1px solid var(--hueso);
+}
+.resultado-detalle span { display: flex; align-items: center; gap: 8px; color: var(--gris-600); }
+.resultado-detalle span i { font-size: 16px; color: var(--teal-700); }
+.resultado-detalle strong { color: var(--gris-900); font-weight: 600; }
+
+.resultado-mensaje {
+    font-size: 14px; padding: 14px 16px; border-radius: var(--radio);
+    margin-bottom: 14px; line-height: 1.5;
+}
+.resultado-mensaje.tono-ambar { background: #FDF3E3; color: #7A4B0B; }
+.resultado-mensaje.tono-rojo { background: #FCEAEA; color: #A32D2D; }
+.resultado-mensaje.tono-teal { background: var(--teal-50); color: var(--teal-900); }
+
+/* ---------- Formulario walk-in (FA04) ---------- */
+.etiqueta-campo {
+    display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--gris-900);
+}
+.campo-formulario {
+    width: 100%; border: 1px solid var(--gris-300); border-radius: var(--radio);
+    padding: 11px 14px; font-size: 15px; font-family: inherit; outline: none;
+    margin-bottom: 14px; background: #fff;
+}
+.campo-formulario:focus { border-color: var(--teal-700); }
+.campo-formulario:disabled { background: var(--hueso); color: var(--gris-400); cursor: not-allowed; }
+textarea.campo-formulario { resize: vertical; min-height: 80px; }
+.error-campo { color: var(--rojo); font-size: 12px; margin: -10px 0 12px; }
+.fila-dos-columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ---------- Botones (identicos a citas.css) ---------- */
+.boton-principal {
+    background: var(--teal-700); color: #fff; border: none; border-radius: var(--radio);
+    padding: 12px 22px; font-size: 15px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: background .2s;
+    display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    width: 100%; justify-content: center;
+}
+.boton-principal:hover { background: var(--teal-800); }
+.boton-principal:disabled { background: var(--gris-400); cursor: not-allowed; }
+
+.boton-secundario {
+    background: #fff; color: var(--gris-900); border: 1px solid var(--gris-300);
+    border-radius: var(--radio); padding: 12px 22px; font-size: 15px; font-weight: 600;
+    font-family: inherit; cursor: pointer; transition: border-color .2s;
+}
+.boton-secundario:hover { border-color: var(--gris-600); }
+
+/* ---------- Mensaje de exito tras registrar llegada ---------- */
+.exito-llegada {
+    text-align: center; padding: 24px 20px; background: #fff;
+    border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.exito-llegada i { font-size: 48px; color: var(--verde); margin-bottom: 12px; display: block; }
+.exito-llegada p { color: var(--gris-600); margin-top: 6px; }
+
+.cargando { color: var(--gris-600); font-size: 14px; text-align: center; padding: 20px 0; }
+.oculto { display: none; }
+
+@media (max-width: 700px) {
+    .barra-admin { flex-direction: column; gap: 10px; align-items: flex-start; }
+    .resultado-encabezado { flex-direction: column; }
+    .fila-dos-columnas { grid-template-columns: 1fr; }
+}
