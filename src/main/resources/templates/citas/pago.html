@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago de Consulta · Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/citas.css}">
+    <link rel="stylesheet" th:href="@{/css/pago.css}">
+</head>
+<body>
+
+<header class="barra-admin">
+    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
+    <nav>
+        <a th:href="@{/dashboard}"><i class="ti ti-arrow-left"></i> Volver a mi panel</a>
+    </nav>
+</header>
+
+<main class="contenedor contenedor-pago">
+
+    <h1>Pago de Consulta</h1>
+    <p class="menu-sub">Complete el pago para confirmar su cita medica</p>
+
+    <!-- FA02: temporizador de reserva -->
+    <div class="reserva-timer" id="reservaTimer">
+        <i class="ti ti-clock-hour-4"></i>
+        Tiempo para completar el pago: <strong id="contadorReserva">5:00</strong>
+    </div>
+
+    <!-- FA02 / FA03: banner de error a nivel de pagina -->
+    <div class="banner-error oculto" id="bannerError">
+        <i class="ti ti-alert-triangle"></i>
+        <span id="bannerErrorTexto"></span>
+    </div>
+
+    <div class="grid-pago">
+
+        <!-- Resumen de la cita -->
+        <section class="tarjeta-wizard resumen-pago">
+            <h2>Resumen de la cita</h2>
+            <ul class="lista-resumen">
+                <li><span>Medico</span><strong th:text="${cita.medico.nombreCompleto}">—</strong></li>
+                <li><span>Especialidad</span><strong th:text="${cita.especialidad.nombre}">—</strong></li>
+                <li><span>Sede</span><strong th:text="${cita.sucursal.nombre}">—</strong></li>
+                <li><span>Fecha</span><strong th:text="${fechaFmt}">—</strong></li>
+                <li><span>Hora</span><strong th:text="${horaFmt}">—</strong></li>
+                <li class="total"><span>Total a pagar</span><strong>Q<span th:text="${montoFmt}">0.00</span></strong></li>
+            </ul>
+        </section>
+
+        <!-- Formulario de pago -->
+        <section class="tarjeta-wizard form-pago">
+            <h2>Datos de pago</h2>
+
+            <label class="campo">
+                <span>Numero de tarjeta</span>
+                <input type="text" id="numeroTarjeta" inputmode="numeric" autocomplete="cc-number"
+                       maxlength="23" placeholder="0000 0000 0000 0000">
+                <small class="error-campo" id="errNumeroTarjeta"></small>
+            </label>
+
+            <label class="campo">
+                <span>Nombre del titular</span>
+                <input type="text" id="titular" autocomplete="cc-name" maxlength="100"
+                       placeholder="COMO APARECE EN LA TARJETA">
+                <small class="error-campo" id="errTitular"></small>
+            </label>
+
+            <div class="fila-doble">
+                <label class="campo">
+                    <span>Vencimiento</span>
+                    <input type="text" id="vencimiento" inputmode="numeric" autocomplete="cc-exp"
+                           maxlength="5" placeholder="MM/AA">
+                    <small class="error-campo" id="errVencimiento"></small>
+                </label>
+                <label class="campo">
+                    <span>CVV</span>
+                    <input type="password" id="cvv" inputmode="numeric" autocomplete="cc-csc"
+                           maxlength="4" placeholder="•••">
+                    <small class="error-campo" id="errCvv"></small>
+                </label>
+            </div>
+
+            <p class="nota-seguridad">
+                <i class="ti ti-lock"></i>
+                Tu informacion de pago esta protegida. El CVV nunca se almacena ni se envia.
+            </p>
+
+            <button type="button" class="boton-principal boton-pagar" id="btnPagar">
+                <i class="ti ti-credit-card"></i> Pagar Q<span th:text="${montoFmt}">0.00</span>
+            </button>
+        </section>
+
+    </div>
+
+    <!-- ConfirmationPage: se muestra al aprobar el pago -->
+    <section class="tarjeta-wizard exito-pago oculto" id="pagoExito">
+        <div class="exito">
+            <i class="ti ti-circle-check"></i>
+            <h2>¡Pago Exitoso!</h2>
+            <p>Su cita ha sido confirmada.</p>
+        </div>
+        <ul class="lista-resumen">
+            <li><span>No. de transaccion</span><strong id="trxNumero">—</strong></li>
+            <li><span>Medico</span><strong th:text="${cita.medico.nombreCompleto}">—</strong></li>
+            <li><span>Especialidad</span><strong th:text="${cita.especialidad.nombre}">—</strong></li>
+            <li><span>Sede</span><strong th:text="${cita.sucursal.nombre}">—</strong></li>
+            <li><span>Fecha</span><strong th:text="${fechaFmt}">—</strong></li>
+            <li><span>Hora</span><strong th:text="${horaFmt}">—</strong></li>
+            <li class="total"><span>Monto pagado</span><strong>Q<span th:text="${montoFmt}">0.00</span></strong></li>
+        </ul>
+        <p class="aviso-correo">
+            <i class="ti ti-mail"></i> Se ha enviado un comprobante a su correo electronico.
+        </p>
+        <div class="fila-doble">
+            <a th:href="@{/dashboard}" class="boton-secundario">Volver al Portal</a>
+            <a th:href="@{/citas/mis-citas}" class="boton-principal">Ver Mis Citas</a>
+        </div>
+    </section>
+
+</main>
+
+<script th:inline="javascript">
+    const CTX = /*[[@{/}]]*/ '/';
+    const CITA_ID = /*[[${cita.id}]]*/ 0;
+    const EXPIRA_EN = /*[[${expiraEn}]]*/ '';
+</script>
+<script th:src="@{/js/pago.js}"></script>
+</body>
+</html>
