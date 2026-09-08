@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Perfil · Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/usuarios.css}">
+</head>
+<body>
+
+<header class="barra-admin">
+    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
+    <nav>
+        <a th:href="@{/dashboard}"><i class="ti ti-arrow-left"></i> Volver a mi panel</a>
+    </nav>
+</header>
+
+<main class="contenedor">
+    <h1>Mi perfil</h1>
+    <p class="menu-sub">Revise y actualice sus datos personales</p>
+
+    <p th:if="${param.actualizado}" class="mensaje-ok">Sus datos se actualizaron correctamente.</p>
+
+    <form th:action="@{/perfil}" th:object="${form}" method="post" class="formulario">
+
+        <label>Nombre completo</label>
+        <input type="text" th:value="${usuario.nombreCompleto}" disabled>
+
+        <label>Nombre de usuario</label>
+        <input type="text" th:value="${usuario.username}" disabled>
+
+        <label>Correo Electronico</label>
+        <input type="email" th:field="*{correo}">
+        <p class="error" th:if="${errores.get('correo')} != null" th:text="${errores.get('correo')}"></p>
+
+        <label>Numero de Telefono (opcional)</label>
+        <input type="text" th:field="*{telefono}" maxlength="8">
+        <p class="error" th:if="${errores.get('telefono')} != null" th:text="${errores.get('telefono')}"></p>
+
+        <h2 style="margin-top:28px;font-size:16px;">Cambiar contrasena (opcional)</h2>
+        <p style="font-size:13px;color:var(--gris-600);margin-top:-8px;">Deje estos campos en blanco si no desea cambiarla.</p>
+
+        <label>Contrasena actual</label>
+        <input type="password" th:field="*{passwordActual}" autocomplete="off">
+        <p class="error" th:if="${errores.get('passwordActual')} != null" th:text="${errores.get('passwordActual')}"></p>
+
+        <label>Nueva contrasena</label>
+        <input type="password" th:field="*{passwordNueva}" autocomplete="off">
+        <p class="error" th:if="${errores.get('passwordNueva')} != null" th:text="${errores.get('passwordNueva')}"></p>
+
+        <div class="acciones-formulario">
+            <a th:href="@{/dashboard}" class="boton-secundario">Cancelar</a>
+            <button type="submit" class="boton-principal">Guardar cambios</button>
+        </div>
+    </form>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Paciente - Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/portal.css}">
+</head>
+<body>
+
+<div class="login-contenedor">
+
+    <div class="login-panel">
+        <a th:href="@{/}" class="login-volver">
+            <i class="ti ti-arrow-left"></i> Volver al portal
+        </a>
+        <div class="login-marca">
+            <i class="ti ti-heartbeat"></i>
+            <span>Hospital San Rafael</span>
+        </div>
+        <h1>Cree su cuenta</h1>
+        <p>Registrese como paciente para agendar y consultar sus citas medicas.</p>
+    </div>
+
+    <div class="login-forma">
+        <h2>Registro de paciente</h2>
+        <p class="login-sub">Complete sus datos para crear su cuenta</p>
+
+        <!-- Error general (ej. rol Paciente inexistente) -->
+        <div class="alerta alerta-error" th:if="${errores.get('general')}">
+            <i class="ti ti-alert-circle"></i>
+            <span th:text="${errores.get('general')}"></span>
+        </div>
+
+        <form th:action="@{/registro}" method="post" th:object="${form}">
+
+            <label class="etiqueta" for="nombreCompleto">Nombre completo</label>
+            <div class="entrada-icono">
+                <i class="ti ti-user"></i>
+                <input type="text" id="nombreCompleto" th:field="*{nombreCompleto}"
+                       class="entrada" placeholder="Nombres y apellidos">
+            </div>
+            <p class="mensaje-error" th:if="${errores.get('nombreCompleto')}" th:text="${errores.get('nombreCompleto')}"></p>
+
+            <label class="etiqueta" for="dpi">DPI</label>
+            <div class="entrada-icono">
+                <i class="ti ti-id"></i>
+                <input type="text" id="dpi" th:field="*{dpi}" maxlength="13"
+                       inputmode="numeric" class="entrada" placeholder="13 digitos">
+            </div>
+            <p class="mensaje-error" th:if="${errores.get('dpi')}" th:text="${errores.get('dpi')}"></p>
+
+            <label class="etiqueta" for="nit">NIT</label>
+            <div class="entrada-icono">
+                <i class="ti ti-file-invoice"></i>
+                <input type="text" id="nit" th:field="*{nit}" maxlength="9"
+                       inputmode="numeric" class="entrada" placeholder="8 a 9 digitos">
+            </div>
+            <p class="mensaje-error" th:if="${errores.get('nit')}" th:text="${errores.get('nit')}"></p>
+
+            <label class="etiqueta" for="telefono">Telefono</label>
+            <div class="entrada-icono">
+                <i class="ti ti-phone"></i>
+                <input type="text" id="telefono" th:field="*{telefono}" maxlength="8"
+                       inputmode="numeric" class="entrada" placeholder="8 digitos">
+            </div>
+            <p class="mensaje-error" th:if="${errores.get('telefono')}" th:text="${errores.get('telefono')}"></p>
+
+            <label class="etiqueta" for="numeroSeguro">Numero de afiliado del seguro <span class="opcional">(opcional)</span></label>
+            <div class="entrada-icono">
+                <i class="ti ti-shield-heart"></i>
+                <input type="text" id="numeroSeguro" th:field="*{numeroSeguro}" maxlength="50"
+                       class="entrada" placeholder="Solo si aplica">
+            </div>
+            <p class="mensaje-error" th:if="${errores.get('numeroSeguro')}" th:text="${errores.get('numeroSeguro')}"></p>
+
+            <label class="etiqueta" for="correo">Correo electronico</label>
+            <div class="entrada-icono">
+                <i class="ti ti-mail"></i>
+                <input type="text" id="correo" th:field="*{correo}"
+                       class="entrada" placeholder="usuario@dominio.com" autocomplete="off">
+            </div>
+            <p class="mensaje-error" th:if="${errores.get('correo')}" th:text="${errores.get('correo')}"></p>
+
+            <label class="etiqueta" for="username">Nombre de usuario</label>
+            <div class="entrada-icono">
+                <i class="ti ti-at"></i>
+                <input type="text" id="username" th:field="*{username}" maxlength="9"
+                       class="entrada" placeholder="8 a 9 caracteres" autocomplete="off">
+            </div>
+            <p class="mensaje-error" th:if="${errores.get('username')}" th:text="${errores.get('username')}"></p>
+
+            <label class="etiqueta" for="password">Contrasena</label>
+            <div class="entrada-icono">
+                <i class="ti ti-lock"></i>
+                <input type="password" id="password" th:field="*{password}"
+                       class="entrada" placeholder="Minimo 12 caracteres">
+            </div>
+            <p class="mensaje-error" th:if="${errores.get('password')}" th:text="${errores.get('password')}"></p>
+
+            <button type="submit" class="btn-principal">
+                <i class="ti ti-user-plus"></i> Registrarse
+            </button>
+        </form>
+
+        <a th:href="@{/login}" class="login-alt">Ya tengo cuenta, iniciar sesion</a>
+    </div>
+
+</div>
+
+<script>
+    // Filtra en tiempo real lo que el usuario puede escribir por campo.
+    // La validacion real sigue en el backend; esto es solo comodidad de UX.
+
+    function soloDigitos(input) {
+        input.addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+    function soloAlfanumerico(input) {
+        input.addEventListener('input', function () {
+            this.value = this.value.replace(/[^A-Za-z0-9]/g, '');
+        });
+    }
+
+    soloDigitos(document.getElementById('dpi'));       // RN-GLOBAL-001: solo numeros
+    soloDigitos(document.getElementById('telefono'));  // RN-CU02-02: solo numeros
+    soloDigitos(document.getElementById('nit'));  // RN-GLOBAL-002: solo numeros
+    soloAlfanumerico(document.getElementById('username')); // RN-CU02-05: alfanumerico
+</script>
+
+</body>
+</html>
