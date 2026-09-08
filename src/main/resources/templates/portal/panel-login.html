@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/portal.css}">
+</head>
+<body>
+
+<div class="login-contenedor">
+
+    <div class="login-panel">
+        <a th:href="@{/}" class="login-volver">
+            <i class="ti ti-arrow-left"></i> Volver al portal
+        </a>
+        <div class="login-marca">
+            <i class="ti ti-heartbeat"></i>
+            <span>Hospital San Rafael</span>
+        </div>
+        <h1>Panel Administrativo</h1>
+        <p>Acceso exclusivo para personal del hospital.</p>
+    </div>
+
+    <div class="login-forma">
+        <h2>Iniciar sesion</h2>
+        <p class="login-sub">Ingrese sus credenciales de personal interno</p>
+
+        <div class="alerta alerta-error" th:if="${param.error}">
+            <i class="ti ti-alert-circle"></i>
+            <span th:if="${param.restantes}"
+                  th:text="'Usuario o contrasena incorrectos. Intentos restantes: ' + ${param.restantes[0]} + '.'">
+</span>
+            <span th:unless="${param.restantes}">Usuario o contrasena incorrectos.</span>
+        </div>
+
+        <div class="alerta alerta-error" th:if="${param.bloqueado}">
+            <i class="ti ti-lock-x"></i>
+            <span>Cuenta bloqueada temporalmente. Intente de nuevo en 15 minutos.</span>
+        </div>
+
+        <div class="alerta alerta-error" th:if="${param.rolNoAutorizado}">
+            <i class="ti ti-shield-x"></i>
+            <span>Esta pantalla es exclusiva para personal del hospital. Si es paciente, use el acceso normal.</span>
+        </div>
+
+        <div class="alerta alerta-ok" th:if="${param.logout}">
+            <i class="ti ti-circle-check"></i>
+            <span>Sesion cerrada correctamente.</span>
+        </div>
+
+        <form th:action="@{/login}" method="post">
+            <input type="hidden" name="origen" value="panel">
+
+            <label class="etiqueta" for="username">Usuario</label>
+            <div class="entrada-icono">
+                <i class="ti ti-user"></i>
+                <input type="text" id="username" name="username" class="entrada"
+                       placeholder="Su nombre de usuario" autocomplete="off" required>
+            </div>
+
+            <label class="etiqueta" for="password">Contrasena</label>
+            <div class="entrada-icono">
+                <i class="ti ti-lock"></i>
+                <input type="password" id="password" name="password" class="entrada"
+                       placeholder="Su contrasena" required>
+            </div>
+
+            <button type="submit" class="btn-principal">
+                <i class="ti ti-login-2"></i> Iniciar sesion
+            </button>
+        </form>
+
+        <a th:href="@{/login}" class="login-alt">Acceso para Pacientes</a>
+    </div>
+
+</div>
+
+</body>
+</html>

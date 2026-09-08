@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/portal.css}">
+</head>
+<body>
+
+<header class="barra">
+    <div class="contenedor barra-interna">
+        <div class="marca">
+            <i class="ti ti-heartbeat"></i>
+            <span>Hospital San Rafael</span>
+        </div>
+        <nav class="nav">
+            <a href="#servicios">Servicios</a>
+            <a href="#especialidades">Especialidades</a>
+            <a href="#horarios">Horarios</a>
+            <a href="#sedes">Sedes</a>
+            <a href="/login" class="destacado">
+                <i class="ti ti-lock"></i> Ingresar
+            </a>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="contenedor">
+        <h1>Su cita medica en tres pasos</h1>
+        <p>Verifique su registro con el numero de DPI para continuar</p>
+
+        <div class="buscador">
+            <div class="campo-dpi">
+                <i class="ti ti-id"></i>
+                <input type="text" id="dpiRapido" placeholder="Ingrese su DPI"
+                       maxlength="13" inputmode="numeric" autocomplete="off">
+                <span class="contador" id="contadorRapido">0/13</span>
+            </div>
+            <button class="btn-agendar" onclick="abrirModal()">
+                Agendar cita
+                <i class="ti ti-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- ============ CARRUSEL DE ESPECIALIDADES ============ -->
+<section class="seccion" id="especialidades">
+    <div class="contenedor">
+        <p class="rotulo">NUESTRAS ESPECIALIDADES</p>
+
+        <div class="carrusel" id="carrusel">
+            <div class="carrusel-pista" id="pista">
+                <div class="carrusel-slide" th:each="esp : ${especialidades}">
+                    <div class="icono-grande">
+                        <i class="ti ti-stethoscope"></i>
+                    </div>
+                    <div class="texto">
+                        <h3 th:text="${esp.nombre}">Medicina General</h3>
+                        <p th:text="${esp.descripcion}">Descripcion de la especialidad</p>
+                    </div>
+                </div>
+            </div>
+            <div class="carrusel-puntos" id="puntos"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ SERVICIOS ============ -->
+<!-- Pegar DESPUES de </section> del carrusel y ANTES de la seccion de sedes -->
+<section class="seccion" id="servicios">
+    <div class="contenedor">
+        <p class="rotulo">TODO EN UN MISMO LUGAR</p>
+        <div class="servicios-fila">
+            <div class="servicio">
+                <div class="servicio-icono"><i class="ti ti-stethoscope"></i></div>
+                <h3>Consulta Medica</h3>
+                <p>Medicos generales y especialistas</p>
+            </div>
+            <div class="servicio">
+                <div class="servicio-icono"><i class="ti ti-flask"></i></div>
+                <h3>Laboratorio</h3>
+                <p>Analisis clinicos y resultados</p>
+            </div>
+            <div class="servicio">
+                <div class="servicio-icono"><i class="ti ti-pill"></i></div>
+                <h3>Farmacia</h3>
+                <p>Despacho de medicamentos</p>
+            </div>
+            <div class="servicio">
+                <div class="servicio-icono"><i class="ti ti-ambulance"></i></div>
+                <h3>Urgencias</h3>
+                <p>Atencion de emergencias</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ HORARIOS ============ -->
+<section class="seccion" id="horarios">
+    <div class="contenedor">
+        <p class="rotulo">HORARIOS DE ATENCION</p>
+        <div class="horarios-caja">
+            <div class="horario-fila">
+                <span>Lunes a Viernes</span>
+                <span>7:00 - 19:00</span>
+            </div>
+            <div class="horario-fila">
+                <span>Sabado</span>
+                <span>7:00 - 13:00</span>
+            </div>
+            <div class="horario-fila">
+                <span>Domingo</span>
+                <span>Cerrado</span>
+            </div>
+            <div class="horario-fila">
+                <span>Dias festivos</span>
+                <span>Solo urgencias</span>
+            </div>
+            <div class="horario-emergencia">
+                <i class="ti ti-24-hours"></i>
+                <span>Servicio de urgencias disponible las 24 horas, todos los dias.</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seccion" id="sedes">
+    <div class="contenedor">
+        <p class="rotulo">NUESTRAS SEDES</p>
+        <div class="rejilla">
+            <article class="tarjeta tarjeta-sede" th:each="suc : ${sucursales}">
+                <i class="ti ti-building-hospital"></i>
+                <div>
+                    <h3 th:text="${suc.nombre}">Sede Central</h3>
+                    <p class="dato-sede" th:if="${suc.direccion != null}">
+                        <i class="ti ti-map-pin"></i>
+                        <span th:text="${suc.direccion}">Direccion</span>
+                    </p>
+                    <p class="dato-sede" th:if="${suc.telefono != null}">
+                        <i class="ti ti-phone"></i>
+                        <span th:text="${suc.telefono}">00000000</span>
+                    </p>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<footer class="pie" id="contacto">
+    <div class="contenedor pie-interno">
+        <span>Hospital San Rafael &middot; Sistema Informatico Hospitalario</span>
+        <span><i class="ti ti-phone"></i> 2200-4500</span>
+    </div>
+</footer>
+
+<div class="velo" id="velo">
+    <div class="modal">
+        <div class="modal-cabecera">
+            <h2>Verificar registro</h2>
+            <button class="cerrar" onclick="cerrarModal()" aria-label="Cerrar">
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+        <p class="modal-texto">
+            Ingrese su numero de DPI para verificar si esta registrado en el sistema.
+        </p>
+
+        <label class="etiqueta" for="dpiModal">Numero de DPI</label>
+        <input type="text" id="dpiModal" class="entrada" maxlength="13"
+               inputmode="numeric" autocomplete="off" placeholder="2547896320101">
+
+        <div class="fila-contador">
+            <span class="contador" id="contadorModal">0/13</span>
+        </div>
+
+        <p class="mensaje-error" id="errorDpi">
+            <i class="ti ti-alert-circle"></i>
+            <span id="textoError"></span>
+        </p>
+
+        <button class="btn-principal" onclick="verificarDpi()">
+            <i class="ti ti-search"></i> Verificar DPI
+        </button>
+    </div>
+</div>
+
+<script>
+    /* ===================== MODAL DE DPI ===================== */
+    const velo          = document.getElementById('velo');
+    const dpiModal      = document.getElementById('dpiModal');
+    const dpiRapido     = document.getElementById('dpiRapido');
+    const contadorModal = document.getElementById('contadorModal');
+    const contadorRap   = document.getElementById('contadorRapido');
+    const cajaError     = document.getElementById('errorDpi');
+    const textoError    = document.getElementById('textoError');
+
+    function soloDigitos(valor) {
+        return valor.replace(/\D/g, '');
+    }
+
+    function pintarContador(elemento, cantidad) {
+        elemento.textContent = cantidad + '/13';
+        elemento.classList.toggle('completo', cantidad === 13);
+    }
+
+    dpiRapido.addEventListener('input', e => {
+        e.target.value = soloDigitos(e.target.value);
+        pintarContador(contadorRap, e.target.value.length);
+    });
+
+    dpiModal.addEventListener('input', e => {
+        e.target.value = soloDigitos(e.target.value);
+        pintarContador(contadorModal, e.target.value.length);
+        ocultarError();
+    });
+
+    function abrirModal() {
+        dpiModal.value = soloDigitos(dpiRapido.value);
+        pintarContador(contadorModal, dpiModal.value.length);
+        ocultarError();
+        velo.classList.add('visible');
+        dpiModal.focus();
+    }
+
+    function cerrarModal() {
+        velo.classList.remove('visible');
+    }
+
+    function mostrarError(mensaje) {
+        textoError.textContent = mensaje;
+        cajaError.classList.add('visible');
+        dpiModal.classList.add('error');
+    }
+
+    function ocultarError() {
+        cajaError.classList.remove('visible');
+        dpiModal.classList.remove('error');
+    }
+
+    /* Validaciones RN-GLOBAL-001 + verificacion contra la base (CU-00) */
+    async function verificarDpi() {
+        const dpi = dpiModal.value;
+
+        if (dpi.length === 0) {
+            mostrarError('El campo DPI es obligatorio. Por favor, ingrese su numero de DPI.');
+            return;
+        }
+        if (dpi.length !== 13) {
+            mostrarError('El DPI debe contener exactamente 13 digitos. Usted ingreso '
+                + dpi.length + ' digitos.');
+            return;
+        }
+
+        const boton = document.querySelector('.btn-principal');
+        boton.disabled = true;
+        boton.innerHTML = '<i class="ti ti-loader"></i> Verificando...';
+
+        try {
+            const respuesta = await fetch('/portal/verificar-dpi', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'dpi=' + dpi
+            });
+            const datos = await respuesta.json();
+
+            if (datos.accion === 'LOGIN') {
+                window.location.href = '/login';
+            } else if (datos.accion === 'REGISTRO') {
+                alert(datos.mensaje);
+                window.location.href = '/registro';
+            } else {
+                mostrarError(datos.mensaje);
+            }
+        } catch (e) {
+            mostrarError('No se pudo conectar con el servidor. Intente de nuevo mas tarde.');
+        } finally {
+            boton.disabled = false;
+            boton.innerHTML = '<i class="ti ti-search"></i> Verificar DPI';
+        }
+    }
+
+    velo.addEventListener('click', e => {
+        if (e.target === velo) cerrarModal();
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') cerrarModal();
+    });
+
+    /* ===================== CARRUSEL ===================== */
+    const pista  = document.getElementById('pista');
+    const puntos = document.getElementById('puntos');
+    const totalSlides = pista.children.length;
+    let indiceActual = 0;
+
+    /* Crear un puntito por cada especialidad */
+    for (let i = 0; i < totalSlides; i++) {
+        const p = document.createElement('span');
+        p.className = 'punto' + (i === 0 ? ' activo' : '');
+        p.addEventListener('click', () => irASlide(i));
+        puntos.appendChild(p);
+    }
+
+    function irASlide(i) {
+        indiceActual = i;
+        pista.style.transform = 'translateX(-' + (i * 100) + '%)';
+        document.querySelectorAll('.punto').forEach((p, idx) => {
+            p.classList.toggle('activo', idx === i);
+        });
+    }
+
+    function siguienteSlide() {
+        let siguiente = (indiceActual + 1) % totalSlides;
+        irASlide(siguiente);
+    }
+
+    /* Avance automatico cada 5 segundos, solo si hay mas de una especialidad */
+    if (totalSlides > 1) {
+        setInterval(siguienteSlide, 5000);
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/portal.css}">
+</head>
+<body>
+
+<header class="barra">
+    <div class="contenedor barra-interna">
+        <div class="marca">
+            <i class="ti ti-heartbeat"></i>
+            <span>Hospital San Rafael</span>
+        </div>
+        <nav class="nav">
+<span style="color:var(--teal-50);font-size:14px;">
+<i class="ti ti-user-circle" style="vertical-align:-2px;"></i>
+<span th:text="${nombre}">Administrador</span>
+&middot;
+<span th:text="${rol}">Rol</span>
+</span>
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" style="background:none;border:none;color:var(--teal-100);
+                        font-size:14px;cursor:pointer;font-family:inherit;">
+                    <i class="ti ti-logout"></i> Salir
+                </button>
+            </form>
+        </nav>
+    </div>
+</header>
+
+<section class="hero" style="padding-bottom:40px;">
+    <div class="contenedor">
+        <h1 th:text="'Hola, ' + ${nombre}">Hola, Administrador</h1>
+        <p>Panel administrativo del Sistema Informatico Hospitalario.</p>
+    </div>
+</section>
+
+<section class="seccion">
+    <div class="contenedor">
+        <div class="rejilla">
+            <a th:if="${rol == 'Administrador'}" th:href="@{/usuarios}" class="tarjeta"
+               style="text-decoration:none;color:inherit;">
+                <i class="ti ti-users"></i>
+                <h3>Mantenimiento de Usuarios</h3>
+                <p>Listar, crear, editar y eliminar cuentas de usuarios internos.</p>
+            </a>
+
+            <a th:if="${rol == 'Recepcionista' or rol == 'Administrador'}" th:href="@{/recepcion/buscar}"
+               class="tarjeta" style="text-decoration:none;color:inherit;">
+                <i class="ti ti-clipboard-check"></i>
+                <h3>Recepcion y Verificacion de Cita</h3>
+                <p>Buscar pacientes por DPI o numero de cita y registrar su llegada.</p>
+            </a>
+
+            <a th:if="${rol == 'Cajero' or rol == 'Administrador'}" th:href="@{/caja/cobro}" class="tarjeta"
+               style="text-decoration:none;color:inherit;">
+                <i class="ti ti-cash-register"></i>
+                <h3>Cobro de Consulta en Caja</h3>
+                <p>Cobrar consultas pendientes de pago en efectivo o con tarjeta y emitir el comprobante.</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

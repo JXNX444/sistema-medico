@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: sistema-medico
+
+  datasource:
+    url: jdbc:postgresql://sistema-medico.postgres.database.azure.com:5432/postgres?sslmode=require&currentSchema=his
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 20000
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        default_schema: his
+        format_sql: true
+    show-sql: true
+
+  # La BD ya existe en Azure (crear_bd_azure.sql = V1 + V2).
+  # baseline-version 2 le dice a Flyway que ese estado ya esta aplicado
+  # y de ahi en adelante aplica V3, V4, ...
+  flyway:
+    enabled: false
+    schemas: his
+    default-schema: his
+    baseline-on-migrate: true
+    baseline-version: 2
+    locations: classpath:db/migration
+
+  thymeleaf:
+    cache: false
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USER}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+server:
+  port: 8080
+  error:
+    whitelabel:
+      enabled: false
+
+his:
+  hospital:
+    nombre: "Hospital San Rafael"
+    telefono: "2200-4500"
+  seguridad:
+    max-intentos-fallidos: 5   # RN-CU00-03
+    minutos-bloqueo: 15        # RN-CU00-03
+
+logging:
+  level:
+    gt.edu.umg.sistemamedico: DEBUG

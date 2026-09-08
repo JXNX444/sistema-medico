@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Portal - Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/portal.css}">
+</head>
+<body>
+
+<header class="barra">
+    <div class="contenedor barra-interna">
+        <div class="marca">
+            <i class="ti ti-heartbeat"></i>
+            <span>Hospital San Rafael</span>
+        </div>
+        <nav class="nav">
+<span style="color:var(--teal-50);font-size:14px;">
+<i class="ti ti-user-circle" style="vertical-align:-2px;"></i>
+<span th:text="${nombre}">Paciente</span>
+</span>
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" style="background:none;border:none;color:var(--teal-100);
+
+                        font-size:14px;cursor:pointer;font-family:inherit;">
+                    <i class="ti ti-logout"></i> Salir
+                </button>
+            </form>
+        </nav>
+    </div>
+</header>
+
+<section class="hero" style="padding-bottom:40px;">
+    <div class="contenedor">
+        <h1 th:text="'Hola, ' + ${nombre}">Hola, Paciente</h1>
+        <p>Bienvenido a su portal. Desde aqui puede gestionar sus citas medicas.</p>
+    </div>
+</section>
+
+<section class="seccion">
+    <div class="contenedor">
+        <div class="rejilla">
+            <a th:href="@{/citas/nueva}" class="tarjeta" style="text-decoration:none;color:inherit;">
+                <i class="ti ti-calendar-plus"></i>
+                <h3>Agendar cita</h3>
+                <p>Solicite una nueva cita con la especialidad que necesite.</p>
+            </a>
+            <a th:href="@{/citas/mis-citas}" class="tarjeta" style="text-decoration:none;color:inherit;">
+                <i class="ti ti-calendar-check"></i>
+                <h3>Mis citas</h3>
+                <p>Consulte el estado de sus citas programadas.</p>
+            </a>
+            <a th:href="@{/perfil}" class="tarjeta" style="text-decoration:none;color:inherit;">
+                <i class="ti ti-user-cog"></i>
+                <h3>Mi perfil</h3>
+                <p>Revise y actualice sus datos personales.</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

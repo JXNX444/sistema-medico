@@ -1,0 +1,400 @@
+/* =====================================================================
+   Portal publico - CU-00
+   Hospital San Rafael - Sistema Informatico Hospitalario
+   ===================================================================== */
+
+:root {
+    --teal-900: #04342C;
+    --teal-800: #085041;
+    --teal-700: #0F6E56;
+    --teal-400: #1D9E75;
+    --teal-200: #5DCAA5;
+    --teal-100: #9FE1CB;
+    --teal-50:  #E1F5EE;
+
+    --ambar:      #EF9F27;
+    --ambar-osc:  #412402;
+
+    --hueso:    #F1EFE8;
+    --gris-300: #D3D1C7;
+    --gris-400: #B4B2A9;
+    --gris-600: #5F5E5A;
+    --gris-900: #2C2C2A;
+
+    --rojo:  #E24B4A;
+    --radio: 6px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--hueso);
+    color: var(--gris-900);
+    line-height: 1.6;
+}
+
+.contenedor { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+/* ---------- Barra superior ---------- */
+.barra {
+    background: var(--teal-700);
+    padding: 16px 0;
+}
+.barra-interna {
+    display: flex; align-items: center; justify-content: space-between;
+}
+.marca { display: flex; align-items: center; gap: 10px; }
+.marca i { font-size: 26px; color: var(--teal-100); }
+.marca span { color: var(--teal-50); font-size: 17px; font-weight: 600; letter-spacing: .3px; }
+
+.nav { display: flex; gap: 24px; align-items: center; }
+.nav a { color: var(--teal-100); text-decoration: none; font-size: 14px; transition: color .2s; }
+.nav a:hover { color: #fff; }
+.nav a.destacado { color: var(--teal-50); }
+
+/* ---------- Encabezado principal ---------- */
+.hero { background: var(--teal-700); padding: 8px 0 56px; }
+.hero h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    color: #fff; font-size: 42px; font-weight: 400;
+    line-height: 1.2; margin-bottom: 10px; max-width: 560px;
+}
+.hero p { color: var(--teal-100); font-size: 15px; margin-bottom: 26px; }
+
+.buscador { display: flex; gap: 10px; max-width: 560px; }
+.campo-dpi {
+    flex: 1; background: #fff; border-radius: var(--radio);
+    padding: 13px 16px; display: flex; align-items: center; gap: 10px;
+}
+.campo-dpi i { font-size: 20px; color: var(--gris-600); }
+.campo-dpi input {
+    flex: 1; border: none; outline: none;
+    font-size: 15px; font-family: inherit; color: var(--gris-900);
+}
+.campo-dpi input::placeholder { color: var(--gris-400); }
+.contador { color: var(--gris-400); font-size: 13px; font-variant-numeric: tabular-nums; }
+.contador.completo { color: var(--teal-700); font-weight: 600; }
+
+.btn-agendar {
+    background: var(--ambar); color: var(--ambar-osc);
+    border: none; border-radius: var(--radio);
+    padding: 13px 26px; font-size: 15px; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: filter .2s;
+}
+.btn-agendar:hover { filter: brightness(1.08); }
+.btn-agendar i { font-size: 18px; }
+
+/* ---------- Secciones ---------- */
+.seccion { padding: 40px 0; }
+.rotulo {
+    font-size: 12px; color: var(--gris-600);
+    letter-spacing: 1.5px; margin-bottom: 18px; font-weight: 600;
+}
+
+.rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+}
+
+.tarjeta {
+    background: #fff; border-radius: 8px; padding: 18px;
+    border-top: 3px solid var(--teal-700);
+    transition: transform .2s;
+}
+.tarjeta:hover { transform: translateY(-2px); }
+.tarjeta i { font-size: 24px; color: var(--teal-700); }
+.tarjeta h3 { font-size: 15px; font-weight: 600; margin: 8px 0 4px; }
+.tarjeta p { font-size: 13px; color: var(--gris-600); line-height: 1.5; }
+
+.tarjeta-sede { display: flex; gap: 14px; align-items: flex-start; }
+.tarjeta-sede i { font-size: 26px; }
+.dato-sede {
+    font-size: 12px; color: var(--gris-600);
+    display: flex; align-items: center; gap: 6px; margin-top: 5px;
+}
+.dato-sede i { font-size: 15px; color: var(--gris-400); }
+
+/* ---------- Pie ---------- */
+.pie {
+    background: var(--teal-900); color: var(--teal-100);
+    padding: 28px 0; font-size: 13px; margin-top: 20px;
+}
+.pie-interno { display: flex; justify-content: space-between; align-items: center; }
+
+/* ---------- Modal de verificacion ---------- */
+.velo {
+    position: fixed; inset: 0; background: rgba(4, 52, 44, .55);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px; z-index: 50;
+}
+.velo.visible { display: flex; }
+
+.modal {
+    background: #fff; border-radius: 10px;
+    width: 100%; max-width: 420px; padding: 26px;
+}
+.modal-cabecera {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px;
+}
+.modal h2 { font-size: 19px; font-weight: 600; }
+.cerrar {
+    background: none; border: none; cursor: pointer;
+    color: var(--gris-400); font-size: 22px; line-height: 1;
+    display: flex; padding: 4px;
+}
+.cerrar:hover { color: var(--gris-900); }
+.modal-texto { font-size: 14px; color: var(--gris-600); margin-bottom: 18px; }
+
+.etiqueta { font-size: 13px; font-weight: 600; display: block; margin-bottom: 7px; }
+.entrada {
+    width: 100%; border: 1px solid var(--gris-300); border-radius: var(--radio);
+    padding: 11px 14px; font-size: 15px; font-family: inherit;
+    outline: none; transition: border-color .2s;
+}
+.entrada:focus { border-color: var(--teal-700); }
+.entrada.error { border-color: var(--rojo); }
+
+.fila-contador { display: flex; justify-content: flex-end; margin-top: 6px; }
+
+/* Mensaje de error de campo.
+   - En formularios Thymeleaf (registro) se pinta con th:if -> visible por defecto.
+   - En el modal del portal (index.html) lo controla el JS con la clase .visible,
+     por eso ahi arranca oculto con #errorDpi. */
+.mensaje-error {
+    color: var(--rojo); font-size: 13px; margin-top: 8px;
+    display: flex; align-items: center; gap: 6px;
+}
+/* El error del modal del DPI arranca oculto y el JS lo muestra con .visible */
+#errorDpi { display: none; }
+#errorDpi.visible { display: flex; }
+
+.btn-principal {
+    width: 100%; background: var(--teal-700); color: #fff;
+    border: none; border-radius: var(--radio); padding: 12px;
+    font-size: 15px; font-weight: 600; font-family: inherit;
+    cursor: pointer; margin-top: 18px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background .2s;
+}
+.btn-principal:hover { background: var(--teal-800); }
+.btn-principal:disabled { background: var(--gris-400); cursor: not-allowed; }
+
+@media (max-width: 700px) {
+    .hero h1 { font-size: 30px; }
+    .buscador { flex-direction: column; }
+    .nav { display: none; }
+    .pie-interno { flex-direction: column; gap: 10px; text-align: center; }
+}
+/* =====================================================================
+   CARRUSEL DE ESPECIALIDADES  (CU-00)
+   Se agrega al final de portal.css
+   ===================================================================== */
+
+.carrusel {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--teal-800);
+    margin-top: 10px;
+}
+
+/* La pista es la fila larga que se desliza. Cada slide ocupa el 100%. */
+.carrusel-pista {
+    display: flex;
+    transition: transform .6s ease;
+}
+
+.carrusel-slide {
+    min-width: 100%;
+    box-sizing: border-box;
+    padding: 40px 48px;
+    display: flex;
+    align-items: center;
+    gap: 26px;
+}
+
+.carrusel-slide .icono-grande {
+    background: rgba(255, 255, 255, .12);
+    width: 80px; height: 80px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.carrusel-slide .icono-grande i { font-size: 40px; color: #fff; }
+
+.carrusel-slide .texto h3 {
+    color: #fff; font-size: 24px; font-weight: 600; margin-bottom: 6px;
+    font-family: Georgia, serif;
+}
+.carrusel-slide .texto p {
+    color: var(--teal-100); font-size: 14px; line-height: 1.6; max-width: 480px;
+}
+
+/* Los puntitos de abajo */
+.carrusel-puntos {
+    display: flex; gap: 8px; justify-content: center;
+    padding: 0 0 18px;
+}
+.punto {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255, 255, 255, .3);
+    cursor: pointer; transition: all .3s;
+}
+.punto.activo { background: var(--ambar); width: 22px; border-radius: 4px; }
+
+@media (max-width: 700px) {
+    .carrusel-slide { flex-direction: column; text-align: center; padding: 30px 24px; }
+    .carrusel-slide .texto p { font-size: 13px; }
+}
+
+/* =====================================================================
+   PANTALLA DE LOGIN  (CU-00)
+   ===================================================================== */
+
+.login-contenedor {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 45% 55%;
+}
+
+.login-panel {
+    background: var(--teal-800);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+.login-volver {
+    position: absolute; top: 28px; left: 40px;
+    color: var(--teal-100); text-decoration: none; font-size: 13px;
+    display: flex; align-items: center; gap: 6px;
+}
+.login-volver:hover { color: #fff; }
+
+.login-marca { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+.login-marca i { font-size: 30px; color: var(--teal-100); }
+.login-marca span { color: var(--teal-50); font-size: 18px; font-weight: 600; }
+
+.login-panel h1 {
+    font-family: Georgia, serif; color: #fff; font-size: 34px;
+    font-weight: 400; margin-bottom: 12px;
+}
+.login-panel p { color: var(--teal-100); font-size: 15px; max-width: 340px; }
+
+.login-forma {
+    padding: 60px; display: flex; flex-direction: column;
+    justify-content: center; max-width: 440px;
+}
+.login-forma h2 { font-size: 26px; margin-bottom: 4px; }
+.login-sub { color: var(--gris-600); font-size: 14px; margin-bottom: 28px; }
+
+.entrada-icono { position: relative; margin-bottom: 16px; }
+.entrada-icono i {
+    position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+    color: var(--gris-400); font-size: 18px;
+}
+.entrada-icono .entrada { padding-left: 40px; margin: 0; }
+
+.login-alt {
+    text-align: center; margin-top: 20px;
+    color: var(--teal-700); font-size: 13px; text-decoration: none;
+}
+.login-alt:hover { text-decoration: underline; }
+
+@media (max-width: 800px) {
+    .login-contenedor { grid-template-columns: 1fr; }
+    .login-panel { min-height: 200px; }
+    .login-forma { padding: 40px 24px; max-width: 100%; }
+}
+
+/* =====================================================================
+   SERVICIOS + HORARIOS  (CU-00)
+   ===================================================================== */
+
+/* --- Servicios: iconos circulares tipo Blue Medical --- */
+.servicios-fila {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+}
+.servicio {
+    text-align: center;
+    padding: 20px 12px;
+}
+.servicio-icono {
+    width: 68px; height: 68px; margin: 0 auto 12px;
+    border: 2px solid var(--teal-700);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .25s;
+}
+.servicio-icono i { font-size: 30px; color: var(--teal-700); }
+.servicio:hover .servicio-icono {
+    background: var(--teal-700);
+}
+.servicio:hover .servicio-icono i { color: #fff; }
+.servicio h3 { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+.servicio p  { font-size: 12px; color: var(--gris-600); }
+
+/* --- Horarios --- */
+.horarios-caja {
+    background: var(--teal-800);
+    border-radius: 10px;
+    padding: 28px 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 40px;
+}
+.horario-fila {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,.12);
+}
+.horario-fila span:first-child { color: var(--teal-50); font-size: 14px; }
+.horario-fila span:last-child  { color: var(--teal-100); font-size: 14px; font-weight: 600; }
+.horario-emergencia {
+    grid-column: 1 / -1;
+    background: rgba(239,159,39,.15);
+    border-radius: 6px; padding: 12px 16px; margin-top: 8px;
+    display: flex; align-items: center; gap: 10px;
+}
+.horario-emergencia i { color: var(--ambar); font-size: 22px; }
+.horario-emergencia span { color: #fff; font-size: 13px; }
+
+@media (max-width: 700px) {
+    .horarios-caja { grid-template-columns: 1fr; padding: 22px; }
+}
+
+/* =====================================================================
+   ALERTAS  (login FA06-FA09)
+   ===================================================================== */
+.alerta {
+    display: flex; align-items: center; gap: 9px;
+    padding: 12px 14px; border-radius: var(--radio);
+    font-size: 13px; margin-bottom: 16px;
+}
+.alerta i { font-size: 18px; flex-shrink: 0; }
+
+.alerta-error {
+    background: #FDECEC; color: #B02A2A;
+    border: 1px solid #F5C6C6;
+}
+.alerta-ok {
+    background: #E7F6EF; color: #0F6E56;
+    border: 1px solid #B9E4D2;
+}
+
+/* =====================================================================
+   REGISTRO DE PACIENTE  (CU-02)
+   ===================================================================== */
+.opcional {
+    font-weight: 400;
+    font-size: 0.85em;
+    color: var(--gris-600);
+}
