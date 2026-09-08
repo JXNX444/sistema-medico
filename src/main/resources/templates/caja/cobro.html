@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Caja · Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/caja.css}">
+</head>
+<body>
+
+<header class="barra-admin">
+    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
+    <nav>
+        <span style="color:var(--teal-100);font-size:14px;font-weight:400;">
+            <i class="ti ti-user-circle" style="vertical-align:-2px;"></i>
+            <span th:text="${nombre}">Cajero</span>
+        </span>
+        <a th:href="@{/panel/inicio}"><i class="ti ti-arrow-left"></i> Volver al panel</a>
+    </nav>
+</header>
+
+<main class="contenedor">
+    <h1>Cobro de consulta en caja</h1>
+    <p class="menu-sub">Busque la cita del paciente por DPI o numero de cita para registrar el pago</p>
+
+    <!-- Buscador -->
+    <div class="tarjeta-buscador">
+        <div class="alternancia">
+            <button type="button" id="btnModoDpi" class="alternancia-boton activa">
+                <i class="ti ti-id"></i> Por DPI
+            </button>
+            <button type="button" id="btnModoNumero" class="alternancia-boton">
+                <i class="ti ti-ticket"></i> Por No. Cita
+            </button>
+        </div>
+
+        <div class="fila-busqueda">
+            <input type="text" id="campoValor" placeholder="1234567890101" autocomplete="off">
+            <button type="button" id="btnBuscar" class="boton-principal" style="width:auto;">
+                <i class="ti ti-search"></i> Buscar
+            </button>
+        </div>
+
+        <p class="error-busqueda" id="errorBusqueda"></p>
+    </div>
+
+    <p class="cargando oculto" id="cargando">Buscando...</p>
+
+    <div id="zonaResultado"></div>
+</main>
+
+<!-- Modal de cobro -->
+<div class="overlay oculto" id="overlayCobro">
+    <div class="modal">
+        <div class="modal-cabecera">
+            <h2><i class="ti ti-cash-register"></i> Registrar cobro</h2>
+            <button type="button" id="btnCerrarModal">&times;</button>
+        </div>
+        <div class="modal-cuerpo">
+
+            <!-- Panel de cobro (se ve primero) -->
+            <div id="zonaFormCobro">
+                <div class="resumen-cobro">
+                    <div class="linea"><span>Paciente</span><span id="rcPaciente"></span></div>
+                    <div class="linea"><span>Cita</span><span id="rcNumeroCita"></span></div>
+                    <div class="linea"><span>Especialidad</span><span id="rcEspecialidad"></span></div>
+                    <div class="linea total"><span>Total a cobrar</span><span id="rcMonto"></span></div>
+                </div>
+
+                <div class="grupo">
+                    <label for="metodoPago">Metodo de pago</label>
+                    <select id="metodoPago">
+                        <option value="0">Efectivo</option>
+                        <option value="1">Tarjeta Visa</option>
+                        <option value="2">Tarjeta Mastercard</option>
+                        <option value="3">Tarjeta de Debito</option>
+                    </select>
+                </div>
+
+                <!-- Efectivo -->
+                <div id="bloqueEfectivo">
+                    <div class="grupo">
+                        <label for="montoRecibido">Monto recibido (Q)</label>
+                        <input type="number" id="montoRecibido" min="0" step="0.01" placeholder="0.00" autocomplete="off">
+                    </div>
+                    <div class="caja-cambio oculto" id="cajaCambio">
+                        Cambio a devolver: <strong id="txtCambio">Q0.00</strong>
+                    </div>
+                </div>
+
+                <!-- Tarjeta -->
+                <div id="bloqueTarjeta" class="oculto">
+                    <div class="grupo">
+                        <label for="ultimos4">Ultimos 4 digitos de la tarjeta</label>
+                        <input type="text" id="ultimos4" maxlength="4" inputmode="numeric" placeholder="1234" autocomplete="off">
+                        <p class="ayuda">Solo como referencia en el comprobante. No se guarda la tarjeta completa.</p>
+                    </div>
+                </div>
+
+                <p class="error-modal" id="errorModal"></p>
+
+                <button type="button" id="btnRegistrarPago" class="boton-principal" style="width:100%;">
+                    <i class="ti ti-check"></i> Registrar pago
+                </button>
+            </div>
+
+            <!-- Comprobante (se ve tras aprobar) -->
+            <div id="zonaComprobante" class="oculto">
+                <div class="comprobante">
+                    <div class="comprobante-top">
+                        <i class="ti ti-circle-check check"></i>
+                        <h3>Pago registrado</h3>
+                    </div>
+                    <p class="comprobante-trx">Transaccion <strong id="cpTrx"></strong></p>
+
+                    <div class="comprobante-fila"><span>Paciente</span><span id="cpPaciente"></span></div>
+                    <div class="comprobante-fila"><span>Cita</span><span id="cpNumeroCita"></span></div>
+                    <div class="comprobante-fila"><span>Especialidad</span><span id="cpEspecialidad"></span></div>
+                    <div class="comprobante-fila"><span>Medico</span><span id="cpMedico"></span></div>
+                    <div class="comprobante-fila"><span>Sucursal</span><span id="cpSucursal"></span></div>
+                    <div class="comprobante-fila"><span>Fecha de la cita</span><span id="cpFechaCita"></span></div>
+                    <div class="comprobante-fila"><span>Fecha del pago</span><span id="cpFechaTrx"></span></div>
+                    <div class="comprobante-fila"><span>Forma de pago</span><span id="cpFormaPago"></span></div>
+                    <div class="comprobante-fila" id="cpFilaRecibido"><span>Monto recibido</span><span id="cpRecibido"></span></div>
+                    <div class="comprobante-fila" id="cpFilaCambio"><span>Cambio</span><span id="cpCambio"></span></div>
+                    <div class="comprobante-total"><span>Total pagado</span><span id="cpMonto"></span></div>
+                </div>
+
+                <div class="acciones-comprobante">
+                    <button type="button" id="btnImprimir" class="boton-secundario">
+                        <i class="ti ti-printer"></i> Imprimir
+                    </button>
+                    <button type="button" id="btnNuevoCobro" class="boton-principal">
+                        <i class="ti ti-plus"></i> Nuevo cobro
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const CTX = /*[[@{/}]]*/ '/';
+</script>
+<script th:src="@{/js/caja.js}"></script>
+
+</body>
+</html>

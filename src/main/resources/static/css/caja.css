@@ -1,0 +1,232 @@
+/* =====================================================================
+   Modulo Caja - CU-06 (Cobro de Consulta en Caja)
+   Misma paleta que recepcion.css / citas.css / usuarios.css
+   ===================================================================== */
+
+:root {
+    --teal-900: #04342C;
+    --teal-800: #085041;
+    --teal-700: #0F6E56;
+    --teal-400: #1D9E75;
+    --teal-200: #5DCAA5;
+    --teal-100: #9FE1CB;
+    --teal-50:  #E1F5EE;
+
+    --ambar:      #EF9F27;
+    --ambar-osc:  #C97E10;
+
+    --hueso:    #F1EFE8;
+    --gris-300: #D3D1C7;
+    --gris-400: #B4B2A9;
+    --gris-600: #5F5E5A;
+    --gris-900: #2C2C2A;
+
+    --rojo:  #E24B4A;
+    --verde: #1D9E75;
+    --radio: 6px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--hueso);
+    color: var(--gris-900);
+    line-height: 1.6;
+}
+
+.contenedor { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+
+/* ---------- Barra superior ---------- */
+.barra-admin {
+    background: var(--teal-700);
+    padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    color: var(--teal-50); font-size: 15px; font-weight: 600;
+}
+.barra-admin span { display: flex; align-items: center; gap: 10px; }
+.barra-admin nav { display: flex; align-items: center; gap: 20px; }
+.barra-admin nav a {
+    color: var(--teal-100); text-decoration: none; font-size: 14px; font-weight: 400;
+    display: flex; align-items: center; gap: 6px;
+}
+.barra-admin nav a:hover { color: #fff; }
+
+h1 { font-family: Georgia, 'Times New Roman', serif; font-size: 28px; font-weight: 400; margin-bottom: 6px; }
+.menu-sub { color: var(--gris-600); font-size: 14px; margin-bottom: 24px; }
+
+/* ---------- Buscador con alternancia DPI / No. Cita ---------- */
+.tarjeta-buscador {
+    background: #fff; border-radius: 8px; padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06); margin-bottom: 24px;
+}
+.alternancia { display: flex; gap: 8px; margin-bottom: 16px; }
+.alternancia-boton {
+    flex: 1; padding: 10px; border: 1px solid var(--gris-300); background: #fff;
+    border-radius: var(--radio); cursor: pointer; font-size: 14px; color: var(--gris-600);
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-family: inherit; transition: all .15s;
+}
+.alternancia-boton:hover { border-color: var(--teal-400); }
+.alternancia-boton.activa {
+    background: var(--teal-50); border-color: var(--teal-700); color: var(--teal-800); font-weight: 600;
+}
+
+.fila-busqueda { display: flex; gap: 8px; }
+.fila-busqueda input {
+    flex: 1; padding: 11px 14px; border: 1px solid var(--gris-300);
+    border-radius: var(--radio); font-size: 15px; font-family: inherit;
+}
+.fila-busqueda input:focus { outline: none; border-color: var(--teal-400); }
+
+.boton-principal {
+    background: var(--teal-700); color: #fff; border: none; padding: 11px 20px;
+    border-radius: var(--radio); font-size: 14px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit;
+}
+.boton-principal:hover { background: var(--teal-800); }
+.boton-principal:disabled { background: var(--gris-400); cursor: not-allowed; }
+
+.error-busqueda { color: var(--rojo); font-size: 13px; margin-top: 10px; min-height: 18px; }
+.cargando { color: var(--gris-600); font-size: 14px; text-align: center; padding: 20px; }
+
+/* ---------- Aviso (FA02: sin resultados) ---------- */
+.aviso {
+    background: #fff; border-left: 4px solid var(--ambar); border-radius: var(--radio);
+    padding: 18px 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.aviso i { color: var(--ambar-osc); }
+
+/* ---------- Tarjeta de cita ---------- */
+.tarjeta-cita {
+    background: #fff; border-radius: 8px; padding: 20px 22px; margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06); border: 1px solid var(--gris-300);
+}
+.cita-cabecera {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.cita-numero { font-weight: 700; font-size: 16px; color: var(--teal-800); }
+.cita-paciente { font-size: 14px; color: var(--gris-900); }
+.cita-paciente small { color: var(--gris-600); }
+
+.badge-estado {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+    border-radius: 999px; font-size: 12px; font-weight: 600;
+    background: #FDECC8; color: var(--ambar-osc);
+}
+
+.cita-datos {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px 20px; font-size: 14px; margin-bottom: 16px;
+}
+.cita-datos .dato { display: flex; flex-direction: column; }
+.cita-datos .dato span:first-child { color: var(--gris-600); font-size: 12px; }
+.cita-datos .dato span:last-child { color: var(--gris-900); }
+.cita-monto {
+    font-family: Georgia, serif; font-size: 22px; color: var(--teal-800); font-weight: 700;
+}
+
+.boton-cobrar {
+    background: var(--ambar); color: #3a2600; border: none; padding: 11px 22px;
+    border-radius: var(--radio); font-size: 14px; font-weight: 700; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px; font-family: inherit;
+}
+.boton-cobrar:hover { background: var(--ambar-osc); color: #fff; }
+
+/* ---------- Modal de cobro ---------- */
+.overlay {
+    position: fixed; inset: 0; background: rgba(4,52,44,.55);
+    display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50;
+}
+.overlay.oculto { display: none; }
+.modal {
+    background: var(--hueso); border-radius: 10px; width: 100%; max-width: 480px;
+    max-height: 92vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,.25);
+}
+.modal-cabecera {
+    background: var(--teal-700); color: #fff; padding: 16px 22px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-radius: 10px 10px 0 0;
+}
+.modal-cabecera h2 { font-family: Georgia, serif; font-size: 19px; font-weight: 400; }
+.modal-cabecera button {
+    background: none; border: none; color: var(--teal-100); font-size: 22px;
+    cursor: pointer; line-height: 1;
+}
+.modal-cuerpo { padding: 22px; }
+
+.resumen-cobro {
+    background: #fff; border-radius: var(--radio); padding: 16px; margin-bottom: 18px;
+    border: 1px solid var(--gris-300);
+}
+.resumen-cobro .linea { display: flex; justify-content: space-between; font-size: 14px; padding: 3px 0; }
+.resumen-cobro .total {
+    border-top: 1px dashed var(--gris-300); margin-top: 8px; padding-top: 10px;
+    font-size: 18px; font-weight: 700; color: var(--teal-800);
+}
+
+.grupo { margin-bottom: 16px; }
+.grupo label { display: block; font-size: 13px; font-weight: 600; color: var(--gris-900); margin-bottom: 6px; }
+.grupo input, .grupo select {
+    width: 100%; padding: 11px 12px; border: 1px solid var(--gris-300);
+    border-radius: var(--radio); font-size: 15px; font-family: inherit;
+}
+.grupo input:focus, .grupo select:focus { outline: none; border-color: var(--teal-400); }
+.grupo .ayuda { font-size: 12px; color: var(--gris-600); margin-top: 5px; }
+
+.caja-cambio {
+    background: var(--teal-50); border-radius: var(--radio); padding: 14px 16px;
+    margin-bottom: 16px; font-size: 15px; color: var(--teal-800);
+}
+.caja-cambio strong { font-size: 20px; }
+
+.error-modal { color: var(--rojo); font-size: 13px; margin-bottom: 14px; min-height: 18px; }
+
+.oculto { display: none !important; }
+
+/* ---------- Comprobante ---------- */
+.comprobante {
+    background: #fff; border-radius: var(--radio); padding: 22px;
+    border: 1px solid var(--gris-300);
+}
+.comprobante-top { text-align: center; margin-bottom: 16px; }
+.comprobante-top .check { font-size: 40px; color: var(--verde); }
+.comprobante-top h3 { font-family: Georgia, serif; font-weight: 400; font-size: 20px; margin-top: 6px; }
+.comprobante-trx { text-align: center; color: var(--gris-600); font-size: 13px; margin-bottom: 16px; }
+.comprobante-trx strong { color: var(--teal-800); }
+
+.comprobante-fila {
+    display: flex; justify-content: space-between; font-size: 14px;
+    padding: 6px 0; border-bottom: 1px dashed var(--gris-300);
+}
+.comprobante-fila span:first-child { color: var(--gris-600); }
+.comprobante-fila span:last-child { color: var(--gris-900); text-align: right; }
+.comprobante-total {
+    display: flex; justify-content: space-between; font-size: 18px; font-weight: 700;
+    color: var(--teal-800); padding-top: 12px; margin-top: 6px;
+}
+
+.acciones-comprobante { display: flex; gap: 10px; margin-top: 20px; }
+.acciones-comprobante button { flex: 1; }
+.boton-secundario {
+    background: #fff; color: var(--teal-800); border: 1px solid var(--teal-700);
+    padding: 11px; border-radius: var(--radio); font-size: 14px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-family: inherit;
+}
+.boton-secundario:hover { background: var(--teal-50); }
+
+/* ---------- Impresion: solo el comprobante ---------- */
+@media print {
+    body * { visibility: hidden; }
+    #zonaComprobante, #zonaComprobante * { visibility: visible; }
+    #zonaComprobante {
+        position: absolute; left: 0; top: 0; width: 100%;
+        background: #fff; padding: 0;
+    }
+    .acciones-comprobante { display: none !important; }
+    .modal-cabecera { display: none !important; }
+    .overlay { position: static; background: none; padding: 0; }
+    .modal { box-shadow: none; max-width: 100%; }
+}
