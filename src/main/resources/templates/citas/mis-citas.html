@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Citas · Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/citas.css}">
+</head>
+<body>
+
+<header class="barra-admin">
+    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
+    <nav>
+        <a th:href="@{/dashboard}"><i class="ti ti-arrow-left"></i> Volver a mi panel</a>
+    </nav>
+</header>
+
+<main class="contenedor">
+    <h1>Mis citas</h1>
+    <p class="menu-sub">Consulte el historial y estado de sus citas medicas</p>
+
+    <div class="pestanas-citas">
+        <button type="button" class="pestana-boton activa" data-panel="panelProximas" onclick="cambiarPestana(this)">
+            <i class="ti ti-calendar-time"></i> Proximas
+            <span class="pestana-contador" th:text="${proximas.size()}">0</span>
+        </button>
+        <button type="button" class="pestana-boton" data-panel="panelHistorial" onclick="cambiarPestana(this)">
+            <i class="ti ti-history"></i> Historial
+            <span class="pestana-contador" th:text="${historial.size()}">0</span>
+        </button>
+        <button type="button" class="pestana-boton" data-panel="panelCanceladas" onclick="cambiarPestana(this)">
+            <i class="ti ti-calendar-x"></i> Inactivas
+            <span class="pestana-contador" th:text="${canceladas.size()}">0</span>
+        </button>
+    </div>
+
+    <!-- PROXIMAS -->
+    <div class="panel-citas" id="panelProximas">
+        <p th:if="${proximas.isEmpty()}" class="sin-citas">
+            <i class="ti ti-calendar-off"></i>
+            No tiene citas proximas. <a th:href="@{/citas/nueva}">Agende una cita</a> cuando lo necesite.
+        </p>
+        <div class="tarjeta-cita" th:each="c : ${proximas}">
+            <div class="tarjeta-cita-info">
+                <div class="tarjeta-cita-numero" th:text="${c.numeroCita}"></div>
+                <div class="tarjeta-cita-titulo" th:text="'Dr(a). ' + ${c.medico.nombreCompleto} + ' · ' + ${c.especialidad.nombre}"></div>
+                <div class="tarjeta-cita-detalle">
+                    <span><i class="ti ti-calendar"></i> <span th:text="${#temporals.format(c.fechaLocal, 'dd/MM/yyyy')}"></span></span>
+                    <span><i class="ti ti-clock"></i> <span th:text="${#temporals.format(c.fechaLocal, 'HH:mm')}"></span></span>
+                    <span><i class="ti ti-building-hospital"></i> <span th:text="${c.sucursal.nombre}"></span></span>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <a th:if="${c.estadoCita.codigo == 'PENDIENTE_PAGO'}"
+                   th:href="@{'/citas/pago/' + ${c.id}}" class="boton-principal" style="padding:8px 16px;font-size:13px;">
+                    <i class="ti ti-credit-card"></i> Continuar pago
+                </a>
+                <span class="badge-estado"
+                      th:style="'background-color:' + (${c.estadoCita.colorHex} ?: '#0F6E56')"
+                      th:text="${c.estadoCita.nombre}"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="panel-citas oculto" id="panelHistorial">
+        <p th:if="${historial.isEmpty()}" class="sin-citas">
+            <i class="ti ti-history"></i>
+            Todavia no tiene citas atendidas en su historial.
+        </p>
+        <div class="tarjeta-cita" th:each="c : ${historial}">
+            <div class="tarjeta-cita-info">
+                <div class="tarjeta-cita-numero" th:text="${c.numeroCita}"></div>
+                <div class="tarjeta-cita-titulo" th:text="'Dr(a). ' + ${c.medico.nombreCompleto} + ' · ' + ${c.especialidad.nombre}"></div>
+                <div class="tarjeta-cita-detalle">
+                    <span><i class="ti ti-calendar"></i> <span th:text="${#temporals.format(c.fechaLocal, 'dd/MM/yyyy')}"></span></span>
+                    <span><i class="ti ti-clock"></i> <span th:text="${#temporals.format(c.fechaLocal, 'HH:mm')}"></span></span>
+                    <span><i class="ti ti-building-hospital"></i> <span th:text="${c.sucursal.nombre}"></span></span>
+                </div>
+            </div>
+            <span class="badge-estado"
+                  th:style="'background-color:' + (${c.estadoCita.colorHex} ?: '#1D9E75')"
+                  th:text="${c.estadoCita.nombre}"></span>
+        </div>
+    </div>
+
+    <!-- CANCELADAS / INACTIVAS -->
+    <div class="panel-citas oculto" id="panelCanceladas">
+        <p th:if="${canceladas.isEmpty()}" class="sin-citas">
+            <i class="ti ti-calendar-x"></i>
+            No tiene citas canceladas ni inasistencias.
+        </p>
+        <div class="tarjeta-cita" th:each="c : ${canceladas}" style="flex-direction:column;align-items:stretch;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+                <div class="tarjeta-cita-info">
+                    <div class="tarjeta-cita-numero" th:text="${c.numeroCita}"></div>
+                    <div class="tarjeta-cita-titulo" th:text="'Dr(a). ' + ${c.medico.nombreCompleto} + ' · ' + ${c.especialidad.nombre}"></div>
+                    <div class="tarjeta-cita-detalle">
+                        <span><i class="ti ti-calendar"></i> <span th:text="${#temporals.format(c.fechaLocal, 'dd/MM/yyyy')}"></span></span>
+                        <span><i class="ti ti-clock"></i> <span th:text="${#temporals.format(c.fechaLocal, 'HH:mm')}"></span></span>
+                        <span><i class="ti ti-building-hospital"></i> <span th:text="${c.sucursal.nombre}"></span></span>
+                    </div>
+                </div>
+                <span class="badge-estado"
+                      th:style="'background-color:' + (${c.estadoCita.colorHex} ?: '#E24B4A')"
+                      th:text="${c.estadoCita.nombre}"></span>
+            </div>
+            <div th:if="${motivosCancelacion.get(c.id)} != null"
+                 style="margin-top:10px;padding:10px 14px;background:var(--hueso);border-radius:var(--radio);font-size:13px;color:var(--gris-600);">
+                <i class="ti ti-info-circle"></i> <span th:text="${motivosCancelacion.get(c.id)}"></span>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    function cambiarPestana(boton) {
+        document.querySelectorAll('.pestana-boton').forEach(b => b.classList.remove('activa'));
+        document.querySelectorAll('.panel-citas').forEach(p => p.classList.add('oculto'));
+
+        boton.classList.add('activa');
+        document.getElementById(boton.dataset.panel).classList.remove('oculto');
+    }
+</script>
+</body>
+</html>

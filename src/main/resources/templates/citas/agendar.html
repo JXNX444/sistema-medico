@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Cita · Hospital San Rafael</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/citas.css}">
+</head>
+<body>
+
+<header class="barra-admin">
+    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
+    <nav>
+        <a th:href="@{/dashboard}"><i class="ti ti-arrow-left"></i> Volver a mi panel</a>
+    </nav>
+</header>
+
+<main class="contenedor">
+    <h1>Agendar cita</h1>
+    <p class="menu-sub">Complete los pasos para reservar su cita medica</p>
+
+    <!-- Indicador de progreso -->
+    <ol class="pasos" id="indicadorPasos">
+        <li data-paso="1" class="paso-activo">1. Sucursal</li>
+        <li data-paso="2">2. Especialidad</li>
+        <li data-paso="3">3. Medico</li>
+        <li data-paso="4">4. Fecha y hora</li>
+        <li data-paso="5">5. Confirmar</li>
+    </ol>
+
+    <div class="tarjeta-wizard">
+
+        <!-- PASO 1: Sucursal -->
+        <section class="paso" id="paso1">
+            <h2>Seleccione una sucursal</h2>
+            <div class="rejilla-opciones" id="listaSucursales">
+                <label class="opcion" th:each="s : ${sucursales}">
+                    <input type="radio" name="sucursal" th:value="${s.id}" th:attr="data-nombre=${s.nombre}">
+                    <span class="opcion-texto">
+<i class="ti ti-building-hospital"></i>
+<span th:text="${s.nombre}">Sede</span>
+</span>
+                </label>
+            </div>
+            <p class="error" id="errorPaso1"></p>
+            <div class="acciones-paso">
+                <button type="button" class="boton-principal" onclick="irAPaso(2)">Siguiente</button>
+            </div>
+        </section>
+
+        <!-- PASO 2: Especialidad -->
+        <section class="paso oculto" id="paso2">
+            <h2>Seleccione una especialidad</h2>
+            <div class="rejilla-opciones" id="listaEspecialidades">
+                <p class="cargando">Cargando especialidades...</p>
+            </div>
+            <p class="error" id="errorPaso2"></p>
+            <div class="acciones-paso">
+                <button type="button" class="boton-secundario" onclick="irAPaso(1)">Atras</button>
+                <button type="button" class="boton-principal" onclick="irAPaso(3)">Siguiente</button>
+            </div>
+        </section>
+
+        <!-- PASO 3: Medico -->
+        <section class="paso oculto" id="paso3">
+            <h2>Seleccione un medico</h2>
+            <div class="rejilla-opciones" id="listaMedicos">
+                <p class="cargando">Cargando medicos...</p>
+            </div>
+            <p class="error" id="errorPaso3"></p>
+            <div class="acciones-paso">
+                <button type="button" class="boton-secundario" onclick="irAPaso(2)">Atras</button>
+                <button type="button" class="boton-principal" onclick="irAPaso(4)">Siguiente</button>
+            </div>
+        </section>
+
+        <!-- PASO 4: Fecha y hora -->
+        <section class="paso oculto" id="paso4">
+            <h2>Seleccione fecha y hora</h2>
+
+            <label class="etiqueta" for="fechaCita">Fecha</label>
+            <input type="date" id="fechaCita" class="entrada-fecha">
+
+            <div id="bloqueHorarios" class="oculto">
+                <label class="etiqueta">Horarios disponibles</label>
+                <div class="rejilla-horarios" id="listaHorarios"></div>
+            </div>
+
+            <p class="error" id="errorPaso4"></p>
+            <div class="acciones-paso">
+                <button type="button" class="boton-secundario" onclick="irAPaso(3)">Atras</button>
+                <button type="button" class="boton-principal" onclick="irAPaso(5)">Siguiente</button>
+            </div>
+        </section>
+
+        <!-- PASO 5: Confirmar -->
+        <section class="paso oculto" id="paso5">
+            <h2>Confirme su cita</h2>
+
+            <div class="resumen" id="resumenCita"></div>
+
+            <label class="etiqueta" for="motivoCita">Motivo de la consulta</label>
+            <textarea id="motivoCita" rows="4" maxlength="2000"
+                      placeholder="Describa brevemente el motivo de su consulta (minimo 10 caracteres)"></textarea>
+
+            <p class="error" id="errorPaso5"></p>
+            <div class="acciones-paso">
+                <button type="button" class="boton-secundario" onclick="irAPaso(4)">Atras</button>
+                <button type="button" class="boton-principal" id="btnConfirmar" onclick="confirmarCita()">
+                    <i class="ti ti-calendar-check"></i> Confirmar cita
+                </button>
+            </div>
+        </section>
+
+        <!-- PASO FINAL: exito -->
+        <section class="paso oculto" id="pasoExito">
+            <div class="exito">
+                <i class="ti ti-circle-check"></i>
+                <h2>Cita reservada</h2>
+                <p>Numero de cita: <strong id="numeroCitaTexto"></strong></p>
+                <p>Tiene <strong id="contadorReserva">5:00</strong> minutos para completar el pago antes de que la reserva expire.</p>
+                <a th:href="@{/dashboard}" class="boton-principal">Ir a mi panel</a>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<script th:inline="javascript">
+    const CTX = /*[[@{/}]]*/ '/';
+</script>
+<script th:src="@{/js/agendar.js}"></script>
+</body>
+</html>
