@@ -26,7 +26,7 @@
         No puede eliminar su propia cuenta mientras tiene la sesion iniciada.
     </p>
 
-    <form th:action="@{/usuarios/listado}" method="get" class="barra-busqueda">
+    <form th:action="@{/usuarios/listado/buscar}" method="get" class="barra-busqueda">
         <select name="campo">
             <option value="usuario" th:selected="${campo == 'usuario'}">Nombre de Usuario</option>
             <option value="nombre" th:selected="${campo == 'nombre'}">Nombre</option>
@@ -72,7 +72,7 @@
 
     <div class="paginacion" th:if="${usuarios.totalPages > 1}">
         <a th:each="p : ${#numbers.sequence(0, usuarios.totalPages - 1)}"
-           th:href="@{/usuarios/listado(campo=${campo}, valor=${valor}, page=${p})}"
+           th:href="@{${endpoint}(campo=${campo}, valor=${valor}, page=${p})}"
            th:text="${p + 1}"
            th:classappend="${p == usuarios.number} ? 'pagina-activa'"></a>
     </div>
