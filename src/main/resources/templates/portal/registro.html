@@ -12,7 +12,8 @@
 <div class="login-contenedor">
 
     <div class="login-panel">
-        <a th:href="@{/}" class="login-volver">
+        <a th:href="@{/}" class="login-volver"
+           onclick="return confirm('¿Deseas cancelar el registro? Los datos ingresados se perderan.');">
             <i class="ti ti-arrow-left"></i> Volver al portal
         </a>
         <div class="login-marca">
