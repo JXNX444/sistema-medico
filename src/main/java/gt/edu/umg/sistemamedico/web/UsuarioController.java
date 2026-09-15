@@ -26,19 +26,15 @@ import java.util.Map;
 /**
  * CU-01 Mantenimiento de Usuarios.
  *
- * /usuarios            -> menu principal (Listar / Crear)
- * /usuarios/listado    -> tabla con filtro y paginacion
- * /usuarios/nuevo      -> crear
- * /usuarios/{id}/editar -> editar
- * /usuarios/{id}/eliminar -> eliminar (logico, state=2)
+ * /usuarios                -> menu principal (Listar / Crear)
+ * /usuarios/listado        -> Paso 4: tabla con TODOS los usuarios (sin filtro)
+ * /usuarios/listado/buscar -> Paso 6: ejecuta la busqueda por campo+valor [FA02][FA03]
+ * /usuarios/nuevo          -> crear
+ * /usuarios/{id}/editar    -> editar
+ * /usuarios/{id}/eliminar  -> eliminar (logico, state=2)
  *
  * "state" tiene 3 valores: 0=Inactivo, 1=Activo, 2=Eliminado.
- * El listado muestra Activos e Inactivos (ambos gestionables desde el
- * formulario de edicion); solo oculta los Eliminados, que ya no se
- * pueden revertir desde la UI.
- *
- * Los catalogos (roles, sucursales, especialidades) se piden a sus
- * SERVICIOS con cache, no a los repositorios directos.
+ * El listado muestra Activos e Inactivos; solo oculta los Eliminados.
  */
 @Controller
 @RequestMapping("/usuarios")
@@ -75,13 +71,30 @@ public class UsuarioController {
         return "usuarios/menu";
     }
 
-    // ---------- LISTADO ----------
+    // ---------- LISTADO (Paso 4: carga inicial, muestra TODOS) ----------
 
     @GetMapping("/listado")
     public String listado(@RequestParam(defaultValue = "usuario") String campo,
-                          @RequestParam(required = false) String valor,
                           @RequestParam(defaultValue = "0") int page,
                           Model model) {
+        // Sin criterio: valor va en null -> el helper muestra todos los no eliminados.
+        return cargarTabla(campo, null, page, "/usuarios/listado", model);
+    }
+
+    // ---------- BUSCAR (Paso 6: el boton de busqueda 🔍) [FA02][FA03] ----------
+
+    @GetMapping("/listado/buscar")
+    public String buscar(@RequestParam(defaultValue = "usuario") String campo,
+                         @RequestParam(required = false) String valor,
+                         @RequestParam(defaultValue = "0") int page,
+                         Model model) {
+        // FA02: si valor viene vacio, el helper devuelve todos (sin filtro).
+        return cargarTabla(campo, valor, page, "/usuarios/listado/buscar", model);
+    }
+
+    // ---------- Helper compartido: arma la tabla paginada ----------
+
+    private String cargarTabla(String campo, String valor, int page, String endpoint, Model model) {
 
         if (valor != null && valor.length() > 25) { // RN-CU01-01
             valor = valor.substring(0, 25);
@@ -99,6 +112,7 @@ public class UsuarioController {
         model.addAttribute("usuarios", usuarios);
         model.addAttribute("campo", campo);
         model.addAttribute("valor", valor);
+        model.addAttribute("endpoint", endpoint); // para que la paginacion vuelva a la ruta correcta
         return "usuarios/listado";
     }
 

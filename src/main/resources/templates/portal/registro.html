@@ -6,6 +6,7 @@
 <div class="sm-auth-wrap">
     <div class="sm-card" style="width:860px;max-width:100%;display:flex;">
 
+<<<<<<< HEAD
         <!-- Panel navy izquierdo -->
         <div style="width:320px;flex-shrink:0;background:var(--sm-ink);padding:40px 36px;
                 display:flex;flex-direction:column;gap:16px;">
@@ -17,6 +18,29 @@
             <div style="font-size:13px;color:var(--sm-slate-400);line-height:1.6;">
                 Regístrese como paciente para agendar y consultar sus citas médicas.
             </div>
+=======
+    <div class="login-panel">
+        <a th:href="@{/}" class="login-volver"
+           onclick="return confirm('¿Deseas cancelar el registro? Los datos ingresados se perderan.');">
+            <i class="ti ti-arrow-left"></i> Volver al portal
+        </a>
+        <div class="login-marca">
+            <i class="ti ti-heartbeat"></i>
+            <span>Hospital San Rafael</span>
+        </div>
+        <h1>Cree su cuenta</h1>
+        <p>Registrese como paciente para agendar y consultar sus citas medicas.</p>
+    </div>
+
+    <div class="login-forma">
+        <h2>Registro de paciente</h2>
+        <p class="login-sub">Complete sus datos para crear su cuenta</p>
+
+        <!-- Error general (ej. rol Paciente inexistente) -->
+        <div class="alerta alerta-error" th:if="${errores.get('general')}">
+            <i class="ti ti-alert-circle"></i>
+            <span th:text="${errores.get('general')}"></span>
+>>>>>>> 8dbe269e9820f1c47575a1e6f987b41c55eb7c17
         </div>
 
         <!-- Formulario -->
