@@ -1,34 +1,34 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Mantenimiento de Usuarios · Hospital San Rafael</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/usuarios.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('Mantenimiento de Usuarios', null)}"></head>
 <body>
 
-<header class="barra-admin">
-    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
-    <nav>
-        <a th:href="@{/panel/inicio}"><i class="ti ti-arrow-left"></i> Volver al panel</a>
-    </nav>
-</header>
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <a th:href="@{/panel/inicio}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver al panel</a>
+</nav>
 
-<main class="contenedor">
-    <h1>Mantenimiento de usuarios</h1>
-    <p class="menu-sub">Elige que deseas hacer</p>
+<main style="max-width:900px;margin:0 auto;padding:40px 24px;">
+    <div style="font-size:24px;font-weight:800;">Mantenimiento de usuarios</div>
+    <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:24px;">Elige qué deseas hacer</div>
 
-    <div class="menu-tarjetas">
-        <a th:href="@{/usuarios/listado}" class="tarjeta-menu">
-            <i class="ti ti-list-details"></i>
-            <p class="tarjeta-titulo">Listar usuarios</p>
-            <p class="tarjeta-desc">Ver, buscar, editar o eliminar usuarios existentes</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;">
+        <a th:href="@{/usuarios/listado}" class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            </div>
+            <div class="sm-feature__title">Listar usuarios</div>
+            <div class="sm-feature__desc">Ver, buscar, editar o eliminar usuarios existentes.</div>
         </a>
-        <a th:href="@{/usuarios/nuevo}" class="tarjeta-menu">
-            <i class="ti ti-user-plus"></i>
-            <p class="tarjeta-titulo">Crear usuario</p>
-            <p class="tarjeta-desc">Registrar un nuevo usuario en el sistema</p>
+
+        <a th:href="@{/usuarios/nuevo}" class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+            </div>
+            <div class="sm-feature__title">Crear usuario</div>
+            <div class="sm-feature__desc">Registrar un nuevo usuario en el sistema.</div>
         </a>
     </div>
 </main>

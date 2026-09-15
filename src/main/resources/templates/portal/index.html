@@ -1,66 +1,51 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hospital San Rafael</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/portal.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('Hospital San Rafael', null)}"></head>
 <body>
 
-<header class="barra">
-    <div class="contenedor barra-interna">
-        <div class="marca">
-            <i class="ti ti-heartbeat"></i>
-            <span>Hospital San Rafael</span>
-        </div>
-        <nav class="nav">
-            <a href="#servicios">Servicios</a>
-            <a href="#especialidades">Especialidades</a>
-            <a href="#horarios">Horarios</a>
-            <a href="#sedes">Sedes</a>
-            <a href="/login" class="destacado">
-                <i class="ti ti-lock"></i> Ingresar
-            </a>
-        </nav>
+<!-- ============ NAVBAR ============ -->
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <div class="sm-navbar__links">
+        <a href="#servicios">Servicios</a>
+        <a href="#especialidades">Especialidades</a>
+        <a href="#horarios">Horarios</a>
+        <a href="#sedes">Sedes</a>
     </div>
-</header>
+    <a th:href="@{/login}" class="sm-btn sm-btn--primary sm-btn--sm">Ingresar</a>
+</nav>
 
+<!-- ============ HERO + VERIFICACIÓN DPI ============ -->
 <section class="hero">
-    <div class="contenedor">
-        <h1>Su cita medica en tres pasos</h1>
-        <p>Verifique su registro con el numero de DPI para continuar</p>
+    <div class="hero-inner">
+        <div class="sm-pill">Hospital Regional · Guatemala</div>
+        <h1>Su cita médica en tres pasos</h1>
+        <p>Verifique su registro con el número de DPI para continuar.</p>
 
         <div class="buscador">
             <div class="campo-dpi">
-                <i class="ti ti-id"></i>
                 <input type="text" id="dpiRapido" placeholder="Ingrese su DPI"
                        maxlength="13" inputmode="numeric" autocomplete="off">
                 <span class="contador" id="contadorRapido">0/13</span>
             </div>
-            <button class="btn-agendar" onclick="abrirModal()">
-                Agendar cita
-                <i class="ti ti-arrow-right"></i>
-            </button>
+            <button class="btn-agendar" onclick="abrirModal()">Agendar cita →</button>
         </div>
     </div>
 </section>
 
 <!-- ============ CARRUSEL DE ESPECIALIDADES ============ -->
-<section class="seccion" id="especialidades">
-    <div class="contenedor">
-        <p class="rotulo">NUESTRAS ESPECIALIDADES</p>
-
+<section class="seccion-oscura" id="especialidades">
+    <div class="seccion-inner">
+        <p class="rotulo rotulo-claro">NUESTRAS ESPECIALIDADES</p>
         <div class="carrusel" id="carrusel">
             <div class="carrusel-pista" id="pista">
                 <div class="carrusel-slide" th:each="esp : ${especialidades}">
                     <div class="icono-grande">
-                        <i class="ti ti-stethoscope"></i>
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2v2M5 2v2M8 2v6a4 4 0 0 0 8 0"/><circle cx="20" cy="10" r="2"/><path d="M8 15a6 6 0 0 0 12 0v-3"/></svg>
                     </div>
                     <div class="texto">
                         <h3 th:text="${esp.nombre}">Medicina General</h3>
-                        <p th:text="${esp.descripcion}">Descripcion de la especialidad</p>
+                        <p th:text="${esp.descripcion}">Descripción de la especialidad</p>
                     </div>
                 </div>
             </div>
@@ -70,30 +55,25 @@
 </section>
 
 <!-- ============ SERVICIOS ============ -->
-<!-- Pegar DESPUES de </section> del carrusel y ANTES de la seccion de sedes -->
 <section class="seccion" id="servicios">
-    <div class="contenedor">
+    <div class="seccion-inner">
         <p class="rotulo">TODO EN UN MISMO LUGAR</p>
         <div class="servicios-fila">
             <div class="servicio">
-                <div class="servicio-icono"><i class="ti ti-stethoscope"></i></div>
-                <h3>Consulta Medica</h3>
-                <p>Medicos generales y especialistas</p>
+                <div class="servicio-icono"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2v2M5 2v2M8 2v6a4 4 0 0 0 8 0"/><circle cx="20" cy="10" r="2"/><path d="M8 15a6 6 0 0 0 12 0v-3"/></svg></div>
+                <h3>Consulta Médica</h3><p>Médicos generales y especialistas</p>
             </div>
             <div class="servicio">
-                <div class="servicio-icono"><i class="ti ti-flask"></i></div>
-                <h3>Laboratorio</h3>
-                <p>Analisis clinicos y resultados</p>
+                <div class="servicio-icono"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6L4 20a1 1 0 0 0 1 2h14a1 1 0 0 0 1-2L15 8V2"/><path d="M9 2h6M8 15h8"/></svg></div>
+                <h3>Laboratorio</h3><p>Análisis clínicos y resultados</p>
             </div>
             <div class="servicio">
-                <div class="servicio-icono"><i class="ti ti-pill"></i></div>
-                <h3>Farmacia</h3>
-                <p>Despacho de medicamentos</p>
+                <div class="servicio-icono"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 20.5 3.5 13.5a5 5 0 0 1 7-7l7 7a5 5 0 0 1-7 7Z"/><path d="M8.5 8.5l7 7"/></svg></div>
+                <h3>Farmacia</h3><p>Despacho de medicamentos</p>
             </div>
             <div class="servicio">
-                <div class="servicio-icono"><i class="ti ti-ambulance"></i></div>
-                <h3>Urgencias</h3>
-                <p>Atencion de emergencias</p>
+                <div class="servicio-icono"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 19V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v13M2 19h20M6 12h12M12 8v8"/></svg></div>
+                <h3>Urgencias</h3><p>Atención de emergencias</p>
             </div>
         </div>
     </div>
@@ -101,92 +81,148 @@
 
 <!-- ============ HORARIOS ============ -->
 <section class="seccion" id="horarios">
-    <div class="contenedor">
-        <p class="rotulo">HORARIOS DE ATENCION</p>
+    <div class="seccion-inner">
+        <p class="rotulo">HORARIOS DE ATENCIÓN</p>
         <div class="horarios-caja">
-            <div class="horario-fila">
-                <span>Lunes a Viernes</span>
-                <span>7:00 - 19:00</span>
-            </div>
-            <div class="horario-fila">
-                <span>Sabado</span>
-                <span>7:00 - 13:00</span>
-            </div>
-            <div class="horario-fila">
-                <span>Domingo</span>
-                <span>Cerrado</span>
-            </div>
-            <div class="horario-fila">
-                <span>Dias festivos</span>
-                <span>Solo urgencias</span>
-            </div>
-            <div class="horario-emergencia">
-                <i class="ti ti-24-hours"></i>
-                <span>Servicio de urgencias disponible las 24 horas, todos los dias.</span>
-            </div>
+            <div class="horario-fila"><span>Lunes a Viernes</span><span>7:00 - 19:00</span></div>
+            <div class="horario-fila"><span>Sábado</span><span>7:00 - 13:00</span></div>
+            <div class="horario-fila"><span>Domingo</span><span>Cerrado</span></div>
+            <div class="horario-fila"><span>Días festivos</span><span>Solo urgencias</span></div>
+            <div class="horario-emergencia">Servicio de urgencias disponible las 24 horas, todos los días.</div>
         </div>
     </div>
 </section>
 
+<!-- ============ SEDES ============ -->
 <section class="seccion" id="sedes">
-    <div class="contenedor">
+    <div class="seccion-inner">
         <p class="rotulo">NUESTRAS SEDES</p>
-        <div class="rejilla">
-            <article class="tarjeta tarjeta-sede" th:each="suc : ${sucursales}">
-                <i class="ti ti-building-hospital"></i>
+        <div class="rejilla-sedes">
+            <article class="tarjeta-sede" th:each="suc : ${sucursales}">
+                <div class="sede-icono"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 21V7l8-4 8 4v14M9 9h.01M15 9h.01M9 13h.01M15 13h.01M10 21v-4h4v4"/></svg></div>
                 <div>
                     <h3 th:text="${suc.nombre}">Sede Central</h3>
-                    <p class="dato-sede" th:if="${suc.direccion != null}">
-                        <i class="ti ti-map-pin"></i>
-                        <span th:text="${suc.direccion}">Direccion</span>
-                    </p>
-                    <p class="dato-sede" th:if="${suc.telefono != null}">
-                        <i class="ti ti-phone"></i>
-                        <span th:text="${suc.telefono}">00000000</span>
-                    </p>
+                    <p class="dato-sede" th:if="${suc.direccion != null}" th:text="${suc.direccion}">Dirección</p>
+                    <p class="dato-sede" th:if="${suc.telefono != null}" th:text="${suc.telefono}">00000000</p>
                 </div>
             </article>
         </div>
     </div>
 </section>
 
+<!-- ============ FOOTER ============ -->
 <footer class="pie" id="contacto">
-    <div class="contenedor pie-interno">
-        <span>Hospital San Rafael &middot; Sistema Informatico Hospitalario</span>
-        <span><i class="ti ti-phone"></i> 2200-4500</span>
+    <div class="seccion-inner pie-interno">
+        <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','sm-logo--sm')}"></div>
+        <span>Hospital San Rafael · Sistema Informático Hospitalario · 2200-4500</span>
     </div>
 </footer>
 
+<!-- ============ MODAL VERIFICAR DPI ============ -->
 <div class="velo" id="velo">
-    <div class="modal">
+    <div class="modal-dpi">
         <div class="modal-cabecera">
             <h2>Verificar registro</h2>
-            <button class="cerrar" onclick="cerrarModal()" aria-label="Cerrar">
-                <i class="ti ti-x"></i>
-            </button>
+            <button class="cerrar" onclick="cerrarModal()" aria-label="Cerrar">&times;</button>
         </div>
-        <p class="modal-texto">
-            Ingrese su numero de DPI para verificar si esta registrado en el sistema.
-        </p>
+        <p class="modal-texto">Ingrese su número de DPI para verificar si está registrado en el sistema.</p>
 
-        <label class="etiqueta" for="dpiModal">Numero de DPI</label>
-        <input type="text" id="dpiModal" class="entrada" maxlength="13"
+        <label class="sm-field__label" for="dpiModal">Número de DPI</label>
+        <input type="text" id="dpiModal" class="sm-input" maxlength="13"
                inputmode="numeric" autocomplete="off" placeholder="2547896320101">
 
-        <div class="fila-contador">
-            <span class="contador" id="contadorModal">0/13</span>
-        </div>
+        <div class="fila-contador"><span class="contador" id="contadorModal">0/13</span></div>
 
-        <p class="mensaje-error" id="errorDpi">
-            <i class="ti ti-alert-circle"></i>
-            <span id="textoError"></span>
-        </p>
+        <p class="mensaje-error" id="errorDpi"><span id="textoError"></span></p>
 
-        <button class="btn-principal" onclick="verificarDpi()">
-            <i class="ti ti-search"></i> Verificar DPI
-        </button>
+        <button class="btn-principal" onclick="verificarDpi()">Verificar DPI</button>
     </div>
 </div>
+
+<style>
+    .hero { background:linear-gradient(180deg,#F8FAFC 0%,#FFFFFF 100%); padding:72px 24px; }
+    .hero-inner { max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:18px; animation:fadeUp .6s ease both; }
+    .hero h1 { font-size:44px; font-weight:800; line-height:1.15; margin:0; }
+    .hero p { font-size:16px; color:var(--sm-slate-500); margin:0; }
+    .buscador { display:flex; gap:12px; margin-top:10px; flex-wrap:wrap; }
+    .campo-dpi { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--sm-border);
+        border-radius:var(--sm-r-input); padding:0 14px; min-width:280px; }
+    .campo-dpi input { border:none; outline:none; font-family:var(--sm-font); font-size:15px; padding:14px 0; flex:1; color:var(--sm-ink); }
+    .contador { font-size:12px; color:var(--sm-slate-400); font-weight:600; }
+    .contador.completo { color:var(--sm-cyan-dark); }
+    .btn-agendar { background:var(--sm-cyan); color:#fff; border:none; cursor:pointer; font-family:var(--sm-font);
+        font-size:14px; font-weight:700; padding:14px 26px; border-radius:var(--sm-r-input); }
+    .btn-agendar:hover { background:var(--sm-cyan-dark); }
+
+    .seccion { background:#fff; padding:56px 24px; }
+    .seccion-oscura { background:var(--sm-ink); padding:56px 24px; }
+    .seccion-inner { max-width:1180px; margin:0 auto; }
+    .rotulo { font-size:13px; font-weight:700; color:var(--sm-cyan-dark); letter-spacing:1px; margin:0 0 24px; }
+    .rotulo-claro { color:var(--sm-cyan-bright); }
+
+    /* Carrusel */
+    .carrusel { overflow:hidden; }
+    .carrusel-pista { display:flex; transition:transform .5s ease; }
+    .carrusel-slide { min-width:100%; display:flex; align-items:center; gap:24px; padding:8px 4px; }
+    .icono-grande { width:64px; height:64px; border-radius:16px; background:var(--sm-cyan);
+        display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .carrusel-slide .texto h3 { font-size:22px; font-weight:800; color:#fff; margin:0 0 6px; }
+    .carrusel-slide .texto p { font-size:15px; color:var(--sm-slate-400); margin:0; line-height:1.6; max-width:560px; }
+    .carrusel-puntos { display:flex; gap:8px; justify-content:center; margin-top:24px; }
+    .punto { width:8px; height:8px; border-radius:50%; background:var(--sm-slate-700); cursor:pointer; transition:.2s; }
+    .punto.activo { background:var(--sm-cyan); width:24px; border-radius:4px; }
+
+    /* Servicios */
+    .servicios-fila { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:24px; }
+    .servicio h3 { font-size:16px; font-weight:700; margin:12px 0 4px; }
+    .servicio p { font-size:13px; color:var(--sm-slate-500); margin:0; }
+    .servicio-icono { width:44px; height:44px; border-radius:12px; background:var(--sm-cyan-50);
+        display:flex; align-items:center; justify-content:center; }
+    .servicio-icono svg { stroke:var(--sm-cyan-dark); }
+
+    /* Horarios */
+    .horarios-caja { max-width:560px; background:var(--sm-panel); border:1px solid var(--sm-border);
+        border-radius:var(--sm-r-panel); padding:8px 20px; }
+    .horario-fila { display:flex; justify-content:space-between; padding:14px 0; font-size:14px;
+        border-bottom:1px solid var(--sm-line); }
+    .horario-fila span:first-child { color:var(--sm-slate-600); }
+    .horario-fila span:last-child { font-weight:600; }
+    .horario-emergencia { background:var(--sm-cyan-50); color:var(--sm-cyan-dark); border-radius:10px;
+        padding:12px 14px; font-size:13px; margin:12px 0; }
+
+    /* Sedes */
+    .rejilla-sedes { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
+    .tarjeta-sede { display:flex; gap:14px; background:#fff; border:1px solid var(--sm-border);
+        border-radius:var(--sm-r-panel); padding:20px; }
+    .sede-icono { width:44px; height:44px; border-radius:12px; background:var(--sm-cyan-50);
+        display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .sede-icono svg { stroke:var(--sm-cyan-dark); }
+    .tarjeta-sede h3 { font-size:15px; font-weight:700; margin:0 0 6px; }
+    .dato-sede { font-size:13px; color:var(--sm-slate-500); margin:2px 0; }
+
+    /* Footer */
+    .pie { background:var(--sm-ink); padding:32px 24px; }
+    .pie-interno { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+        color:var(--sm-slate-400); font-size:13px; }
+
+    /* Modal DPI */
+    .velo { display:none; position:fixed; inset:0; background:rgba(15,23,42,.55);
+        align-items:center; justify-content:center; padding:24px; z-index:50; }
+    .velo.visible { display:flex; }
+    .modal-dpi { background:#fff; border-radius:var(--sm-r-card); box-shadow:var(--sm-shadow);
+        padding:28px; width:440px; max-width:100%; }
+    .modal-cabecera { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .modal-cabecera h2 { font-size:18px; font-weight:800; margin:0; }
+    .cerrar { background:none; border:none; font-size:24px; cursor:pointer; color:var(--sm-slate-400); }
+    .modal-texto { font-size:14px; color:var(--sm-slate-500); margin:0 0 16px; }
+    .fila-contador { display:flex; justify-content:flex-end; margin:6px 0; }
+    .mensaje-error { display:none; color:var(--sm-danger); font-size:13px; margin:6px 0; }
+    .mensaje-error.visible { display:block; }
+    #dpiModal.error { border-color:var(--sm-danger); box-shadow:0 0 0 3px rgba(239,68,68,.15); }
+    .modal-dpi .btn-principal { width:100%; margin-top:12px; }
+
+    @media (max-width:640px){ .hero h1{font-size:32px;} }
+</style>
 
 <script>
     /* ===================== MODAL DE DPI ===================== */
@@ -198,9 +234,7 @@
     const cajaError     = document.getElementById('errorDpi');
     const textoError    = document.getElementById('textoError');
 
-    function soloDigitos(valor) {
-        return valor.replace(/\D/g, '');
-    }
+    function soloDigitos(valor) { return valor.replace(/\D/g, ''); }
 
     function pintarContador(elemento, cantidad) {
         elemento.textContent = cantidad + '/13';
@@ -226,9 +260,7 @@
         dpiModal.focus();
     }
 
-    function cerrarModal() {
-        velo.classList.remove('visible');
-    }
+    function cerrarModal() { velo.classList.remove('visible'); }
 
     function mostrarError(mensaje) {
         textoError.textContent = mensaje;
@@ -241,23 +273,21 @@
         dpiModal.classList.remove('error');
     }
 
-    /* Validaciones RN-GLOBAL-001 + verificacion contra la base (CU-00) */
     async function verificarDpi() {
         const dpi = dpiModal.value;
 
         if (dpi.length === 0) {
-            mostrarError('El campo DPI es obligatorio. Por favor, ingrese su numero de DPI.');
+            mostrarError('El campo DPI es obligatorio. Por favor, ingrese su número de DPI.');
             return;
         }
         if (dpi.length !== 13) {
-            mostrarError('El DPI debe contener exactamente 13 digitos. Usted ingreso '
-                + dpi.length + ' digitos.');
+            mostrarError('El DPI debe contener exactamente 13 dígitos. Usted ingresó ' + dpi.length + ' dígitos.');
             return;
         }
 
         const boton = document.querySelector('.btn-principal');
         boton.disabled = true;
-        boton.innerHTML = '<i class="ti ti-loader"></i> Verificando...';
+        boton.innerHTML = 'Verificando...';
 
         try {
             const respuesta = await fetch('/portal/verificar-dpi', {
@@ -276,20 +306,15 @@
                 mostrarError(datos.mensaje);
             }
         } catch (e) {
-            mostrarError('No se pudo conectar con el servidor. Intente de nuevo mas tarde.');
+            mostrarError('No se pudo conectar con el servidor. Intente de nuevo más tarde.');
         } finally {
             boton.disabled = false;
-            boton.innerHTML = '<i class="ti ti-search"></i> Verificar DPI';
+            boton.innerHTML = 'Verificar DPI';
         }
     }
 
-    velo.addEventListener('click', e => {
-        if (e.target === velo) cerrarModal();
-    });
-
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') cerrarModal();
-    });
+    velo.addEventListener('click', e => { if (e.target === velo) cerrarModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
 
     /* ===================== CARRUSEL ===================== */
     const pista  = document.getElementById('pista');
@@ -297,7 +322,6 @@
     const totalSlides = pista.children.length;
     let indiceActual = 0;
 
-    /* Crear un puntito por cada especialidad */
     for (let i = 0; i < totalSlides; i++) {
         const p = document.createElement('span');
         p.className = 'punto' + (i === 0 ? ' activo' : '');
@@ -313,15 +337,8 @@
         });
     }
 
-    function siguienteSlide() {
-        let siguiente = (indiceActual + 1) % totalSlides;
-        irASlide(siguiente);
-    }
-
-    /* Avance automatico cada 5 segundos, solo si hay mas de una especialidad */
-    if (totalSlides > 1) {
-        setInterval(siguienteSlide, 5000);
-    }
+    function siguienteSlide() { irASlide((indiceActual + 1) % totalSlides); }
+    if (totalSlides > 1) { setInterval(siguienteSlide, 5000); }
 </script>
 
 </body>

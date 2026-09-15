@@ -1,51 +1,36 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Caja · Hospital San Rafael</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/caja.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('Caja', null)}"></head>
 <body>
 
-<header class="barra-admin">
-    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
-    <nav>
-        <span style="color:var(--teal-100);font-size:14px;font-weight:400;">
-            <i class="ti ti-user-circle" style="vertical-align:-2px;"></i>
-            <span th:text="${nombre}">Cajero</span>
-        </span>
-        <a th:href="@{/panel/inicio}"><i class="ti ti-arrow-left"></i> Volver al panel</a>
-    </nav>
-</header>
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <div style="display:flex;align-items:center;gap:16px;font-size:14px;color:var(--sm-slate-600);">
+        <span style="font-weight:700;color:var(--sm-ink);" th:text="${nombre}">Cajero</span>
+        <a th:href="@{/panel/inicio}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver al panel</a>
+    </div>
+</nav>
 
-<main class="contenedor">
-    <h1>Cobro de consulta en caja</h1>
-    <p class="menu-sub">Busque la cita del paciente por DPI o numero de cita para registrar el pago</p>
+<main style="max-width:760px;margin:0 auto;padding:40px 24px;">
+    <div style="font-size:24px;font-weight:800;">Cobro de consulta en caja</div>
+    <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:24px;">
+        Busque la cita del paciente por DPI o número de cita para registrar el pago
+    </div>
 
     <!-- Buscador -->
-    <div class="tarjeta-buscador">
+    <div class="tarjeta-buscador sm-panel">
         <div class="alternancia">
-            <button type="button" id="btnModoDpi" class="alternancia-boton activa">
-                <i class="ti ti-id"></i> Por DPI
-            </button>
-            <button type="button" id="btnModoNumero" class="alternancia-boton">
-                <i class="ti ti-ticket"></i> Por No. Cita
-            </button>
+            <button type="button" id="btnModoDpi" class="alternancia-boton activa">Por DPI</button>
+            <button type="button" id="btnModoNumero" class="alternancia-boton">Por No. Cita</button>
         </div>
-
         <div class="fila-busqueda">
-            <input type="text" id="campoValor" placeholder="1234567890101" autocomplete="off">
-            <button type="button" id="btnBuscar" class="boton-principal" style="width:auto;">
-                <i class="ti ti-search"></i> Buscar
-            </button>
+            <input type="text" id="campoValor" class="sm-input" placeholder="1234567890101" autocomplete="off">
+            <button type="button" id="btnBuscar" class="boton-principal" style="width:auto;">Buscar</button>
         </div>
-
         <p class="error-busqueda" id="errorBusqueda"></p>
     </div>
 
     <p class="cargando oculto" id="cargando">Buscando...</p>
-
     <div id="zonaResultado"></div>
 </main>
 
@@ -53,12 +38,12 @@
 <div class="overlay oculto" id="overlayCobro">
     <div class="modal">
         <div class="modal-cabecera">
-            <h2><i class="ti ti-cash-register"></i> Registrar cobro</h2>
+            <h2>Registrar cobro</h2>
             <button type="button" id="btnCerrarModal">&times;</button>
         </div>
         <div class="modal-cuerpo">
 
-            <!-- Panel de cobro (se ve primero) -->
+            <!-- Panel de cobro -->
             <div id="zonaFormCobro">
                 <div class="resumen-cobro">
                     <div class="linea"><span>Paciente</span><span id="rcPaciente"></span></div>
@@ -68,12 +53,12 @@
                 </div>
 
                 <div class="grupo">
-                    <label for="metodoPago">Metodo de pago</label>
+                    <label for="metodoPago">Método de pago</label>
                     <select id="metodoPago">
                         <option value="0">Efectivo</option>
                         <option value="1">Tarjeta Visa</option>
                         <option value="2">Tarjeta Mastercard</option>
-                        <option value="3">Tarjeta de Debito</option>
+                        <option value="3">Tarjeta de Débito</option>
                     </select>
                 </div>
 
@@ -91,7 +76,7 @@
                 <!-- Tarjeta -->
                 <div id="bloqueTarjeta" class="oculto">
                     <div class="grupo">
-                        <label for="ultimos4">Ultimos 4 digitos de la tarjeta</label>
+                        <label for="ultimos4">Últimos 4 dígitos de la tarjeta</label>
                         <input type="text" id="ultimos4" maxlength="4" inputmode="numeric" placeholder="1234" autocomplete="off">
                         <p class="ayuda">Solo como referencia en el comprobante. No se guarda la tarjeta completa.</p>
                     </div>
@@ -99,24 +84,22 @@
 
                 <p class="error-modal" id="errorModal"></p>
 
-                <button type="button" id="btnRegistrarPago" class="boton-principal" style="width:100%;">
-                    <i class="ti ti-check"></i> Registrar pago
-                </button>
+                <button type="button" id="btnRegistrarPago" class="boton-principal" style="width:100%;">Registrar pago</button>
             </div>
 
-            <!-- Comprobante (se ve tras aprobar) -->
+            <!-- Comprobante -->
             <div id="zonaComprobante" class="oculto">
                 <div class="comprobante">
                     <div class="comprobante-top">
-                        <i class="ti ti-circle-check check"></i>
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
                         <h3>Pago registrado</h3>
                     </div>
-                    <p class="comprobante-trx">Transaccion <strong id="cpTrx"></strong></p>
+                    <p class="comprobante-trx">Transacción <strong id="cpTrx"></strong></p>
 
                     <div class="comprobante-fila"><span>Paciente</span><span id="cpPaciente"></span></div>
                     <div class="comprobante-fila"><span>Cita</span><span id="cpNumeroCita"></span></div>
                     <div class="comprobante-fila"><span>Especialidad</span><span id="cpEspecialidad"></span></div>
-                    <div class="comprobante-fila"><span>Medico</span><span id="cpMedico"></span></div>
+                    <div class="comprobante-fila"><span>Médico</span><span id="cpMedico"></span></div>
                     <div class="comprobante-fila"><span>Sucursal</span><span id="cpSucursal"></span></div>
                     <div class="comprobante-fila"><span>Fecha de la cita</span><span id="cpFechaCita"></span></div>
                     <div class="comprobante-fila"><span>Fecha del pago</span><span id="cpFechaTrx"></span></div>
@@ -127,18 +110,81 @@
                 </div>
 
                 <div class="acciones-comprobante">
-                    <button type="button" id="btnImprimir" class="boton-secundario">
-                        <i class="ti ti-printer"></i> Imprimir
-                    </button>
-                    <button type="button" id="btnNuevoCobro" class="boton-principal">
-                        <i class="ti ti-plus"></i> Nuevo cobro
-                    </button>
+                    <button type="button" id="btnImprimir" class="boton-secundario">Imprimir</button>
+                    <button type="button" id="btnNuevoCobro" class="boton-principal">Nuevo cobro</button>
                 </div>
             </div>
 
         </div>
     </div>
 </div>
+
+<style>
+    .oculto { display:none !important; }
+    h2 { font-size:16px; font-weight:800; margin:0; }
+    h3 { font-size:16px; font-weight:800; margin:0; }
+
+    /* Botones (estilados por clase original para no tocar el JS) */
+    .boton-principal { display:inline-flex; align-items:center; justify-content:center; gap:8px;
+        background:var(--sm-cyan); color:#fff; border:none; cursor:pointer; font-family:inherit;
+        font-size:14px; font-weight:700; padding:13px 22px; border-radius:var(--sm-r-input); }
+    .boton-principal:hover { background:var(--sm-cyan-dark); }
+    .boton-secundario { display:inline-flex; align-items:center; justify-content:center; gap:8px;
+        background:#fff; color:var(--sm-ink); border:1px solid var(--sm-border); cursor:pointer;
+        font-family:inherit; font-size:14px; font-weight:700; padding:13px 22px; border-radius:var(--sm-r-input); }
+
+    /* Buscador */
+    .tarjeta-buscador { display:flex; flex-direction:column; gap:16px; }
+    .alternancia { display:flex; background:var(--sm-line); border-radius:10px; padding:4px; width:fit-content; }
+    .alternancia-boton { border:none; background:none; cursor:pointer; font-family:inherit;
+        padding:8px 18px; border-radius:8px; font-size:13px; font-weight:600; color:var(--sm-slate-500); }
+    .alternancia-boton.activa { background:var(--sm-ink); color:#fff; }
+    .fila-busqueda { display:flex; gap:10px; }
+    .error-busqueda { color:var(--sm-danger); font-size:13px; margin:0; }
+    .cargando { color:var(--sm-slate-500); margin-top:16px; }
+
+    /* Modal */
+    .overlay { position:fixed; inset:0; background:rgba(15,23,42,.5); display:flex;
+        align-items:center; justify-content:center; padding:24px; z-index:50; }
+    .overlay.oculto { display:none !important; }
+    .modal { background:#fff; border-radius:var(--sm-r-card); box-shadow:var(--sm-shadow);
+        width:460px; max-width:100%; max-height:90vh; overflow:auto; }
+    .modal-cabecera { display:flex; align-items:center; justify-content:space-between;
+        padding:20px 24px; border-bottom:1px solid var(--sm-border); }
+    .modal-cabecera button { background:none; border:none; font-size:24px; cursor:pointer; color:var(--sm-slate-400); }
+    .modal-cuerpo { padding:24px; }
+
+    .resumen-cobro { background:var(--sm-panel); border:1px solid var(--sm-border);
+        border-radius:var(--sm-r-panel); padding:16px; margin-bottom:16px; }
+    .linea { display:flex; justify-content:space-between; padding:8px 0; font-size:14px;
+        border-bottom:1px solid var(--sm-line); }
+    .linea:last-child { border-bottom:none; }
+    .linea span:first-child { color:var(--sm-slate-500); }
+    .linea.total { font-size:16px; font-weight:800; }
+    .linea.total span:last-child { color:var(--sm-cyan-dark); }
+
+    .grupo { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+    .grupo label { font-size:12px; font-weight:600; }
+    .grupo select, .grupo input { width:100%; font-family:inherit; font-size:14px; color:var(--sm-ink);
+        border:1px solid var(--sm-border); border-radius:var(--sm-r-input); padding:12px 14px; outline:none; }
+    .grupo select:focus, .grupo input:focus { border-color:var(--sm-cyan); box-shadow:0 0 0 3px rgba(6,182,212,.15); }
+    .ayuda { font-size:12px; color:var(--sm-slate-400); margin:4px 0 0; }
+    .caja-cambio { background:var(--sm-cyan-50); color:var(--sm-cyan-dark);
+        border-radius:10px; padding:10px 14px; font-size:14px; }
+    .error-modal { color:var(--sm-danger); font-size:13px; }
+
+    /* Comprobante */
+    .comprobante-top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+    .comprobante-trx { font-size:13px; color:var(--sm-slate-500); margin:0 0 12px; }
+    .comprobante-fila { display:flex; justify-content:space-between; padding:7px 0;
+        font-size:13px; border-bottom:1px solid var(--sm-line); }
+    .comprobante-fila span:first-child { color:var(--sm-slate-500); }
+    .comprobante-total { display:flex; justify-content:space-between; padding-top:12px;
+        font-size:16px; font-weight:800; }
+    .comprobante-total span:last-child { color:var(--sm-cyan-dark); }
+    .acciones-comprobante { display:flex; gap:12px; margin-top:20px; }
+    .acciones-comprobante button { flex:1; }
+</style>
 
 <script th:inline="javascript">
     const CTX = /*[[@{/}]]*/ '/';

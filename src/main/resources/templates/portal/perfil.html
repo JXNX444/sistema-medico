@@ -1,56 +1,69 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Mi Perfil · Hospital San Rafael</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/usuarios.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('Mi Perfil', null)}"></head>
 <body>
 
-<header class="barra-admin">
-    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
-    <nav>
-        <a th:href="@{/dashboard}"><i class="ti ti-arrow-left"></i> Volver a mi panel</a>
-    </nav>
-</header>
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <a th:href="@{/dashboard}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver a mi panel</a>
+</nav>
 
-<main class="contenedor">
-    <h1>Mi perfil</h1>
-    <p class="menu-sub">Revise y actualice sus datos personales</p>
+<main style="max-width:640px;margin:0 auto;padding:40px 24px;">
+    <div style="font-size:24px;font-weight:800;">Mi perfil</div>
+    <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:24px;">Revise y actualice sus datos personales</div>
 
-    <p th:if="${param.actualizado}" class="mensaje-ok">Sus datos se actualizaron correctamente.</p>
+    <div th:if="${param.actualizado}" class="sm-badge sm-badge--success"
+         style="display:flex;padding:10px 14px;margin-bottom:16px;font-size:13px;">
+        Sus datos se actualizaron correctamente.
+    </div>
 
-    <form th:action="@{/perfil}" th:object="${form}" method="post" class="formulario">
+    <form th:action="@{/perfil}" th:object="${form}" method="post"
+          class="sm-panel" style="display:flex;flex-direction:column;gap:14px;">
 
-        <label>Nombre completo</label>
-        <input type="text" th:value="${usuario.nombreCompleto}" disabled>
+        <div class="sm-field">
+            <label>Nombre completo</label>
+            <input class="sm-input" type="text" th:value="${usuario.nombreCompleto}" disabled
+                   style="background:var(--sm-line);color:var(--sm-slate-500);">
+        </div>
 
-        <label>Nombre de usuario</label>
-        <input type="text" th:value="${usuario.username}" disabled>
+        <div class="sm-field">
+            <label>Nombre de usuario</label>
+            <input class="sm-input" type="text" th:value="${usuario.username}" disabled
+                   style="background:var(--sm-line);color:var(--sm-slate-500);">
+        </div>
 
-        <label>Correo Electronico</label>
-        <input type="email" th:field="*{correo}">
-        <p class="error" th:if="${errores.get('correo')} != null" th:text="${errores.get('correo')}"></p>
+        <div class="sm-field">
+            <label>Correo electrónico</label>
+            <input class="sm-input" type="email" th:field="*{correo}">
+            <p class="sm-error" th:if="${errores.get('correo')} != null" th:text="${errores.get('correo')}"></p>
+        </div>
 
-        <label>Numero de Telefono (opcional)</label>
-        <input type="text" th:field="*{telefono}" maxlength="8">
-        <p class="error" th:if="${errores.get('telefono')} != null" th:text="${errores.get('telefono')}"></p>
+        <div class="sm-field">
+            <label>Número de teléfono (opcional)</label>
+            <input class="sm-input" type="text" th:field="*{telefono}" maxlength="8">
+            <p class="sm-error" th:if="${errores.get('telefono')} != null" th:text="${errores.get('telefono')}"></p>
+        </div>
 
-        <h2 style="margin-top:28px;font-size:16px;">Cambiar contrasena (opcional)</h2>
-        <p style="font-size:13px;color:var(--gris-600);margin-top:-8px;">Deje estos campos en blanco si no desea cambiarla.</p>
+        <div style="border-top:1px solid var(--sm-border);margin-top:8px;padding-top:16px;">
+            <div style="font-size:16px;font-weight:700;">Cambiar contraseña (opcional)</div>
+            <div style="font-size:13px;color:var(--sm-slate-500);">Deje estos campos en blanco si no desea cambiarla.</div>
+        </div>
 
-        <label>Contrasena actual</label>
-        <input type="password" th:field="*{passwordActual}" autocomplete="off">
-        <p class="error" th:if="${errores.get('passwordActual')} != null" th:text="${errores.get('passwordActual')}"></p>
+        <div class="sm-field">
+            <label>Contraseña actual</label>
+            <input class="sm-input" type="password" th:field="*{passwordActual}" autocomplete="off">
+            <p class="sm-error" th:if="${errores.get('passwordActual')} != null" th:text="${errores.get('passwordActual')}"></p>
+        </div>
 
-        <label>Nueva contrasena</label>
-        <input type="password" th:field="*{passwordNueva}" autocomplete="off">
-        <p class="error" th:if="${errores.get('passwordNueva')} != null" th:text="${errores.get('passwordNueva')}"></p>
+        <div class="sm-field">
+            <label>Nueva contraseña</label>
+            <input class="sm-input" type="password" th:field="*{passwordNueva}" autocomplete="off">
+            <p class="sm-error" th:if="${errores.get('passwordNueva')} != null" th:text="${errores.get('passwordNueva')}"></p>
+        </div>
 
-        <div class="acciones-formulario">
-            <a th:href="@{/dashboard}" class="boton-secundario">Cancelar</a>
-            <button type="submit" class="boton-principal">Guardar cambios</button>
+        <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:8px;">
+            <a th:href="@{/dashboard}" class="sm-btn sm-btn--ghost">Cancelar</a>
+            <button type="submit" class="sm-btn sm-btn--primary">Guardar cambios</button>
         </div>
     </form>
 </main>

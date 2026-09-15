@@ -1,135 +1,153 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendar Cita · Hospital San Rafael</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/citas.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('Agendar Cita', null)}"></head>
 <body>
 
-<header class="barra-admin">
-    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
-    <nav>
-        <a th:href="@{/dashboard}"><i class="ti ti-arrow-left"></i> Volver a mi panel</a>
-    </nav>
-</header>
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <a th:href="@{/dashboard}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver a mi panel</a>
+</nav>
 
-<main class="contenedor">
-    <h1>Agendar cita</h1>
-    <p class="menu-sub">Complete los pasos para reservar su cita medica</p>
+<main style="max-width:820px;margin:0 auto;padding:40px 24px;">
+    <div style="font-size:24px;font-weight:800;">Agendar cita</div>
+    <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:24px;">Complete los pasos para reservar su cita médica</div>
 
     <!-- Indicador de progreso -->
     <ol class="pasos" id="indicadorPasos">
-        <li data-paso="1" class="paso-activo">1. Sucursal</li>
-        <li data-paso="2">2. Especialidad</li>
-        <li data-paso="3">3. Medico</li>
-        <li data-paso="4">4. Fecha y hora</li>
-        <li data-paso="5">5. Confirmar</li>
+        <li data-paso="1" class="paso-activo">Sucursal</li>
+        <li data-paso="2">Especialidad</li>
+        <li data-paso="3">Médico</li>
+        <li data-paso="4">Fecha y hora</li>
+        <li data-paso="5">Confirmar</li>
     </ol>
 
-    <div class="tarjeta-wizard">
+    <div class="tarjeta-wizard sm-panel" style="margin-top:20px;">
 
-        <!-- PASO 1: Sucursal -->
+        <!-- PASO 1 -->
         <section class="paso" id="paso1">
             <h2>Seleccione una sucursal</h2>
             <div class="rejilla-opciones" id="listaSucursales">
                 <label class="opcion" th:each="s : ${sucursales}">
                     <input type="radio" name="sucursal" th:value="${s.id}" th:attr="data-nombre=${s.nombre}">
-                    <span class="opcion-texto">
-<i class="ti ti-building-hospital"></i>
-<span th:text="${s.nombre}">Sede</span>
-</span>
+                    <span class="opcion-texto" th:text="${s.nombre}">Sede</span>
                 </label>
             </div>
             <p class="error" id="errorPaso1"></p>
             <div class="acciones-paso">
-                <button type="button" class="boton-principal" onclick="irAPaso(2)">Siguiente</button>
+                <button type="button" class="boton-principal sm-btn sm-btn--primary" onclick="irAPaso(2)">Siguiente</button>
             </div>
         </section>
 
-        <!-- PASO 2: Especialidad -->
+        <!-- PASO 2 -->
         <section class="paso oculto" id="paso2">
             <h2>Seleccione una especialidad</h2>
-            <div class="rejilla-opciones" id="listaEspecialidades">
-                <p class="cargando">Cargando especialidades...</p>
-            </div>
+            <div class="rejilla-opciones" id="listaEspecialidades"><p class="cargando">Cargando especialidades...</p></div>
             <p class="error" id="errorPaso2"></p>
             <div class="acciones-paso">
-                <button type="button" class="boton-secundario" onclick="irAPaso(1)">Atras</button>
-                <button type="button" class="boton-principal" onclick="irAPaso(3)">Siguiente</button>
+                <button type="button" class="boton-secundario sm-btn sm-btn--ghost" onclick="irAPaso(1)">Atrás</button>
+                <button type="button" class="boton-principal sm-btn sm-btn--primary" onclick="irAPaso(3)">Siguiente</button>
             </div>
         </section>
 
-        <!-- PASO 3: Medico -->
+        <!-- PASO 3 -->
         <section class="paso oculto" id="paso3">
-            <h2>Seleccione un medico</h2>
-            <div class="rejilla-opciones" id="listaMedicos">
-                <p class="cargando">Cargando medicos...</p>
-            </div>
+            <h2>Seleccione un médico</h2>
+            <div class="rejilla-opciones" id="listaMedicos"><p class="cargando">Cargando médicos...</p></div>
             <p class="error" id="errorPaso3"></p>
             <div class="acciones-paso">
-                <button type="button" class="boton-secundario" onclick="irAPaso(2)">Atras</button>
-                <button type="button" class="boton-principal" onclick="irAPaso(4)">Siguiente</button>
+                <button type="button" class="boton-secundario sm-btn sm-btn--ghost" onclick="irAPaso(2)">Atrás</button>
+                <button type="button" class="boton-principal sm-btn sm-btn--primary" onclick="irAPaso(4)">Siguiente</button>
             </div>
         </section>
 
-        <!-- PASO 4: Fecha y hora -->
+        <!-- PASO 4 -->
         <section class="paso oculto" id="paso4">
             <h2>Seleccione fecha y hora</h2>
-
             <label class="etiqueta" for="fechaCita">Fecha</label>
-            <input type="date" id="fechaCita" class="entrada-fecha">
-
+            <input type="date" id="fechaCita" class="entrada-fecha sm-input" style="max-width:220px;">
             <div id="bloqueHorarios" class="oculto">
                 <label class="etiqueta">Horarios disponibles</label>
                 <div class="rejilla-horarios" id="listaHorarios"></div>
             </div>
-
             <p class="error" id="errorPaso4"></p>
             <div class="acciones-paso">
-                <button type="button" class="boton-secundario" onclick="irAPaso(3)">Atras</button>
-                <button type="button" class="boton-principal" onclick="irAPaso(5)">Siguiente</button>
+                <button type="button" class="boton-secundario sm-btn sm-btn--ghost" onclick="irAPaso(3)">Atrás</button>
+                <button type="button" class="boton-principal sm-btn sm-btn--primary" onclick="irAPaso(5)">Siguiente</button>
             </div>
         </section>
 
-        <!-- PASO 5: Confirmar -->
+        <!-- PASO 5 -->
         <section class="paso oculto" id="paso5">
             <h2>Confirme su cita</h2>
-
             <div class="resumen" id="resumenCita"></div>
-
             <label class="etiqueta" for="motivoCita">Motivo de la consulta</label>
-            <textarea id="motivoCita" rows="4" maxlength="2000"
-                      placeholder="Describa brevemente el motivo de su consulta (minimo 10 caracteres)"></textarea>
-
+            <textarea id="motivoCita" class="sm-textarea" rows="4" maxlength="2000"
+                      placeholder="Describa brevemente el motivo de su consulta (mínimo 10 caracteres)"></textarea>
             <p class="error" id="errorPaso5"></p>
             <div class="acciones-paso">
-                <button type="button" class="boton-secundario" onclick="irAPaso(4)">Atras</button>
-                <button type="button" class="boton-principal" id="btnConfirmar" onclick="confirmarCita()">
-                    <i class="ti ti-calendar-check"></i> Confirmar cita
-                </button>
+                <button type="button" class="boton-secundario sm-btn sm-btn--ghost" onclick="irAPaso(4)">Atrás</button>
+                <button type="button" class="boton-principal sm-btn sm-btn--primary" id="btnConfirmar" onclick="confirmarCita()">Confirmar cita</button>
             </div>
         </section>
 
-        <!-- PASO FINAL: exito -->
+        <!-- ÉXITO -->
         <section class="paso oculto" id="pasoExito">
             <div class="exito">
-                <i class="ti ti-circle-check"></i>
+                <div class="exito-icono">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+                </div>
                 <h2>Cita reservada</h2>
-                <p>Numero de cita: <strong id="numeroCitaTexto"></strong></p>
+                <p>Número de cita: <strong id="numeroCitaTexto"></strong></p>
                 <p>Tiene <strong id="contadorReserva">5:00</strong> minutos para completar el pago antes de que la reserva expire.</p>
-                <a th:href="@{/dashboard}" class="boton-principal">Ir a mi panel</a>
+                <a th:href="@{/dashboard}" class="sm-btn sm-btn--primary">Ir a mi panel</a>
             </div>
         </section>
 
     </div>
 </main>
 
+<style>
+    .pasos { display:flex; flex-wrap:wrap; gap:8px; list-style:none; padding:0; margin:0; counter-reset:paso; }
+    .pasos li { counter-increment:paso; display:flex; align-items:center; gap:8px;
+        font-size:13px; font-weight:600; color:var(--sm-slate-400); padding:8px 14px;
+        border:1px solid var(--sm-border); border-radius:var(--sm-r-pill); background:#fff; }
+    .pasos li::before { content:counter(paso); width:20px; height:20px; border-radius:50%;
+        background:var(--sm-line); color:var(--sm-slate-500); display:flex;
+        align-items:center; justify-content:center; font-size:11px; }
+    .pasos li.paso-activo { color:var(--sm-cyan-dark); border-color:var(--sm-cyan); background:var(--sm-cyan-50); }
+    .pasos li.paso-activo::before { background:var(--sm-cyan); color:#fff; }
+
+    .paso h2 { font-size:18px; font-weight:800; margin:0 0 16px; }
+    .paso.oculto, .oculto { display:none !important; }
+    .etiqueta { display:block; font-size:12px; font-weight:600; margin:14px 0 6px; }
+
+    .rejilla-opciones { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; }
+    .opcion input { display:none; }
+    .opcion-texto { display:flex; align-items:center; gap:8px; padding:16px; cursor:pointer;
+        border:1px solid var(--sm-border); border-radius:var(--sm-r-panel);
+        font-size:14px; font-weight:600; transition:.15s ease; }
+    .opcion input:checked + .opcion-texto { border-color:var(--sm-cyan); background:var(--sm-cyan-50); color:var(--sm-cyan-dark); }
+
+    .rejilla-horarios { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:10px; margin-top:8px; }
+    .rejilla-horarios button, .horario { padding:10px; border:1px solid var(--sm-border); border-radius:10px;
+        background:#fff; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+    .rejilla-horarios .activa, .rejilla-horarios button.activa { border-color:var(--sm-cyan); background:var(--sm-cyan-50); color:var(--sm-cyan-dark); }
+
+    .resumen { background:var(--sm-panel); border:1px solid var(--sm-border); border-radius:var(--sm-r-panel);
+        padding:16px; font-size:14px; margin-bottom:8px; }
+    .cargando { color:var(--sm-slate-500); font-size:14px; }
+    .error { color:var(--sm-danger); font-size:13px; margin:10px 0 0; }
+    .acciones-paso { display:flex; justify-content:flex-end; gap:12px; margin-top:20px; }
+
+    .exito { text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px; padding:24px; }
+    .exito-icono { width:72px; height:72px; border-radius:50%; background:var(--sm-success-bg);
+        display:flex; align-items:center; justify-content:center; }
+</style>
+
 <script th:inline="javascript">
     const CTX = /*[[@{/}]]*/ '/';
 </script>
 <script th:src="@{/js/agendar.js}"></script>
+
 </body>
 </html>

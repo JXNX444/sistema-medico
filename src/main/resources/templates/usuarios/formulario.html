@@ -1,92 +1,108 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${editando} ? 'Editar Usuario' : 'Crear Usuario'">Usuario</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/usuarios.css}">
-</head>
+<head th:replace="~{fragments/layout :: head(${editando} ? 'Editar Usuario' : 'Crear Usuario', null)}"></head>
 <body>
 
-<header class="barra-admin">
-    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
-    <nav>
-        <a th:href="@{/usuarios}"><i class="ti ti-arrow-left"></i> Volver a Mantenimiento de Usuarios</a>
-    </nav>
-</header>
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <a th:href="@{/usuarios}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver a Mantenimiento</a>
+</nav>
 
-<main class="contenedor">
-    <h1 th:text="${editando} ? 'Editar Usuario' : 'Crear Usuario'"></h1>
+<main style="max-width:760px;margin:0 auto;padding:40px 24px;">
+    <div style="font-size:24px;font-weight:800;margin-bottom:20px;"
+         th:text="${editando} ? 'Editar Usuario' : 'Crear Usuario'">Usuario</div>
 
     <form th:action="${editando} ? @{'/usuarios/' + ${form.id} + '/editar'} : @{/usuarios/nuevo}"
-          th:object="${form}" method="post" class="formulario">
+          th:object="${form}" method="post" class="sm-panel"
+          style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
 
-        <label>Nombre Completo</label>
-        <input type="text" th:field="*{nombreCompleto}">
-        <p class="error" th:if="${errores.get('nombreCompleto')} != null" th:text="${errores.get('nombreCompleto')}"></p>
+        <div class="sm-field" style="grid-column:1/-1;">
+            <label>Nombre completo</label>
+            <input class="sm-input" type="text" th:field="*{nombreCompleto}">
+            <p class="sm-error" th:if="${errores.get('nombreCompleto')} != null" th:text="${errores.get('nombreCompleto')}"></p>
+        </div>
 
-        <label>Correo Electronico</label>
-        <input type="email" th:field="*{correo}">
-        <p class="error" th:if="${errores.get('correo')} != null" th:text="${errores.get('correo')}"></p>
+        <div class="sm-field">
+            <label>Correo electrónico</label>
+            <input class="sm-input" type="email" th:field="*{correo}">
+            <p class="sm-error" th:if="${errores.get('correo')} != null" th:text="${errores.get('correo')}"></p>
+        </div>
 
-        <label>Nombre de Usuario</label>
-        <input type="text" th:field="*{username}">
-        <p class="error" th:if="${errores.get('username')} != null" th:text="${errores.get('username')}"></p>
+        <div class="sm-field">
+            <label>Nombre de usuario</label>
+            <input class="sm-input" type="text" th:field="*{username}">
+            <p class="sm-error" th:if="${errores.get('username')} != null" th:text="${errores.get('username')}"></p>
+        </div>
 
-        <label th:text="${editando} ? 'Nueva Contrasena (opcional)' : 'Contrasena'"></label>
-        <input type="password" th:field="*{password}">
-        <p class="error" th:if="${errores.get('password')} != null" th:text="${errores.get('password')}"></p>
+        <div class="sm-field">
+            <label th:text="${editando} ? 'Nueva contraseña (opcional)' : 'Contraseña'"></label>
+            <input class="sm-input" type="password" th:field="*{password}">
+            <p class="sm-error" th:if="${errores.get('password')} != null" th:text="${errores.get('password')}"></p>
+        </div>
 
-        <label>Documento de Identificacion (opcional)</label>
-        <input type="text" th:field="*{dpi}" maxlength="13">
-        <p class="error" th:if="${errores.get('dpi')} != null" th:text="${errores.get('dpi')}"></p>
+        <div class="sm-field">
+            <label>Documento de identificación (opcional)</label>
+            <input class="sm-input" type="text" th:field="*{dpi}" maxlength="13">
+            <p class="sm-error" th:if="${errores.get('dpi')} != null" th:text="${errores.get('dpi')}"></p>
+        </div>
 
-        <label>Numero de Telefono (opcional)</label>
-        <input type="text" th:field="*{telefono}" maxlength="8">
-        <p class="error" th:if="${errores.get('telefono')} != null" th:text="${errores.get('telefono')}"></p>
+        <div class="sm-field">
+            <label>Número de teléfono (opcional)</label>
+            <input class="sm-input" type="text" th:field="*{telefono}" maxlength="8">
+            <p class="sm-error" th:if="${errores.get('telefono')} != null" th:text="${errores.get('telefono')}"></p>
+        </div>
 
-        <label>Rol</label>
-        <select th:field="*{rolId}" id="rolSelect" onchange="mostrarEspecialidad()">
-            <option value="">-- Seleccione --</option>
-            <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.nombre}"></option>
-        </select>
-        <p class="error" th:if="${errores.get('rolId')} != null" th:text="${errores.get('rolId')}"></p>
+        <div class="sm-field">
+            <label>Rol</label>
+            <select class="sm-select" th:field="*{rolId}" id="rolSelect" onchange="mostrarEspecialidad()">
+                <option value="">-- Seleccione --</option>
+                <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.nombre}"></option>
+            </select>
+            <p class="sm-error" th:if="${errores.get('rolId')} != null" th:text="${errores.get('rolId')}"></p>
+        </div>
 
-        <label>NIT (opcional)</label>
-        <input type="text" th:field="*{nit}" maxlength="9">
-        <p class="error" th:if="${errores.get('nit')} != null" th:text="${errores.get('nit')}"></p>
+        <div class="sm-field">
+            <label>NIT (opcional)</label>
+            <input class="sm-input" type="text" th:field="*{nit}" maxlength="9">
+            <p class="sm-error" th:if="${errores.get('nit')} != null" th:text="${errores.get('nit')}"></p>
+        </div>
 
-        <label>Numero de Seguro (opcional)</label>
-        <input type="text" th:field="*{numeroSeguro}" maxlength="50">
-        <p class="error" th:if="${errores.get('numeroSeguro')} != null" th:text="${errores.get('numeroSeguro')}"></p>
+        <div class="sm-field">
+            <label>Número de seguro (opcional)</label>
+            <input class="sm-input" type="text" th:field="*{numeroSeguro}" maxlength="50">
+            <p class="sm-error" th:if="${errores.get('numeroSeguro')} != null" th:text="${errores.get('numeroSeguro')}"></p>
+        </div>
 
-        <label th:text="${editando} ? 'Sucursal (opcional)' : 'Sucursal'"></label>
-        <select th:field="*{sucursalId}">
-            <option value="">-- Seleccione --</option>
-            <option th:each="s : ${sucursales}" th:value="${s.id}" th:text="${s.nombre}"></option>
-        </select>
-        <p class="error" th:if="${errores.get('sucursalId')} != null" th:text="${errores.get('sucursalId')}"></p>
+        <div class="sm-field">
+            <label th:text="${editando} ? 'Sucursal (opcional)' : 'Sucursal'"></label>
+            <select class="sm-select" th:field="*{sucursalId}">
+                <option value="">-- Seleccione --</option>
+                <option th:each="s : ${sucursales}" th:value="${s.id}" th:text="${s.nombre}"></option>
+            </select>
+            <p class="sm-error" th:if="${errores.get('sucursalId')} != null" th:text="${errores.get('sucursalId')}"></p>
+        </div>
 
-        <div id="campoEspecialidad">
+        <div class="sm-field" id="campoEspecialidad">
             <label>Especialidad</label>
-            <select th:field="*{especialidadId}">
+            <select class="sm-select" th:field="*{especialidadId}">
                 <option value="">-- Seleccione --</option>
                 <option th:each="e : ${especialidades}" th:value="${e.id}" th:text="${e.nombre}"></option>
             </select>
-            <p class="error" th:if="${errores.get('especialidadId')} != null" th:text="${errores.get('especialidadId')}"></p>
+            <p class="sm-error" th:if="${errores.get('especialidadId')} != null" th:text="${errores.get('especialidadId')}"></p>
         </div>
 
-        <label>Estado</label>
-        <select th:field="*{state}">
-            <option value="1">Activo</option>
-            <option value="0">Inactivo</option>
-        </select>
-        <p class="error" th:if="${errores.get('state')} != null" th:text="${errores.get('state')}"></p>
+        <div class="sm-field">
+            <label>Estado</label>
+            <select class="sm-select" th:field="*{state}">
+                <option value="1">Activo</option>
+                <option value="0">Inactivo</option>
+            </select>
+            <p class="sm-error" th:if="${errores.get('state')} != null" th:text="${errores.get('state')}"></p>
+        </div>
 
-        <div class="acciones-formulario">
-            <a th:href="@{/usuarios/listado}" class="boton-secundario">Cancelar</a>
-            <button type="submit" class="boton-principal"
-                    th:text="${editando} ? 'Actualizar' : 'Crear'"></button>
+        <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:12px;margin-top:8px;">
+            <a th:href="@{/usuarios/listado}" class="sm-btn sm-btn--ghost">Cancelar</a>
+            <button type="submit" class="sm-btn sm-btn--primary" th:text="${editando} ? 'Actualizar' : 'Crear'"></button>
         </div>
     </form>
 </main>
@@ -97,9 +113,10 @@
         const rolId = document.getElementById('rolSelect').value;
         const rol = roles.find(r => r.id == rolId);
         document.getElementById('campoEspecialidad').style.display =
-            (rol && rol.nombre === 'Medico') ? 'block' : 'none';
+            (rol && rol.nombre === 'Medico') ? 'flex' : 'none';
     }
     document.addEventListener('DOMContentLoaded', mostrarEspecialidad);
 </script>
+
 </body>
 </html>

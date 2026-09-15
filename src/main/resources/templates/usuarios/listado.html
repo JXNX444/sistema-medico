@@ -1,99 +1,122 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8">
-    <title>Usuarios · Hospital San Rafael</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/usuarios.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('Usuarios', null)}"></head>
 <body>
 
-<header class="barra-admin">
-    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
-    <nav>
-        <a th:href="@{/usuarios}"><i class="ti ti-arrow-left"></i> Volver a Mantenimiento de Usuarios</a>
-    </nav>
-</header>
+<div class="sm-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('usuarios')}"></aside>
 
-<main class="contenedor">
-    <h1>Listado de Usuarios</h1>
+    <div class="sm-main">
+        <header th:replace="~{fragments/layout :: topbar('Listado de Usuarios','Gestión de cuentas internas')}"></header>
 
-    <p th:if="${param.creado}" class="mensaje-ok">Usuario creado correctamente.</p>
-    <p th:if="${param.actualizado}" class="mensaje-ok">Usuario actualizado correctamente.</p>
-    <p th:if="${param.eliminado}" class="mensaje-ok">El usuario ha sido eliminado correctamente.</p>
-    <p th:if="${param.errorAutoeliminar}" class="mensaje-error">
-        No puede eliminar su propia cuenta mientras tiene la sesion iniciada.
-    </p>
+        <div class="sm-content">
 
-    <form th:action="@{/usuarios/listado}" method="get" class="barra-busqueda">
-        <select name="campo">
-            <option value="usuario" th:selected="${campo == 'usuario'}">Nombre de Usuario</option>
-            <option value="nombre" th:selected="${campo == 'nombre'}">Nombre</option>
-            <option value="nit" th:selected="${campo == 'nit'}">NIT</option>
-            <option value="rol" th:selected="${campo == 'rol'}">Rol</option>
-            <option value="sucursal" th:selected="${campo == 'sucursal'}">Sucursal</option>
-        </select>
-        <input type="text" name="valor" th:value="${valor}" maxlength="25" placeholder="Buscar...">
-        <button type="submit"><i class="ti ti-search"></i></button>
-    </form>
+            <!-- Mensajes -->
+            <div th:if="${param.creado}"       class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;">Usuario creado correctamente.</div>
+            <div th:if="${param.actualizado}"  class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;">Usuario actualizado correctamente.</div>
+            <div th:if="${param.eliminado}"    class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;">El usuario ha sido eliminado correctamente.</div>
+            <div th:if="${param.errorAutoeliminar}" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;">No puede eliminar su propia cuenta mientras tiene la sesión iniciada.</div>
 
-    <p th:if="${usuarios.totalElements == 0}" class="mensaje-error">
-        No se encontraron resultados para los criterios de busqueda ingresados. Por favor, modifique los filtros e intente nuevamente.
-    </p>
+            <!-- Barra: buscar + crear -->
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+                <form th:action="@{/usuarios/listado/buscar}" method="get" style="display:flex;gap:10px;">
+                    <select class="sm-select" name="campo" style="width:auto;">
+                        <option value="usuario"  th:selected="${campo == 'usuario'}">Nombre de Usuario</option>
+                        <option value="nombre"   th:selected="${campo == 'nombre'}">Nombre</option>
+                        <option value="nit"      th:selected="${campo == 'nit'}">NIT</option>
+                        <option value="rol"      th:selected="${campo == 'rol'}">Rol</option>
+                        <option value="sucursal" th:selected="${campo == 'sucursal'}">Sucursal</option>
+                    </select>
+                    <input class="sm-input" type="text" name="valor" th:value="${valor}" maxlength="25" placeholder="Buscar..." style="width:220px;">
+                    <button type="submit" class="sm-btn sm-btn--primary sm-btn--sm">Buscar</button>
+                </form>
+                <a th:href="@{/usuarios/nuevo}" class="sm-btn sm-btn--dark sm-btn--sm">+ Crear usuario</a>
+            </div>
 
-    <table th:if="${usuarios.totalElements > 0}" class="tabla">
-        <thead>
-        <tr>
-            <th>Usuario</th><th>Nombre</th><th>Rol</th><th>NIT</th>
-            <th>Estado</th><th>Sucursal</th><th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="u : ${usuarios.content}">
-            <td th:text="${u.username}"></td>
-            <td th:text="${u.nombreCompleto}"></td>
-            <td th:text="${u.nombreRol}"></td>
-            <td th:text="${u.nit}"></td>
-            <td th:text="${u.state == 1 ? 'Activo' : (u.state == 0 ? 'Inactivo' : 'Eliminado')}"></td>
-            <td th:text="${u.sucursal != null ? u.sucursal.nombre : '-'}"></td>
-            <td class="acciones">
-                <a th:href="@{'/usuarios/' + ${u.id} + '/editar'}">Editar</a>
-                <button type="button" class="link-eliminar"
-                        th:unless="${u.username == #authentication.name}"
-                        th:attr="data-id=${u.id}, data-nombre=${u.username}"
-                        onclick="confirmarEliminar(this)">Eliminar</button>
-                <span th:if="${u.username == #authentication.name}"
-                      class="etiqueta-yo" title="No puedes eliminar tu propia cuenta">(Tu cuenta)</span>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+            <!-- Sin resultados -->
+            <div th:if="${usuarios.totalElements == 0}" class="sm-empty">
+                <div class="sm-empty__icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+                </div>
+                <div class="sm-empty__title">No se encontraron resultados</div>
+                <div class="sm-empty__desc">Modifique los filtros e intente nuevamente.</div>
+            </div>
 
-    <div class="paginacion" th:if="${usuarios.totalPages > 1}">
-        <a th:each="p : ${#numbers.sequence(0, usuarios.totalPages - 1)}"
-           th:href="@{/usuarios/listado(campo=${campo}, valor=${valor}, page=${p})}"
-           th:text="${p + 1}"
-           th:classappend="${p == usuarios.number} ? 'pagina-activa'"></a>
+            <!-- Tabla -->
+            <div th:if="${usuarios.totalElements > 0}" class="sm-panel">
+                <table class="sm-table">
+                    <thead>
+                    <tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>NIT</th><th>Estado</th><th>Sucursal</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="u : ${usuarios.content}">
+                        <td th:text="${u.username}"></td>
+                        <td th:text="${u.nombreCompleto}"></td>
+                        <td th:text="${u.nombreRol}"></td>
+                        <td th:text="${u.nit}"></td>
+                        <td>
+                            <span th:if="${u.state == 1}" class="sm-badge sm-badge--success">Activo</span>
+                            <span th:if="${u.state == 0}" class="sm-badge sm-badge--warning">Inactivo</span>
+                            <span th:if="${u.state != 1 and u.state != 0}" class="sm-badge sm-badge--danger">Eliminado</span>
+                        </td>
+                        <td th:text="${u.sucursal != null ? u.sucursal.nombre : '-'}"></td>
+                        <td>
+                            <a th:href="@{'/usuarios/' + ${u.id} + '/editar'}" style="font-weight:600;">Editar</a>
+                            <button type="button"
+                                    th:unless="${u.username == #authentication.name}"
+                                    th:attr="data-id=${u.id}, data-nombre=${u.username}"
+                                    onclick="confirmarEliminar(this)"
+                                    style="background:none;border:none;color:var(--sm-danger);font-weight:600;cursor:pointer;font-family:inherit;margin-left:8px;">Eliminar</button>
+                            <span th:if="${u.username == #authentication.name}"
+                                  style="color:var(--sm-slate-400);font-size:12px;margin-left:8px;" title="No puedes eliminar tu propia cuenta">(Tu cuenta)</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- Paginación -->
+                <div class="sm-pag" th:if="${usuarios.totalPages > 1}">
+                    <a th:each="p : ${#numbers.sequence(0, usuarios.totalPages - 1)}"
+                       th:href="@{${endpoint}(campo=${campo}, valor=${valor}, page=${p})}"
+                       th:text="${p + 1}"
+                       th:classappend="${p == usuarios.number} ? 'is-active'"></a>
+                </div>
+            </div>
+
+        </div>
     </div>
-</main>
+</div>
 
-<div class="velo" id="veloEliminar">
-    <div class="modal">
-        <h2><i class="ti ti-alert-triangle"></i> Confirmar eliminacion</h2>
-        <p id="textoConfirmacion"></p>
-        <form id="formEliminar" method="post">
-            <button type="button" onclick="cerrarModalEliminar()" class="boton-secundario">Cancelar</button>
-            <button type="submit" class="boton-peligro">Eliminar</button>
+<!-- Modal eliminar -->
+<div class="sm-veil" id="veloEliminar">
+    <div class="sm-modal">
+        <div style="font-size:17px;font-weight:800;">Confirmar eliminación</div>
+        <p id="textoConfirmacion" style="font-size:14px;color:var(--sm-slate-500);"></p>
+        <form id="formEliminar" method="post" style="display:flex;justify-content:flex-end;gap:12px;">
+            <button type="button" onclick="cerrarModalEliminar()" class="sm-btn sm-btn--ghost">Cancelar</button>
+            <button type="submit" class="sm-btn" style="background:var(--sm-danger);color:#fff;">Eliminar</button>
         </form>
     </div>
 </div>
+
+<style>
+    .sm-pag { display:flex; gap:6px; margin-top:16px; }
+    .sm-pag a { padding:6px 12px; border:1px solid var(--sm-border); border-radius:8px;
+        font-size:13px; font-weight:600; color:var(--sm-slate-600); }
+    .sm-pag a.is-active { background:var(--sm-cyan); color:#fff; border-color:var(--sm-cyan); }
+    .sm-veil { display:none; position:fixed; inset:0; background:rgba(15,23,42,.5);
+        align-items:center; justify-content:center; padding:24px; z-index:50; }
+    .sm-veil.visible { display:flex; }
+    .sm-modal { background:#fff; border-radius:var(--sm-r-card); box-shadow:var(--sm-shadow);
+        padding:28px; width:420px; max-width:100%; display:flex; flex-direction:column; gap:14px; }
+</style>
 
 <script>
     function confirmarEliminar(boton) {
         const id = boton.dataset.id, nombre = boton.dataset.nombre;
         document.getElementById('textoConfirmacion').textContent =
-            'Esta seguro que desea eliminar el usuario "' + nombre + '"? Esta accion no se puede deshacer.';
+            '¿Está seguro que desea eliminar el usuario "' + nombre + '"? Esta acción no se puede deshacer.';
         document.getElementById('formEliminar').action = '/usuarios/' + id + '/eliminar';
         document.getElementById('veloEliminar').classList.add('visible');
     }
@@ -101,5 +124,6 @@
         document.getElementById('veloEliminar').classList.remove('visible');
     }
 </script>
+
 </body>
 </html>

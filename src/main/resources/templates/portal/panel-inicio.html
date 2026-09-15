@@ -1,68 +1,65 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administrativo - Hospital San Rafael</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/portal.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('Panel de personal', null)}"></head>
 <body>
 
-<header class="barra">
-    <div class="contenedor barra-interna">
-        <div class="marca">
-            <i class="ti ti-heartbeat"></i>
-            <span>Hospital San Rafael</span>
-        </div>
-        <nav class="nav">
-<span style="color:var(--teal-50);font-size:14px;">
-<i class="ti ti-user-circle" style="vertical-align:-2px;"></i>
-<span th:text="${nombre}">Administrador</span>
-&middot;
-<span th:text="${rol}">Rol</span>
-</span>
-            <form th:action="@{/logout}" method="post" style="display:inline;">
-                <button type="submit" style="background:none;border:none;color:var(--teal-100);
-                        font-size:14px;cursor:pointer;font-family:inherit;">
-                    <i class="ti ti-logout"></i> Salir
-                </button>
-            </form>
-        </nav>
+<!-- Barra superior -->
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <div style="display:flex;align-items:center;gap:16px;font-size:14px;color:var(--sm-slate-600);">
+    <span>
+      <span style="font-weight:700;color:var(--sm-ink);" th:text="${nombre}">Administrador</span>
+      · <span th:text="${rol}">Rol</span>
+    </span>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit" class="sm-btn sm-btn--ghost sm-btn--sm">Salir</button>
+        </form>
     </div>
-</header>
+</nav>
 
-<section class="hero" style="padding-bottom:40px;">
-    <div class="contenedor">
-        <h1 th:text="'Hola, ' + ${nombre}">Hola, Administrador</h1>
-        <p>Panel administrativo del Sistema Informatico Hospitalario.</p>
+<!-- Hero navy -->
+<section style="background:var(--sm-ink);padding:48px;color:#fff;">
+    <div style="max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:30px;font-weight:800;" th:text="'Hola, ' + ${nombre}">Hola, Administrador</div>
+        <div style="font-size:15px;color:var(--sm-slate-400);">Panel administrativo del Sistema Informático Hospitalario.</div>
     </div>
 </section>
 
-<section class="seccion">
-    <div class="contenedor">
-        <div class="rejilla">
-            <a th:if="${rol == 'Administrador'}" th:href="@{/usuarios}" class="tarjeta"
-               style="text-decoration:none;color:inherit;">
-                <i class="ti ti-users"></i>
-                <h3>Mantenimiento de Usuarios</h3>
-                <p>Listar, crear, editar y eliminar cuentas de usuarios internos.</p>
-            </a>
+<!-- Accesos -->
+<section style="background:var(--sm-panel);padding:36px 48px;min-height:40vh;">
+    <div style="max-width:1180px;margin:0 auto;display:grid;
+              grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;">
 
-            <a th:if="${rol == 'Recepcionista' or rol == 'Administrador'}" th:href="@{/recepcion/buscar}"
-               class="tarjeta" style="text-decoration:none;color:inherit;">
-                <i class="ti ti-clipboard-check"></i>
-                <h3>Recepcion y Verificacion de Cita</h3>
-                <p>Buscar pacientes por DPI o numero de cita y registrar su llegada.</p>
-            </a>
+        <a th:if="${rol == 'Administrador'}" th:href="@{/usuarios}" class="sm-panel sm-feature"
+           style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="sm-feature__title">Mantenimiento de Usuarios</div>
+            <div class="sm-feature__desc">Listar, crear, editar y eliminar cuentas de usuarios internos.</div>
+        </a>
 
-            <a th:if="${rol == 'Cajero' or rol == 'Administrador'}" th:href="@{/caja/cobro}" class="tarjeta"
-               style="text-decoration:none;color:inherit;">
-                <i class="ti ti-cash-register"></i>
-                <h3>Cobro de Consulta en Caja</h3>
-                <p>Cobrar consultas pendientes de pago en efectivo o con tarjeta y emitir el comprobante.</p>
-            </a>
-        </div>
+        <a th:if="${rol == 'Recepcionista' or rol == 'Administrador'}" th:href="@{/recepcion/buscar}"
+           class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/></svg>
+            </div>
+            <div class="sm-feature__title">Recepción y Verificación de Cita</div>
+            <div class="sm-feature__desc">Buscar pacientes por DPI o número de cita y registrar su llegada.</div>
+        </a>
+
+        <a th:if="${rol == 'Cajero' or rol == 'Administrador'}" th:href="@{/caja/cobro}"
+           class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+            </div>
+            <div class="sm-feature__title">Cobro de Consulta en Caja</div>
+            <div class="sm-feature__desc">Cobrar consultas pendientes en efectivo o tarjeta y emitir el comprobante.</div>
+        </a>
+
     </div>
 </section>
 

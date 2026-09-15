@@ -1,62 +1,59 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Portal - Hospital San Rafael</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/portal.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('Mi Portal', null)}"></head>
 <body>
 
-<header class="barra">
-    <div class="contenedor barra-interna">
-        <div class="marca">
-            <i class="ti ti-heartbeat"></i>
-            <span>Hospital San Rafael</span>
-        </div>
-        <nav class="nav">
-<span style="color:var(--teal-50);font-size:14px;">
-<i class="ti ti-user-circle" style="vertical-align:-2px;"></i>
-<span th:text="${nombre}">Paciente</span>
-</span>
-            <form th:action="@{/logout}" method="post" style="display:inline;">
-                <button type="submit" style="background:none;border:none;color:var(--teal-100);
-
-                        font-size:14px;cursor:pointer;font-family:inherit;">
-                    <i class="ti ti-logout"></i> Salir
-                </button>
-            </form>
-        </nav>
+<!-- Barra superior -->
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <div style="display:flex;align-items:center;gap:16px;font-size:14px;color:var(--sm-slate-600);">
+        <span style="font-weight:700;color:var(--sm-ink);" th:text="${nombre}">Paciente</span>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit" class="sm-btn sm-btn--ghost sm-btn--sm">Salir</button>
+        </form>
     </div>
-</header>
+</nav>
 
-<section class="hero" style="padding-bottom:40px;">
-    <div class="contenedor">
-        <h1 th:text="'Hola, ' + ${nombre}">Hola, Paciente</h1>
-        <p>Bienvenido a su portal. Desde aqui puede gestionar sus citas medicas.</p>
+<!-- Hero navy -->
+<section style="background:var(--sm-ink);padding:48px;color:#fff;">
+    <div style="max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:30px;font-weight:800;" th:text="'Hola, ' + ${nombre}">Hola, Paciente</div>
+        <div style="font-size:15px;color:var(--sm-slate-400);">Bienvenido a su portal. Desde aquí puede gestionar sus citas médicas.</div>
     </div>
 </section>
 
-<section class="seccion">
-    <div class="contenedor">
-        <div class="rejilla">
-            <a th:href="@{/citas/nueva}" class="tarjeta" style="text-decoration:none;color:inherit;">
-                <i class="ti ti-calendar-plus"></i>
-                <h3>Agendar cita</h3>
-                <p>Solicite una nueva cita con la especialidad que necesite.</p>
-            </a>
-            <a th:href="@{/citas/mis-citas}" class="tarjeta" style="text-decoration:none;color:inherit;">
-                <i class="ti ti-calendar-check"></i>
-                <h3>Mis citas</h3>
-                <p>Consulte el estado de sus citas programadas.</p>
-            </a>
-            <a th:href="@{/perfil}" class="tarjeta" style="text-decoration:none;color:inherit;">
-                <i class="ti ti-user-cog"></i>
-                <h3>Mi perfil</h3>
-                <p>Revise y actualice sus datos personales.</p>
-            </a>
-        </div>
+<!-- Accesos rápidos -->
+<section style="background:var(--sm-panel);padding:36px 48px;min-height:40vh;">
+    <div style="max-width:1180px;margin:0 auto;display:grid;
+              grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;">
+
+        <a th:href="@{/citas/nueva}" class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14v4M10 16h4"/></svg>
+            </div>
+            <div class="sm-feature__title">Agendar cita</div>
+            <div class="sm-feature__desc">Solicite una nueva cita con la especialidad que necesite.</div>
+        </a>
+
+        <a th:href="@{/citas/mis-citas}" class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/></svg>
+            </div>
+            <div class="sm-feature__title">Mis citas</div>
+            <div class="sm-feature__desc">Consulte el estado de sus citas programadas.</div>
+        </a>
+
+        <a th:href="@{/perfil}" class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+            </div>
+            <div class="sm-feature__title">Mi perfil</div>
+            <div class="sm-feature__desc">Revise y actualice sus datos personales.</div>
+        </a>
+
     </div>
 </section>
 

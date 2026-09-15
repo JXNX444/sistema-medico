@@ -1,52 +1,52 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Recepcion · Hospital San Rafael</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/recepcion.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('Recepción', null)}"></head>
 <body>
 
-<header class="barra-admin">
-    <span><i class="ti ti-heartbeat"></i> Hospital San Rafael</span>
-    <nav>
-<span style="color:var(--teal-100);font-size:14px;font-weight:400;">
-<i class="ti ti-user-circle" style="vertical-align:-2px;"></i>
-<span th:text="${nombre}">Recepcionista</span>
-</span>
-        <a th:href="@{/panel/inicio}"><i class="ti ti-arrow-left"></i> Volver al panel</a>
-    </nav>
-</header>
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <div style="display:flex;align-items:center;gap:16px;font-size:14px;color:var(--sm-slate-600);">
+        <span style="font-weight:700;color:var(--sm-ink);" th:text="${nombre}">Recepcionista</span>
+        <a th:href="@{/panel/inicio}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver al panel</a>
+    </div>
+</nav>
 
-<main class="contenedor">
-    <h1>Recepcion y verificacion de cita</h1>
-    <p class="menu-sub">Busque al paciente por DPI o numero de cita para registrar su llegada</p>
-
-    <div class="tarjeta-buscador">
-        <div class="alternancia">
-            <button type="button" id="btnModoDpi" class="alternancia-boton activa">
-                <i class="ti ti-id"></i> Por DPI
-            </button>
-            <button type="button" id="btnModoNumero" class="alternancia-boton">
-                <i class="ti ti-ticket"></i> Por No. Cita
-            </button>
-        </div>
-
-        <div class="fila-busqueda">
-            <input type="text" id="campoValor" placeholder="1234567890101" autocomplete="off">
-            <button type="button" id="btnBuscar" class="boton-principal" style="width:auto;">
-                <i class="ti ti-search"></i> Buscar
-            </button>
-        </div>
-
-        <p class="error-busqueda" id="errorBusqueda"></p>
+<main style="max-width:760px;margin:0 auto;padding:40px 24px;">
+    <div style="font-size:24px;font-weight:800;">Recepción y verificación de cita</div>
+    <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:24px;">
+        Busque al paciente por DPI o número de cita para registrar su llegada
     </div>
 
-    <p class="cargando oculto" id="cargando">Buscando...</p>
+    <div class="sm-panel" style="display:flex;flex-direction:column;gap:16px;">
+        <!-- Alternancia (el JS togglea la clase 'activa') -->
+        <div class="rec-seg">
+            <button type="button" id="btnModoDpi" class="alternancia-boton activa">Por DPI</button>
+            <button type="button" id="btnModoNumero" class="alternancia-boton">Por No. Cita</button>
+        </div>
 
-    <div id="zonaResultado"></div>
+        <div style="display:flex;gap:10px;">
+            <input class="sm-input" type="text" id="campoValor" placeholder="1234567890101" autocomplete="off">
+            <button type="button" id="btnBuscar" class="sm-btn sm-btn--primary" style="width:auto;">Buscar</button>
+        </div>
+
+        <p class="sm-error" id="errorBusqueda"></p>
+    </div>
+
+    <p class="oculto" id="cargando" style="color:var(--sm-slate-500);margin-top:16px;">Buscando...</p>
+
+    <div id="zonaResultado" style="margin-top:16px;"></div>
 </main>
+
+<style>
+    .oculto { display:none !important; }
+    .rec-seg { display:flex; background:var(--sm-line); border-radius:10px; padding:4px; width:fit-content; }
+    .alternancia-boton {
+        border:none; background:none; cursor:pointer; font-family:inherit;
+        padding:8px 18px; border-radius:8px; font-size:13px; font-weight:600;
+        color:var(--sm-slate-500);
+    }
+    .alternancia-boton.activa { background:var(--sm-ink); color:#fff; }
+</style>
 
 <script th:inline="javascript">
     const CTX = /*[[@{/}]]*/ '/';

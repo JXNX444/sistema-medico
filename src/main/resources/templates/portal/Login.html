@@ -1,88 +1,71 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesion - Hospital San Rafael</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/portal.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('Iniciar Sesión', null)}"></head>
 <body>
 
-<div class="login-contenedor">
+<div class="sm-auth-wrap">
+    <div class="sm-auth-card">
+        <div class="sm-auth-card__body">
 
-    <div class="login-panel">
-        <a th:href="@{/}" class="login-volver">
-            <i class="ti ti-arrow-left"></i> Volver al portal
-        </a>
-        <div class="login-marca">
-            <i class="ti ti-heartbeat"></i>
-            <span>Hospital San Rafael</span>
-        </div>
-        <h1>Bienvenido de nuevo</h1>
-        <p>Acceda a su cuenta para agendar y consultar sus citas medicas.</p>
-    </div>
+            <a th:href="@{/}" style="font-size:13px;color:var(--sm-slate-500);">← Volver al portal</a>
 
-    <div class="login-forma">
-        <h2>Iniciar sesion</h2>
-        <p class="login-sub">Ingrese sus credenciales de paciente</p>
-
-        <!-- FA06: credenciales incorrectas, con intentos restantes -->
-        <div class="alerta alerta-error" th:if="${param.error}">
-            <i class="ti ti-alert-circle"></i>
-            <span th:if="${param.restantes}"
-                  th:text="'Usuario o contrasena incorrectos. Intentos restantes: ' + ${param.restantes[0]} + '.'">
-            </span>
-            <span th:unless="${param.restantes}">Usuario o contrasena incorrectos.</span>
-        </div>
-
-        <!-- FA07: cuenta bloqueada -->
-        <div class="alerta alerta-error" th:if="${param.bloqueado}">
-            <i class="ti ti-lock-x"></i>
-            <span>Cuenta bloqueada temporalmente. Intente de nuevo en 15 minutos.</span>
-        </div>
-
-        <!-- FA09: rol no autorizado -->
-        <div class="alerta alerta-error" th:if="${param.rolNoAutorizado}">
-            <i class="ti ti-shield-x"></i>
-            <span>Este acceso es exclusivo para pacientes. Si es personal del hospital, use el panel administrativo.</span>
-        </div>
-
-        <!-- Cierre de sesion -->
-        <div class="alerta alerta-ok" th:if="${param.logout}">
-            <i class="ti ti-circle-check"></i>
-            <span>Sesion cerrada correctamente.</span>
-        </div>
-
-        <!-- Registro exitoso (CU-02 paso 15) -->
-        <div class="alerta alerta-ok" th:if="${param.registrado}">
-            <i class="ti ti-circle-check"></i>
-            <span>Registro exitoso! Su cuenta ha sido creada. Ahora puede iniciar sesion con sus credenciales.</span>
-        </div>
-
-        <form th:action="@{/login}" method="post">
-            <label class="etiqueta" for="username">Usuario</label>
-            <div class="entrada-icono">
-                <i class="ti ti-user"></i>
-                <input type="text" id="username" name="username" class="entrada"
-                       placeholder="Su nombre de usuario" autocomplete="off" required>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+                <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','sm-logo--lg')}"
+                     style="flex-direction:column;text-align:center;"></div>
+                <div style="font-size:13px;color:var(--sm-slate-500);">Portal de pacientes</div>
             </div>
 
-            <label class="etiqueta" for="password">Contrasena</label>
-            <div class="entrada-icono">
-                <i class="ti ti-lock"></i>
-                <input type="password" id="password" name="password" class="entrada"
-                       placeholder="Su contrasena" required>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="font-size:20px;font-weight:800;">Bienvenido de nuevo</div>
+                <div style="font-size:13px;color:var(--sm-slate-500);">Ingrese sus credenciales de paciente</div>
             </div>
 
-            <button type="submit" class="btn-principal">
-                <i class="ti ti-login-2"></i> Iniciar sesion
-            </button>
-        </form>
+            <!-- FA06: credenciales incorrectas -->
+            <div class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;" th:if="${param.error}">
+        <span th:if="${param.restantes}"
+              th:text="'Usuario o contraseña incorrectos. Intentos restantes: ' + ${param.restantes[0]} + '.'"></span>
+                <span th:unless="${param.restantes}">Usuario o contraseña incorrectos.</span>
+            </div>
+            <!-- FA07: cuenta bloqueada -->
+            <div class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;" th:if="${param.bloqueado}">
+                Cuenta bloqueada temporalmente. Intente de nuevo en 15 minutos.
+            </div>
+            <!-- FA09: rol no autorizado -->
+            <div class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;" th:if="${param.rolNoAutorizado}">
+                Este acceso es exclusivo para pacientes. Si es personal del hospital, use el panel administrativo.
+            </div>
+            <!-- Cierre de sesión -->
+            <div class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;" th:if="${param.logout}">
+                Sesión cerrada correctamente.
+            </div>
+            <!-- Registro exitoso -->
+            <div class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;" th:if="${param.registrado}">
+                ¡Registro exitoso! Su cuenta ha sido creada. Ahora puede iniciar sesión con sus credenciales.
+            </div>
 
-        <a th:href="@{/panel}" class="login-alt">Acceso Panel Administrativo</a>
+            <form th:action="@{/login}" method="post" style="display:flex;flex-direction:column;gap:16px;">
+                <div class="sm-field">
+                    <label for="username">Usuario</label>
+                    <input class="sm-input" type="text" id="username" name="username"
+                           placeholder="Su nombre de usuario" autocomplete="off" required>
+                </div>
+                <div class="sm-field">
+                    <label for="password">Contraseña</label>
+                    <input class="sm-input" type="password" id="password" name="password"
+                           placeholder="Su contraseña" required>
+                </div>
+                <button type="submit" class="sm-btn sm-btn--primary sm-btn--block">Iniciar sesión</button>
+            </form>
+
+            <div style="text-align:center;font-size:13px;color:var(--sm-slate-500);">
+                ¿No tienes cuenta? <a th:href="@{/registro}" style="font-weight:600;">Regístrate como paciente</a>
+            </div>
+            <div style="text-align:center;">
+                <a th:href="@{/panel}" style="font-size:13px;">Acceso Panel Administrativo</a>
+            </div>
+
+        </div>
     </div>
-
 </div>
 
 </body>
