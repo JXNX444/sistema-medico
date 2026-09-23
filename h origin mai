@@ -1,0 +1,202 @@
+[1mdiff --cc src/main/resources/templates/portal/registro.html[m
+[1mindex 4fbeaa2,8bf8bbc..0000000[m
+[1m--- a/src/main/resources/templates/portal/registro.html[m
+[1m+++ b/src/main/resources/templates/portal/registro.html[m
+[36m@@@ -1,93 -1,113 +1,117 @@@[m
+  <!DOCTYPE html>[m
+  <html lang="es" xmlns:th="http://www.thymeleaf.org">[m
+[31m -<head>[m
+[31m -    <meta charset="UTF-8">[m
+[31m -    <meta name="viewport" content="width=device-width, initial-scale=1.0">[m
+[31m -    <title>Registro de Paciente - Hospital San Rafael</title>[m
+[31m -    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">[m
+[31m -    <link rel="stylesheet" th:href="@{/css/portal.css}">[m
+[31m -</head>[m
+[32m +<head th:replace="~{fragments/layout :: head('Registro de Paciente', null)}"></head>[m
+  <body>[m
+  [m
+[31m -<div class="login-contenedor">[m
+[31m -[m
+[32m +<div class="sm-auth-wrap">[m
+[32m +    <div class="sm-card" style="width:860px;max-width:100%;display:flex;">[m
+[32m +[m
+[32m++<<<<<<< HEAD[m
+[32m +        <!-- Panel navy izquierdo -->[m
+[32m +        <div style="width:320px;flex-shrink:0;background:var(--sm-ink);padding:40px 36px;[m
+[32m +                display:flex;flex-direction:column;gap:16px;">[m
+[32m +            <a th:href="@{/}" style="font-size:13px;color:var(--sm-slate-300);"[m
+[32m +               onclick="return confirm('¿Deseas cancelar el registro? Los datos ingresados se perderán.');">← Volver al portal</a>[m
+[32m +            <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','sm-logo--lg')}"[m
+[32m +                 style="flex-direction:column;"></div>[m
+[32m +            <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.2;">Cree su cuenta</div>[m
+[32m +            <div style="font-size:13px;color:var(--sm-slate-400);line-height:1.6;">[m
+[32m +                Regístrese como paciente para agendar y consultar sus citas médicas.[m
+[32m +            </div>[m
+[32m++=======[m
+[32m+     <div class="login-panel">[m
+[32m+         <a th:href="@{/}" class="login-volver"[m
+[32m+            onclick="return confirm('¿Deseas cancelar el registro? Los datos ingresados se perderan.');">[m
+[32m+             <i class="ti ti-arrow-left"></i> Volver al portal[m
+[32m+         </a>[m
+[32m+         <div class="login-marca">[m
+[32m+             <i class="ti ti-heartbeat"></i>[m
+[32m+             <span>Hospital San Rafael</span>[m
+[32m+         </div>[m
+[32m+         <h1>Cree su cuenta</h1>[m
+[32m+         <p>Registrese como paciente para agendar y consultar sus citas medicas.</p>[m
+[32m+     </div>[m
+[32m+ [m
+[32m+     <div class="login-forma">[m
+[32m+         <h2>Registro de paciente</h2>[m
+[32m+         <p class="login-sub">Complete sus datos para crear su cuenta</p>[m
+[32m+ [m
+[32m+         <!-- Error general (ej. rol Paciente inexistente) -->[m
+[32m+         <div class="alerta alerta-error" th:if="${errores.get('general')}">[m
+[32m+             <i class="ti ti-alert-circle"></i>[m
+[32m+             <span th:text="${errores.get('general')}"></span>[m
+[32m++>>>>>>> 8dbe269e9820f1c47575a1e6f987b41c55eb7c17[m
+          </div>[m
+  [m
+[31m -        <form th:action="@{/registro}" method="post" th:object="${form}">[m
+[31m -[m
+[31m -            <label class="etiqueta" for="nombreCompleto">Nombre completo</label>[m
+[31m -            <div class="entrada-icono">[m
+[31m -                <i class="ti ti-user"></i>[m
+[31m -                <input type="text" id="nombreCompleto" th:field="*{nombreCompleto}"[m
+[31m -                       class="entrada" placeholder="Nombres y apellidos">[m
+[31m -            </div>[m
+[31m -            <p class="mensaje-error" th:if="${errores.get('nombreCompleto')}" th:text="${errores.get('nombreCompleto')}"></p>[m
+[31m -[m
+[31m -            <label class="etiqueta" for="dpi">DPI</label>[m
+[31m -            <div class="entrada-icono">[m
+[31m -                <i class="ti ti-id"></i>[m
+[31m -                <input type="text" id="dpi" th:field="*{dpi}" maxlength="13"[m
+[31m -                       inputmode="numeric" class="entrada" placeholder="13 digitos">[m
+[31m -            </div>[m
+[31m -            <p class="mensaje-error" th:if="${errores.get('dpi')}" th:text="${errores.get('dpi')}"></p>[m
+[31m -[m
+[31m -            <label class="etiqueta" for="nit">NIT</label>[m
+[31m -            <div class="entrada-icono">[m
+[31m -                <i class="ti ti-file-invoice"></i>[m
+[31m -                <input type="text" id="nit" th:field="*{nit}" maxlength="9"[m
+[31m -                       inputmode="numeric" class="entrada" placeholder="8 a 9 digitos">[m
+[31m -            </div>[m
+[31m -            <p class="mensaje-error" th:if="${errores.get('nit')}" th:text="${errores.get('nit')}"></p>[m
+[31m -[m
+[31m -            <label class="etiqueta" for="telefono">Telefono</label>[m
+[31m -            <div class="entrada-icono">[m
+[31m -                <i class="ti ti-phone"></i>[m
+[31m -                <input type="text" id="telefono" th:field="*{telefono}" maxlength="8"[m
+[31m -                       inputmode="numeric" class="entrada" placeholder="8 digitos">[m
+[31m -            </div>[m
+[31m -            <p class="mensaje-error" th:if="${errores.get('telefono')}" th:text="${errores.get('telefono')}"></p>[m
+[31m -[m
+[31m -            <label class="etiqueta" for="numeroSeguro">Numero de afiliado del seguro <span class="opcional">(opcional)</span></label>[m
+[31m -            <div class="entrada-icono">[m
+[31m -                <i class="ti ti-shield-heart"></i>[m
+[31m -                <input type="text" id="numeroSeguro" th:field="*{numeroSeguro}" maxlength="50"[m
+[31m -                       class="entrada" placeholder="Solo si aplica">[m
+[32m +        <!-- Formulario -->[m
+[32m +        <div style="flex:1;padding:36px 40px;min-width:0;">[m
+[32m +            <div style="font-size:20px;font-weight:800;">Registro de paciente</div>[m
+[32m +            <div style="font-size:13px;color:var(--sm-slate-500);margin-bottom:20px;">Complete sus datos para crear su cuenta</div>[m
+[32m +[m
+[32m +            <div th:if="${errores.get('general')}" class="sm-badge sm-badge--danger"[m
+[32m +                 style="display:flex;padding:10px 14px;margin-bottom:16px;font-size:13px;"[m
+[32m +                 th:text="${errores.get('general')}"></div>[m
+[32m +[m
+[32m +            <form th:action="@{/registro}" method="post" th:object="${form}"[m
+[32m +                  style="display:flex;flex-direction:column;gap:14px;">[m
+[32m +[m
+[32m +                <div class="sm-field">[m
+[32m +                    <label for="nombreCompleto">Nombre completo</label>[m
+[32m +                    <input class="sm-input" type="text" id="nombreCompleto" th:field="*{nombreCompleto}" placeholder="Nombres y apellidos">[m
+[32m +                    <p class="sm-error" th:if="${errores.get('nombreCompleto')}" th:text="${errores.get('nombreCompleto')}"></p>[m
+[32m +                </div>[m
+[32m +[m
+[32m +                <div class="sm-field">[m
+[32m +                    <label for="dpi">DPI</label>[m
+[32m +                    <input class="sm-input" type="text" id="dpi" th:field="*{dpi}" maxlength="13" inputmode="numeric" placeholder="13 dígitos">[m
+[32m +                    <p class="sm-error" th:if="${errores.get('dpi')}" th:text="${errores.get('dpi')}"></p>[m
+[32m +                </div>[m
+[32m +[m
+[32m +                <div class="sm-field">[m
+[32m +                    <label for="nit">NIT</label>[m
+[32m +                    <input class="sm-input" type="text" id="nit" th:field="*{nit}" maxlength="9" inputmode="numeric" placeholder="8 a 9 dígitos">[m
+[32m +                    <p class="sm-error" th:if="${errores.get('nit')}" th:text="${errores.get('nit')}"></p>[m
+[32m +                </div>[m
+[32m +[m
+[32m +                <div class="sm-field">[m
+[32m +                    <label for="telefono">Teléfono</label>[m
+[32m +                    <input class="sm-input" type="text" id="telefono" th:field="*{telefono}" maxlength="8" inputmode="numeric" placeholder="8 dígitos">[m
+[32m +                    <p class="sm-error" th:if="${errores.get('telefono')}" th:text="${errores.get('telefono')}"></p>[m
+[32m +                </div>[m
+[32m +[m
+[32m +                <div class="sm-field">[m
+[32m +                    <label for="numeroSeguro">Número de afiliado del seguro <span style="color:var(--sm-slate-400);font-weight:400;">(opcional)</span></label>[m
+[32m +                    <input class="sm-input" type="text" id="numeroSeguro" th:field="*{numeroSeguro}" maxlength="50" placeholder="Solo si aplica">[m
+[32m +                    <p class="sm-error" th:if="${errores.get('numeroSeguro')}" th:text="${errores.get('numeroSeguro')}"></p>[m
+[32m +                </div>[m
+[32m +[m
+[32m +                <div class="sm-field">[m
+[32m +                    <label for="correo">Correo electrónico</label>[m
+[32m +                    <input class="sm-input" type="text" id="correo" th:field="*{correo}" placeholder="usuario@dominio.com" autocomplete="off">[m
+[32m +                    <p class="sm-error" th:if="${errores.get('correo')}" th:text="${errores.get('correo')}"></p>[m
+[32m +                </div>[m
+[32m +[m
+[32m +                <div class="sm-field">[m
+[32m +                    <label for="username">Nombre de usuario</label>[m
+[32m +                    <input class="sm-input" type="text" id="username" th:field="*{username}" maxlength="9" placeholder="8 a 9 caracteres" autocomplete="off">[m
+[32m +                    <p class="sm-error" th:if="${errores.get('username')}" th:text="${errores.get('username')}"></p>[m
+[32m +                </div>[m
+[32m +[m
+[32m +                <div class="sm-field">[m
+[32m +                    <label for="password">Contraseña</label>[m
+[32m +                    <input class="sm-input" type="password" id="password" th:field="*{password}" placeholder="Mínimo 12 caracteres">[m
+[32m +                    <p class="sm-error" th:if="${errores.get('password')}" th:text="${errores.get('password')}"></p>[m
+[32m +                </div>[m
+[32m +[m
+[32m +                <button type="submit" class="sm-btn sm-btn--primary sm-btn--block" style="margin-top:6px;">Registrarse</button>[m
+[32m +            </form>[m
+[32m +[m
+[32m +            <div style="text-align:center;margin-top:16px;">[m
+[32m +                <a th:href="@{/login}" style="font-size:13px;">Ya tengo cuenta, iniciar sesión</a>[m
+              </div>[m
+[31m -            <p class="mensaje-error" th:if="${errores.get('numeroSeguro')}" th:text="${errores.get('numeroSeguro')}"></p>[m
+[31m -[m
+[31m -            <label class="etiqueta" for="correo">Correo electronico</label>[m
+[31m -            <div class="entrada-icono">[m
+[31m -                <i class="ti ti-mail"></i>[m
+[31m -                <input type="text" id="correo" th:field="*{correo}"[m
+[31m -                       class="entrada" placeholder="usuario@dominio.com" autocomplete="off">[m
+[31m -            </div>[m
+[31m -            <p class="mensaje-error" th:if="${errores.get('correo')}" th:text="${errores.get('correo')}"></p>[m
+[31m -[m
+[31m -            <label class="etiqueta" for="username">Nombre de usuario</label>[m
+[31m -            <div class="entrada-icono">[m
+[31m -                <i class="ti ti-at"></i>[m
+[31m -                <input type="text" id="username" th:field="*{username}" maxlength="9"[m
+[31m -                       class="entrada" placeholder="8 a 9 caracteres" autocomplete="off">[m
+[31m -            </div>[m
+[31m -            <p class="mensaje-error" th:if="${errores.get('username')}" th:text="${errores.get('username')}"></p>[m
+[31m -[m
+[31m -            <label class="etiqueta" for="password">Contrasena</label>[m
+[31m -            <div class="entrada-icono">[m
+[31m -                <i class="ti ti-lock"></i>[m
+[31m -                <input type="password" id="password" th:field="*{password}"[m
+[31m -                       class="entrada" placeholder="Minimo 12 caracteres">[m
+[31m -            </div>[m
+[31m -            <p class="mensaje-error" th:if="${errores.get('password')}" th:text="${errores.get('password')}"></p>[m
+[31m -[m
+[31m -            <button type="submit" class="btn-principal">[m
+[31m -                <i class="ti ti-user-plus"></i> Registrarse[m
+[31m -            </button>[m
+[31m -        </form>[m
+[32m +        </div>[m
+  [m
+[31m -        <a th:href="@{/login}" class="login-alt">Ya tengo cuenta, iniciar sesion</a>[m
+      </div>[m
+[31m -[m
+  </div>[m
+  [m
+  <script>[m

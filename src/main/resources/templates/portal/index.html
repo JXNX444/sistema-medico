@@ -15,42 +15,43 @@
     <a th:href="@{/login}" class="sm-btn sm-btn--primary sm-btn--sm">Ingresar</a>
 </nav>
 
-<!-- ============ HERO + VERIFICACIÓN DPI ============ -->
+<!-- ============ HERO + DPI + CARRUSEL DE IMAGENES ============ -->
 <section class="hero">
-    <div class="hero-inner">
-        <div class="sm-pill">Hospital Regional · Guatemala</div>
-        <h1>Su cita médica en tres pasos</h1>
-        <p>Verifique su registro con el número de DPI para continuar.</p>
+    <div class="hero-grid">
 
-        <div class="buscador">
-            <div class="campo-dpi">
-                <input type="text" id="dpiRapido" placeholder="Ingrese su DPI"
-                       maxlength="13" inputmode="numeric" autocomplete="off">
-                <span class="contador" id="contadorRapido">0/13</span>
-            </div>
-            <button class="btn-agendar" onclick="abrirModal()">Agendar cita →</button>
-        </div>
-    </div>
-</section>
+        <div class="hero-text sm-fade">
+            <div class="sm-pill">Hospital Regional · Guatemala</div>
+            <h1>Tu salud, nuestra prioridad</h1>
+            <p>Verifique su registro con el número de DPI para agendar su cita médica en el hospital o sede más cercana.</p>
 
-<!-- ============ CARRUSEL DE ESPECIALIDADES ============ -->
-<section class="seccion-oscura" id="especialidades">
-    <div class="seccion-inner">
-        <p class="rotulo rotulo-claro">NUESTRAS ESPECIALIDADES</p>
-        <div class="carrusel" id="carrusel">
-            <div class="carrusel-pista" id="pista">
-                <div class="carrusel-slide" th:each="esp : ${especialidades}">
-                    <div class="icono-grande">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2v2M5 2v2M8 2v6a4 4 0 0 0 8 0"/><circle cx="20" cy="10" r="2"/><path d="M8 15a6 6 0 0 0 12 0v-3"/></svg>
-                    </div>
-                    <div class="texto">
-                        <h3 th:text="${esp.nombre}">Medicina General</h3>
-                        <p th:text="${esp.descripcion}">Descripción de la especialidad</p>
-                    </div>
+            <div class="buscador">
+                <div class="campo-dpi">
+                    <input type="text" id="dpiRapido" placeholder="Ingrese su DPI"
+                           maxlength="13" inputmode="numeric" autocomplete="off">
+                    <span class="contador" id="contadorRapido">0/13</span>
                 </div>
+                <button class="btn-agendar" onclick="abrirModal()">Agendar cita →</button>
             </div>
-            <div class="carrusel-puntos" id="puntos"></div>
+
+            <div class="hero-stats">
+                <div><div class="hero-stat-num">36</div><div class="hero-stat-lbl">Doctores</div></div>
+                <div><div class="hero-stat-num" th:text="${especialidades != null ? especialidades.size() : 8}">8</div><div class="hero-stat-lbl">Especialidades</div></div>
+                <div><div class="hero-stat-num" th:text="${sucursales != null ? sucursales.size() : 3}">3</div><div class="hero-stat-lbl">Sedes</div></div>
+            </div>
         </div>
+
+        <div class="hero-media sm-fade-2">
+            <div class="imgcar">
+                <div class="imgcar-pista" id="heroPista">
+                    <!-- Fotos en: src/main/resources/static/img/doctores/  (1.jpg, 2.jpg, 3.jpg) -->
+                    <div class="imgcar-slide" data-ph="Espacio para foto de doctores"><img src="/img/doctores/1.jpg" alt="" onerror="this.style.display='none';this.parentElement.classList.add('sin-foto');"></div>
+                    <div class="imgcar-slide" data-ph="Espacio para foto de doctores"><img src="/img/doctores/2.jpg" alt="" onerror="this.style.display='none';this.parentElement.classList.add('sin-foto');"></div>
+                    <div class="imgcar-slide" data-ph="Espacio para foto de doctores"><img src="/img/doctores/3.jpg" alt="" onerror="this.style.display='none';this.parentElement.classList.add('sin-foto');"></div>
+                </div>
+                <div class="imgcar-puntos" id="heroPuntos"></div>
+            </div>
+        </div>
+
     </div>
 </section>
 
@@ -79,16 +80,54 @@
     </div>
 </section>
 
-<!-- ============ HORARIOS ============ -->
+<!-- ============ ESPECIALIDADES (CARRUSEL con icono propio) ============ -->
+<section class="seccion-oscura" id="especialidades">
+    <div class="seccion-inner">
+        <div class="esp-head">
+            <p class="rotulo rotulo-claro" style="margin:0;">NUESTRAS ESPECIALIDADES</p>
+            <div class="esp-arrows">
+                <button type="button" id="espPrev" aria-label="Anterior">‹</button>
+                <button type="button" id="espNext" aria-label="Siguiente">›</button>
+            </div>
+        </div>
+        <div class="esp-viewport" id="espViewport">
+            <div class="esp-track" id="espTrack">
+                <div class="esp-card" th:each="esp : ${especialidades}" th:attr="data-nombre=${esp.nombre}">
+                    <div class="esp-card__icon"></div>
+                    <h3 th:text="${esp.nombre}">Especialidad</h3>
+                    <p th:text="${esp.descripcion}">Descripción</p>
+                </div>
+            </div>
+        </div>
+        <div class="esp-dots" id="espDots"></div>
+    </div>
+</section>
+
+<!-- ============ HORARIOS + CARRUSEL DE FOTOS (a la par) ============ -->
 <section class="seccion" id="horarios">
     <div class="seccion-inner">
         <p class="rotulo">HORARIOS DE ATENCIÓN</p>
-        <div class="horarios-caja">
-            <div class="horario-fila"><span>Lunes a Viernes</span><span>7:00 - 19:00</span></div>
-            <div class="horario-fila"><span>Sábado</span><span>7:00 - 13:00</span></div>
-            <div class="horario-fila"><span>Domingo</span><span>Cerrado</span></div>
-            <div class="horario-fila"><span>Días festivos</span><span>Solo urgencias</span></div>
-            <div class="horario-emergencia">Servicio de urgencias disponible las 24 horas, todos los días.</div>
+        <div class="horarios-grid">
+
+            <div class="horarios-caja">
+                <div class="horario-fila"><span>Lunes a Viernes</span><span>7:00 - 19:00</span></div>
+                <div class="horario-fila"><span>Sábado</span><span>7:00 - 13:00</span></div>
+                <div class="horario-fila"><span>Domingo</span><span>Cerrado</span></div>
+                <div class="horario-fila"><span>Días festivos</span><span>Solo urgencias</span></div>
+                <div class="horario-emergencia">Servicio de urgencias disponible las 24 horas, todos los días.</div>
+            </div>
+
+            <!-- Carrusel de fotos de sedes / consultorios -->
+            <div class="imgcar imgcar--sm">
+                <div class="imgcar-pista" id="fotosPista">
+                    <!-- Fotos en: src/main/resources/static/img/sedes/  (1.jpg, 2.jpg, 3.jpg) -->
+                    <div class="imgcar-slide" data-ph="Espacio para foto de la sede"><img src="/img/sedes/1.jpg" alt="" onerror="this.style.display='none';this.parentElement.classList.add('sin-foto');"></div>
+                    <div class="imgcar-slide" data-ph="Espacio para foto de la sede"><img src="/img/sedes/2.jpg" alt="" onerror="this.style.display='none';this.parentElement.classList.add('sin-foto');"></div>
+                    <div class="imgcar-slide" data-ph="Espacio para foto de la sede"><img src="/img/sedes/3.jpg" alt="" onerror="this.style.display='none';this.parentElement.classList.add('sin-foto');"></div>
+                </div>
+                <div class="imgcar-puntos" id="fotosPuntos"></div>
+            </div>
+
         </div>
     </div>
 </section>
@@ -126,33 +165,46 @@
             <button class="cerrar" onclick="cerrarModal()" aria-label="Cerrar">&times;</button>
         </div>
         <p class="modal-texto">Ingrese su número de DPI para verificar si está registrado en el sistema.</p>
-
         <label class="sm-field__label" for="dpiModal">Número de DPI</label>
         <input type="text" id="dpiModal" class="sm-input" maxlength="13"
                inputmode="numeric" autocomplete="off" placeholder="2547896320101">
-
         <div class="fila-contador"><span class="contador" id="contadorModal">0/13</span></div>
-
         <p class="mensaje-error" id="errorDpi"><span id="textoError"></span></p>
-
-        <button class="btn-principal" onclick="verificarDpi()">Verificar DPI</button>
+        <button class="btn-principal sm-btn sm-btn--primary sm-btn--block" onclick="verificarDpi()">Verificar DPI</button>
     </div>
 </div>
 
 <style>
-    .hero { background:linear-gradient(180deg,#F8FAFC 0%,#FFFFFF 100%); padding:72px 24px; }
-    .hero-inner { max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:18px; animation:fadeUp .6s ease both; }
+    .hero { background:linear-gradient(180deg,#F8FAFC 0%,#FFFFFF 100%); padding:64px 24px; }
+    .hero-grid { max-width:1180px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
+    .hero-text { display:flex; flex-direction:column; gap:18px; }
     .hero h1 { font-size:44px; font-weight:800; line-height:1.15; margin:0; }
-    .hero p { font-size:16px; color:var(--sm-slate-500); margin:0; }
-    .buscador { display:flex; gap:12px; margin-top:10px; flex-wrap:wrap; }
+    .hero p { font-size:16px; color:var(--sm-slate-500); margin:0; max-width:460px; }
+    .buscador { display:flex; gap:12px; margin-top:6px; flex-wrap:wrap; }
     .campo-dpi { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--sm-border);
-        border-radius:var(--sm-r-input); padding:0 14px; min-width:280px; }
-    .campo-dpi input { border:none; outline:none; font-family:var(--sm-font); font-size:15px; padding:14px 0; flex:1; color:var(--sm-ink); }
+        border-radius:var(--sm-r-input); padding:0 14px; min-width:240px; flex:1; }
+    .campo-dpi input { border:none; outline:none; font-family:var(--sm-font); font-size:15px; padding:14px 0; flex:1; color:var(--sm-ink); background:transparent; }
     .contador { font-size:12px; color:var(--sm-slate-400); font-weight:600; }
     .contador.completo { color:var(--sm-cyan-dark); }
     .btn-agendar { background:var(--sm-cyan); color:#fff; border:none; cursor:pointer; font-family:var(--sm-font);
-        font-size:14px; font-weight:700; padding:14px 26px; border-radius:var(--sm-r-input); }
+        font-size:14px; font-weight:700; padding:14px 24px; border-radius:var(--sm-r-input); white-space:nowrap; }
     .btn-agendar:hover { background:var(--sm-cyan-dark); }
+    .hero-stats { display:flex; gap:36px; margin-top:12px; }
+    .hero-stat-num { font-size:22px; font-weight:800; color:var(--sm-ink); }
+    .hero-stat-lbl { font-size:12px; color:var(--sm-slate-500); }
+
+    /* Carrusel de imagenes (reutilizable) */
+    .imgcar { position:relative; width:100%; border-radius:20px; overflow:hidden; box-shadow:var(--sm-shadow); background:var(--sm-cyan-50); }
+    .imgcar-pista { display:flex; transition:transform .6s ease; }
+    .imgcar-slide { min-width:100%; height:380px; position:relative; }
+    .imgcar--sm .imgcar-slide { height:300px; }
+    .imgcar-slide img { width:100%; height:100%; object-fit:cover; display:block; }
+    .imgcar-slide.sin-foto::after { content:attr(data-ph); position:absolute; inset:0; display:flex;
+        align-items:center; justify-content:center; text-align:center; padding:20px;
+        background:linear-gradient(135deg,var(--sm-cyan-50),#fff); color:var(--sm-cyan-dark); font-size:14px; font-weight:600; }
+    .imgcar-puntos { position:absolute; bottom:14px; left:0; right:0; display:flex; gap:8px; justify-content:center; }
+    .imgcar-punto { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.6); cursor:pointer; transition:.2s; }
+    .imgcar-punto.activo { background:#fff; width:24px; border-radius:4px; }
 
     .seccion { background:#fff; padding:56px 24px; }
     .seccion-oscura { background:var(--sm-ink); padding:56px 24px; }
@@ -160,57 +212,53 @@
     .rotulo { font-size:13px; font-weight:700; color:var(--sm-cyan-dark); letter-spacing:1px; margin:0 0 24px; }
     .rotulo-claro { color:var(--sm-cyan-bright); }
 
-    /* Carrusel */
-    .carrusel { overflow:hidden; }
-    .carrusel-pista { display:flex; transition:transform .5s ease; }
-    .carrusel-slide { min-width:100%; display:flex; align-items:center; gap:24px; padding:8px 4px; }
-    .icono-grande { width:64px; height:64px; border-radius:16px; background:var(--sm-cyan);
-        display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .carrusel-slide .texto h3 { font-size:22px; font-weight:800; color:#fff; margin:0 0 6px; }
-    .carrusel-slide .texto p { font-size:15px; color:var(--sm-slate-400); margin:0; line-height:1.6; max-width:560px; }
-    .carrusel-puntos { display:flex; gap:8px; justify-content:center; margin-top:24px; }
-    .punto { width:8px; height:8px; border-radius:50%; background:var(--sm-slate-700); cursor:pointer; transition:.2s; }
-    .punto.activo { background:var(--sm-cyan); width:24px; border-radius:4px; }
+    .esp-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+    .esp-arrows { display:flex; gap:8px; }
+    .esp-arrows button { width:38px; height:38px; border-radius:50%; border:1px solid #334155;
+        background:#111827; color:#fff; font-size:20px; line-height:1; cursor:pointer; transition:.15s ease; }
+    .esp-arrows button:hover { background:var(--sm-cyan); border-color:var(--sm-cyan); }
+    .esp-viewport { overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; -ms-overflow-style:none; }
+    .esp-viewport::-webkit-scrollbar { display:none; }
+    .esp-track { display:flex; gap:20px; }
+    .esp-card { scroll-snap-align:start; flex:0 0 calc((100% - 60px)/4); box-sizing:border-box;
+        background:#111827; border:1px solid #1E293B; border-radius:var(--sm-r-panel); padding:22px; }
+    .esp-card__icon { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+    .esp-card h3 { font-size:17px; font-weight:800; color:#fff; margin:0 0 6px; }
+    .esp-card p { font-size:13px; color:var(--sm-slate-400); margin:0; line-height:1.5; }
+    .esp-dots { display:flex; gap:8px; justify-content:center; margin-top:22px; }
+    .esp-dot { width:8px; height:8px; border-radius:50%; background:#334155; cursor:pointer; transition:.2s; }
+    .esp-dot.activo { background:var(--sm-cyan); width:24px; border-radius:4px; }
+    @media (max-width:1000px){ .esp-card { flex:0 0 calc((100% - 20px)/2); } }
+    @media (max-width:680px){ .esp-card { flex:0 0 100%; } }
 
-    /* Servicios */
     .servicios-fila { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:24px; }
     .servicio h3 { font-size:16px; font-weight:700; margin:12px 0 4px; }
     .servicio p { font-size:13px; color:var(--sm-slate-500); margin:0; }
-    .servicio-icono { width:44px; height:44px; border-radius:12px; background:var(--sm-cyan-50);
-        display:flex; align-items:center; justify-content:center; }
+    .servicio-icono { width:44px; height:44px; border-radius:12px; background:var(--sm-cyan-50); display:flex; align-items:center; justify-content:center; }
     .servicio-icono svg { stroke:var(--sm-cyan-dark); }
 
-    /* Horarios */
-    .horarios-caja { max-width:560px; background:var(--sm-panel); border:1px solid var(--sm-border);
-        border-radius:var(--sm-r-panel); padding:8px 20px; }
-    .horario-fila { display:flex; justify-content:space-between; padding:14px 0; font-size:14px;
-        border-bottom:1px solid var(--sm-line); }
+    /* Horarios + fotos a la par */
+    .horarios-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:start; }
+    .horarios-caja { background:var(--sm-panel); border:1px solid var(--sm-border); border-radius:var(--sm-r-panel); padding:8px 20px; }
+    .horario-fila { display:flex; justify-content:space-between; padding:14px 0; font-size:14px; border-bottom:1px solid var(--sm-line); }
     .horario-fila span:first-child { color:var(--sm-slate-600); }
     .horario-fila span:last-child { font-weight:600; }
-    .horario-emergencia { background:var(--sm-cyan-50); color:var(--sm-cyan-dark); border-radius:10px;
-        padding:12px 14px; font-size:13px; margin:12px 0; }
+    .horario-emergencia { background:var(--sm-cyan-50); color:var(--sm-cyan-dark); border-radius:10px; padding:12px 14px; font-size:13px; margin:12px 0; }
+    @media (max-width:860px){ .horarios-grid { grid-template-columns:1fr; } }
 
-    /* Sedes */
     .rejilla-sedes { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
-    .tarjeta-sede { display:flex; gap:14px; background:#fff; border:1px solid var(--sm-border);
-        border-radius:var(--sm-r-panel); padding:20px; }
-    .sede-icono { width:44px; height:44px; border-radius:12px; background:var(--sm-cyan-50);
-        display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .tarjeta-sede { display:flex; gap:14px; background:#fff; border:1px solid var(--sm-border); border-radius:var(--sm-r-panel); padding:20px; }
+    .sede-icono { width:44px; height:44px; border-radius:12px; background:var(--sm-cyan-50); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .sede-icono svg { stroke:var(--sm-cyan-dark); }
     .tarjeta-sede h3 { font-size:15px; font-weight:700; margin:0 0 6px; }
     .dato-sede { font-size:13px; color:var(--sm-slate-500); margin:2px 0; }
 
-    /* Footer */
     .pie { background:var(--sm-ink); padding:32px 24px; }
-    .pie-interno { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
-        color:var(--sm-slate-400); font-size:13px; }
+    .pie-interno { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; color:var(--sm-slate-400); font-size:13px; }
 
-    /* Modal DPI */
-    .velo { display:none; position:fixed; inset:0; background:rgba(15,23,42,.55);
-        align-items:center; justify-content:center; padding:24px; z-index:50; }
+    .velo { display:none; position:fixed; inset:0; background:rgba(15,23,42,.55); align-items:center; justify-content:center; padding:24px; z-index:50; }
     .velo.visible { display:flex; }
-    .modal-dpi { background:#fff; border-radius:var(--sm-r-card); box-shadow:var(--sm-shadow);
-        padding:28px; width:440px; max-width:100%; }
+    .modal-dpi { background:#fff; border-radius:var(--sm-r-card); box-shadow:var(--sm-shadow); padding:28px; width:440px; max-width:100%; }
     .modal-cabecera { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
     .modal-cabecera h2 { font-size:18px; font-weight:800; margin:0; }
     .cerrar { background:none; border:none; font-size:24px; cursor:pointer; color:var(--sm-slate-400); }
@@ -219,9 +267,8 @@
     .mensaje-error { display:none; color:var(--sm-danger); font-size:13px; margin:6px 0; }
     .mensaje-error.visible { display:block; }
     #dpiModal.error { border-color:var(--sm-danger); box-shadow:0 0 0 3px rgba(239,68,68,.15); }
-    .modal-dpi .btn-principal { width:100%; margin-top:12px; }
 
-    @media (max-width:640px){ .hero h1{font-size:32px;} }
+    @media (max-width:860px){ .hero-grid{ grid-template-columns:1fr; } .hero h1{font-size:34px;} }
 </style>
 
 <script>
@@ -234,111 +281,137 @@
     const cajaError     = document.getElementById('errorDpi');
     const textoError    = document.getElementById('textoError');
 
-    function soloDigitos(valor) { return valor.replace(/\D/g, ''); }
+    function soloDigitos(v){ return v.replace(/\D/g,''); }
+    function pintarContador(el, n){ el.textContent = n + '/13'; el.classList.toggle('completo', n === 13); }
 
-    function pintarContador(elemento, cantidad) {
-        elemento.textContent = cantidad + '/13';
-        elemento.classList.toggle('completo', cantidad === 13);
-    }
+    dpiRapido.addEventListener('input', e => { e.target.value = soloDigitos(e.target.value); pintarContador(contadorRap, e.target.value.length); });
+    dpiModal.addEventListener('input', e => { e.target.value = soloDigitos(e.target.value); pintarContador(contadorModal, e.target.value.length); ocultarError(); });
 
-    dpiRapido.addEventListener('input', e => {
-        e.target.value = soloDigitos(e.target.value);
-        pintarContador(contadorRap, e.target.value.length);
-    });
+    function abrirModal(){ dpiModal.value = soloDigitos(dpiRapido.value); pintarContador(contadorModal, dpiModal.value.length); ocultarError(); velo.classList.add('visible'); dpiModal.focus(); }
+    function cerrarModal(){ velo.classList.remove('visible'); }
+    function mostrarError(m){ textoError.textContent = m; cajaError.classList.add('visible'); dpiModal.classList.add('error'); }
+    function ocultarError(){ cajaError.classList.remove('visible'); dpiModal.classList.remove('error'); }
 
-    dpiModal.addEventListener('input', e => {
-        e.target.value = soloDigitos(e.target.value);
-        pintarContador(contadorModal, e.target.value.length);
-        ocultarError();
-    });
-
-    function abrirModal() {
-        dpiModal.value = soloDigitos(dpiRapido.value);
-        pintarContador(contadorModal, dpiModal.value.length);
-        ocultarError();
-        velo.classList.add('visible');
-        dpiModal.focus();
-    }
-
-    function cerrarModal() { velo.classList.remove('visible'); }
-
-    function mostrarError(mensaje) {
-        textoError.textContent = mensaje;
-        cajaError.classList.add('visible');
-        dpiModal.classList.add('error');
-    }
-
-    function ocultarError() {
-        cajaError.classList.remove('visible');
-        dpiModal.classList.remove('error');
-    }
-
-    async function verificarDpi() {
+    async function verificarDpi(){
         const dpi = dpiModal.value;
-
-        if (dpi.length === 0) {
-            mostrarError('El campo DPI es obligatorio. Por favor, ingrese su número de DPI.');
-            return;
-        }
-        if (dpi.length !== 13) {
-            mostrarError('El DPI debe contener exactamente 13 dígitos. Usted ingresó ' + dpi.length + ' dígitos.');
-            return;
-        }
-
+        if (dpi.length === 0){ mostrarError('El campo DPI es obligatorio. Por favor, ingrese su número de DPI.'); return; }
+        if (dpi.length !== 13){ mostrarError('El DPI debe contener exactamente 13 dígitos. Usted ingresó ' + dpi.length + ' dígitos.'); return; }
         const boton = document.querySelector('.btn-principal');
-        boton.disabled = true;
-        boton.innerHTML = 'Verificando...';
-
-        try {
-            const respuesta = await fetch('/portal/verificar-dpi', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'dpi=' + dpi
-            });
+        boton.disabled = true; boton.innerHTML = 'Verificando...';
+        try{
+            const respuesta = await fetch('/portal/verificar-dpi', { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body:'dpi=' + dpi });
             const datos = await respuesta.json();
-
-            if (datos.accion === 'LOGIN') {
-                window.location.href = '/login';
-            } else if (datos.accion === 'REGISTRO') {
-                alert(datos.mensaje);
-                window.location.href = '/registro';
-            } else {
-                mostrarError(datos.mensaje);
-            }
-        } catch (e) {
-            mostrarError('No se pudo conectar con el servidor. Intente de nuevo más tarde.');
-        } finally {
-            boton.disabled = false;
-            boton.innerHTML = 'Verificar DPI';
-        }
+            if (datos.accion === 'LOGIN'){ window.location.href = '/login'; }
+            else if (datos.accion === 'REGISTRO'){ alert(datos.mensaje); window.location.href = '/registro'; }
+            else { mostrarError(datos.mensaje); }
+        } catch(e){ mostrarError('No se pudo conectar con el servidor. Intente de nuevo más tarde.'); }
+        finally { boton.disabled = false; boton.innerHTML = 'Verificar DPI'; }
     }
 
     velo.addEventListener('click', e => { if (e.target === velo) cerrarModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
 
-    /* ===================== CARRUSEL ===================== */
-    const pista  = document.getElementById('pista');
-    const puntos = document.getElementById('puntos');
-    const totalSlides = pista.children.length;
-    let indiceActual = 0;
-
-    for (let i = 0; i < totalSlides; i++) {
-        const p = document.createElement('span');
-        p.className = 'punto' + (i === 0 ? ' activo' : '');
-        p.addEventListener('click', () => irASlide(i));
-        puntos.appendChild(p);
+    /* ===================== CARRUSEL DE IMAGENES (reutilizable) ===================== */
+    function initCarrusel(pistaId, puntosId, intervalo){
+        const pista  = document.getElementById(pistaId);
+        const puntos = document.getElementById(puntosId);
+        if (!pista) return;
+        const total = pista.children.length;
+        let idx = 0;
+        for (let i=0;i<total;i++){
+            const p = document.createElement('span');
+            p.className = 'imgcar-punto' + (i===0?' activo':'');
+            p.addEventListener('click', () => irA(i));
+            puntos.appendChild(p);
+        }
+        function irA(i){ idx=i; pista.style.transform='translateX(-'+(i*100)+'%)';
+            [...puntos.children].forEach((p,j)=>p.classList.toggle('activo', j===i)); }
+        if (total > 1) setInterval(() => irA((idx+1)%total), intervalo || 4000);
     }
+    initCarrusel('heroPista','heroPuntos',4000);
+    initCarrusel('fotosPista','fotosPuntos',4500);
 
-    function irASlide(i) {
-        indiceActual = i;
-        pista.style.transform = 'translateX(-' + (i * 100) + '%)';
-        document.querySelectorAll('.punto').forEach((p, idx) => {
-            p.classList.toggle('activo', idx === i);
+    /* ===================== ICONO POR ESPECIALIDAD ===================== */
+    (function(){
+        const colores = ['#06B6D4','#F59E0B','#EC4899','#A78BFA','#22C55E','#EF4444'];
+        const ICONOS = {
+            pediat:  '<path d="M9 12h.01M15 12h.01M10 16a3.5 3.5 0 0 0 4 0"/><circle cx="12" cy="12" r="9"/>',
+            cardio:  '<path d="M20.8 5.6a5.5 5.5 0 0 0-7.8 0L12 6.6l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
+            gineco:  '<circle cx="12" cy="8" r="5"/><path d="M12 13v8M9 18h6"/>',
+            trauma:  '<path d="M17 3a3 3 0 0 0-2.1 5.1L9.1 14.9A3 3 0 1 0 11 17l5.8-5.8A3 3 0 1 0 17 3Z"/>',
+            dermato: '<path d="M12 22a8 8 0 0 0 8-8c0-4-3-9-8-12-5 3-8 8-8 12a8 8 0 0 0 8 8Z"/>',
+            neuro:   '<path d="M9 3a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 2 5 3 3 0 0 0 5 1V4Z"/><path d="M15 3a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-2 5 3 3 0 0 1-5 1"/>',
+            oftalmo: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+            odonto:  '<path d="M9 2C6 2 5 4 5 7c0 5 1 15 3 15s2-6 4-6 2 6 4 6 3-10 3-15c0-3-1-5-4-5-2 0-2 1-3 1s-1-1-3-1Z"/>',
+            otorrino:'<path d="M6 8a6 6 0 1 1 10 4c-1.5 1.3-3 2-3 4a2.5 2.5 0 0 1-5 0"/><path d="M9 9a3 3 0 0 1 5 2"/>',
+            urolog:  '<path d="M12 2s6 6 6 11a6 6 0 0 1-12 0c0-5 6-11 6-11Z"/>',
+            nutri:   '<path d="M12 20a6 6 0 0 0 6-6c0-4-3-6-6-6s-6 2-6 6a6 6 0 0 0 6 6Z"/><path d="M12 8V4M10 4h4"/>',
+            gastro:  '<path d="M12 3a4 4 0 0 0-4 4v3a6 6 0 0 0 6 6 3 3 0 0 1 0 6"/><path d="M8 7H6"/>',
+            pulmo:   '<path d="M12 3v10M8 22c-3 0-4-3-4-6l1-6a2 2 0 0 1 4 0c0 4-1 12 0 12Z"/><path d="M16 22c3 0 4-3 4-6l-1-6a2 2 0 0 0-4 0c0 4 1 12 0 12Z"/>',
+            general: '<path d="M11 2v2M5 2v2M8 2v6a4 4 0 0 0 8 0"/><circle cx="20" cy="10" r="2"/><path d="M8 15a6 6 0 0 0 12 0v-3"/>'
+        };
+        function pick(nombre){
+            const n = (nombre||'').toLowerCase();
+            if (n.includes('pediat')) return ICONOS.pediat;
+            if (n.includes('cardio')) return ICONOS.cardio;
+            if (n.includes('gineco')||n.includes('obstet')) return ICONOS.gineco;
+            if (n.includes('trauma')||n.includes('ortoped')) return ICONOS.trauma;
+            if (n.includes('dermat')) return ICONOS.dermato;
+            if (n.includes('neuro')) return ICONOS.neuro;
+            if (n.includes('psic')||n.includes('psiqu')) return ICONOS.neuro;
+            if (n.includes('oftalm')||n.includes('ojo')||n.includes('visual')) return ICONOS.oftalmo;
+            if (n.includes('odont')||n.includes('dental')) return ICONOS.odonto;
+            if (n.includes('otorr')||n.includes('oido')||n.includes('oído')) return ICONOS.otorrino;
+            if (n.includes('urolog')||n.includes('nefro')||n.includes('renal')) return ICONOS.urolog;
+            if (n.includes('nutri')) return ICONOS.nutri;
+            if (n.includes('gastro')||n.includes('digest')) return ICONOS.gastro;
+            if (n.includes('neumo')||n.includes('pulmo')||n.includes('respir')) return ICONOS.pulmo;
+            return ICONOS.general;
+        }
+        document.querySelectorAll('.esp-card').forEach((card, i) => {
+            const cont = card.querySelector('.esp-card__icon');
+            cont.style.background = colores[i % colores.length];
+            cont.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + pick(card.getAttribute('data-nombre')) + '</svg>';
         });
-    }
+    })();
 
-    function siguienteSlide() { irASlide((indiceActual + 1) % totalSlides); }
-    if (totalSlides > 1) { setInterval(siguienteSlide, 5000); }
+    /* ===================== CARRUSEL DE ESPECIALIDADES ===================== */
+    (function(){
+        const vp   = document.getElementById('espViewport');
+        const track= document.getElementById('espTrack');
+        const dots = document.getElementById('espDots');
+        const prev = document.getElementById('espPrev');
+        const next = document.getElementById('espNext');
+        if (!vp || track.children.length === 0) return;
+
+        function paginaActual(){ return Math.round(vp.scrollLeft / vp.clientWidth); }
+        function paginas(){ return Math.max(1, Math.round(track.scrollWidth / vp.clientWidth)); }
+        function pintarDots(){
+            const n = paginas(); dots.innerHTML = '';
+            for (let i=0;i<n;i++){
+                const d = document.createElement('span');
+                d.className = 'esp-dot' + (i===paginaActual()?' activo':'');
+                d.addEventListener('click', () => vp.scrollTo({ left:i*vp.clientWidth, behavior:'smooth' }));
+                dots.appendChild(d);
+            }
+        }
+        function marcarActivo(){ const a = paginaActual(); [...dots.children].forEach((d,i)=>d.classList.toggle('activo', i===a)); }
+
+        prev.addEventListener('click', () => vp.scrollBy({ left:-vp.clientWidth, behavior:'smooth' }));
+        next.addEventListener('click', () => {
+            if (vp.scrollLeft + vp.clientWidth >= vp.scrollWidth - 5) vp.scrollTo({ left:0, behavior:'smooth' });
+            else vp.scrollBy({ left:vp.clientWidth, behavior:'smooth' });
+        });
+
+        let t;
+        vp.addEventListener('scroll', () => { clearTimeout(t); t = setTimeout(marcarActivo, 80); });
+        window.addEventListener('resize', pintarDots);
+        pintarDots();
+
+        let auto = setInterval(() => next.click(), 5000);
+        vp.addEventListener('mouseenter', () => clearInterval(auto));
+        vp.addEventListener('mouseleave', () => auto = setInterval(() => next.click(), 5000));
+    })();
 </script>
 
 </body>

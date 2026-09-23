@@ -11,7 +11,7 @@
             <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
                 <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','sm-logo--lg')}"
                      style="flex-direction:column;text-align:center;"></div>
-                <div style="font-size:13px;color:var(--sm-slate-500);">Portal de pacientes</div>
+                <div style="font-size:13px;color:var(--sm-slate-500);">Portal del hospital</div>
             </div>
 
             <!-- Pestañas -->
@@ -20,9 +20,22 @@
                 <div class="sm-auth-tab" id="tab-per" onclick="cambiarTab('per')">Personal</div>
             </div>
 
-            <!-- Mensaje de error -->
-            <div th:if="${param.error}" class="sm-error" style="text-align:center;">
-                Credenciales incorrectas. Inténtalo de nuevo.
+            <!-- Mensajes -->
+            <div th:if="${param.error}" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;">
+                Usuario o contraseña incorrectos.
+                <span th:if="${param.restantes}" th:text="'Intentos restantes: ' + ${param.restantes[0]} + '.'"></span>
+            </div>
+            <div th:if="${param.bloqueado}" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;">
+                Cuenta bloqueada temporalmente. Intente de nuevo en 15 minutos.
+            </div>
+            <div th:if="${param.rolNoAutorizado}" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;">
+                Estas credenciales no corresponden al acceso seleccionado.
+            </div>
+            <div th:if="${param.logout}" class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;">
+                Sesión cerrada correctamente.
+            </div>
+            <div th:if="${param.registrado}" class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;">
+                ¡Registro exitoso! Ahora puede iniciar sesión.
             </div>
 
             <!-- Formulario Paciente -->
@@ -30,7 +43,7 @@
                   style="display:flex;flex-direction:column;gap:16px;">
                 <div style="display:flex;flex-direction:column;gap:4px;">
                     <div style="font-size:20px;font-weight:800;">Bienvenido de nuevo</div>
-                    <div style="font-size:13px;color:var(--sm-slate-500);">Ingresa tu DPI o usuario para continuar</div>
+                    <div style="font-size:13px;color:var(--sm-slate-500);">Ingresa tu usuario de paciente</div>
                 </div>
                 <div class="sm-field">
                     <label>Usuario o correo electrónico</label>
@@ -40,7 +53,6 @@
                     <label>Contraseña</label>
                     <input class="sm-input" type="password" name="password" placeholder="••••••••••••" required>
                 </div>
-                <div style="text-align:right;font-size:12px;"><a th:href="@{/recuperar}">Olvidé mi contraseña</a></div>
                 <button type="submit" class="sm-btn sm-btn--primary sm-btn--block">Iniciar sesión</button>
                 <div style="text-align:center;font-size:13px;color:var(--sm-slate-500);">
                     ¿No tienes cuenta? <a th:href="@{/registro}" style="font-weight:600;">Regístrate como paciente</a>
@@ -50,6 +62,7 @@
             <!-- Formulario Personal -->
             <form id="form-per" th:action="@{/login}" method="post"
                   style="display:none;flex-direction:column;gap:16px;">
+                <input type="hidden" name="origen" value="panel">
                 <div style="display:flex;flex-direction:column;gap:4px;">
                     <div style="font-size:20px;font-weight:800;">Acceso de personal</div>
                     <div style="font-size:13px;color:var(--sm-slate-500);">Personal clínico y administrativo</div>
@@ -62,12 +75,15 @@
                     <label>Contraseña</label>
                     <input class="sm-input" type="password" name="password" placeholder="••••••••••••" required>
                 </div>
-                <div style="text-align:right;font-size:12px;"><a th:href="@{/recuperar}">Olvidé mi contraseña</a></div>
                 <button type="submit" class="sm-btn sm-btn--dark sm-btn--block">Iniciar sesión</button>
                 <div style="text-align:center;font-size:13px;color:var(--sm-slate-500);">
                     ¿Problemas para ingresar? Contacta al administrador
                 </div>
             </form>
+
+            <div style="text-align:center;">
+                <a th:href="@{/}" style="font-size:13px;">← Volver al portal</a>
+            </div>
 
         </div>
     </div>
