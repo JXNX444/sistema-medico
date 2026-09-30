@@ -19,6 +19,7 @@
         <li data-paso="3">Médico</li>
         <li data-paso="4">Fecha y hora</li>
         <li data-paso="5">Confirmar</li>
+        <li data-paso="6">Método de pago</li>
     </ol>
 
     <div class="tarjeta-wizard sm-panel" style="margin-top:20px;">
@@ -86,6 +87,32 @@
             <p class="error" id="errorPaso5"></p>
             <div class="acciones-paso">
                 <button type="button" class="boton-secundario sm-btn sm-btn--ghost" onclick="irAPaso(4)">Atrás</button>
+                <button type="button" class="boton-principal sm-btn sm-btn--primary" onclick="irAPaso(6)">Siguiente</button>
+            </div>
+        </section>
+
+        <!-- PASO 6 -->
+        <section class="paso oculto" id="paso6">
+            <h2>Seleccione el método de pago</h2>
+            <div class="rejilla-opciones" id="listaMetodosPago">
+                <label class="opcion">
+                    <input type="radio" name="metodoPago" value="TARJETA">
+                    <span class="opcion-texto opcion-metodo">
+                        <span><i class="ti ti-credit-card"></i> Pago con tarjeta</span>
+                        <small>Pague en línea ahora. Tiene 5 minutos para completar el pago.</small>
+                    </span>
+                </label>
+                <label class="opcion">
+                    <input type="radio" name="metodoPago" value="CAJA">
+                    <span class="opcion-texto opcion-metodo">
+                        <span><i class="ti ti-cash"></i> Pago en caja</span>
+                        <small>Pague en la caja de la sucursal (efectivo o tarjeta) antes de su cita.</small>
+                    </span>
+                </label>
+            </div>
+            <p class="error" id="errorPaso6"></p>
+            <div class="acciones-paso">
+                <button type="button" class="boton-secundario sm-btn sm-btn--ghost" onclick="irAPaso(5)">Atrás</button>
                 <button type="button" class="boton-principal sm-btn sm-btn--primary" id="btnConfirmar" onclick="confirmarCita()">Confirmar cita</button>
             </div>
         </section>
@@ -98,7 +125,8 @@
                 </div>
                 <h2>Cita reservada</h2>
                 <p>Número de cita: <strong id="numeroCitaTexto"></strong></p>
-                <p>Tiene <strong id="contadorReserva">5:00</strong> minutos para completar el pago antes de que la reserva expire.</p>
+                <p>Su cita quedó <strong>pendiente de pago</strong>. Preséntese en la caja de la sucursal
+                    <strong id="sucursalExitoTexto"></strong> con su número de cita para pagar antes de la consulta.</p>
                 <a th:href="@{/dashboard}" class="sm-btn sm-btn--primary">Ir a mi panel</a>
             </div>
         </section>
@@ -126,6 +154,8 @@
     .opcion-texto { display:flex; align-items:center; gap:8px; padding:16px; cursor:pointer;
         border:1px solid var(--sm-border); border-radius:var(--sm-r-panel);
         font-size:14px; font-weight:600; transition:.15s ease; }
+    .opcion-metodo { flex-direction:column; align-items:flex-start; gap:4px; }
+    .opcion-metodo small { font-size:12px; font-weight:500; color:var(--sm-slate-500); }
     .opcion input:checked + .opcion-texto { border-color:var(--sm-cyan); background:var(--sm-cyan-50); color:var(--sm-cyan-dark); }
 
     .rejilla-horarios { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:10px; margin-top:8px; }

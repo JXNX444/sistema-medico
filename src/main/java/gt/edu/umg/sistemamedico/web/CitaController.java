@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * CU-03 Agendar Citas. Wizard de 5 pasos: Sucursal -> Especialidad ->
- * Medico -> Fecha/Hora -> Confirmar.
+ * CU-03 Agendar Citas. Wizard de 6 pasos: Sucursal -> Especialidad ->
+ * Medico -> Fecha/Hora -> Confirmar -> Metodo de pago.
  *
  * La vista es una sola pagina con JavaScript; este controlador expone
  * los datos de cada paso como JSON y un endpoint final para guardar.
@@ -123,7 +123,7 @@ public class CitaController {
         return horas.stream().map(LocalTime::toString).toList();
     }
 
-    // ---------- PASO 5: confirmar y guardar la cita ----------
+    // ---------- PASO 6: elegir metodo de pago y guardar la cita ----------
 
     @PostMapping("/api/agendar")
     @ResponseBody
@@ -166,8 +166,11 @@ public class CitaController {
         cita.setEsSeguimiento(false);
         cita.setState((short) 1);
 
-        // [FA03] reserva temporal de 5 minutos mientras se completa el pago.
-        cita.setReservaExpiraEn(OffsetDateTime.now().plusMinutes(MINUTOS_RESERVA));
+        // [FA03] reserva temporal de 5 minutos mientras se completa el pago en linea.
+        // Si paga en caja no hay temporizador: queda PENDIENTE_PAGO hasta que
+        // el cajero la cobre [CU-06] (igual que las citas internas de CU-05).
+        boolean pagoEnCaja = "CAJA".equals(req.metodoPago());
+        cita.setReservaExpiraEn(pagoEnCaja ? null : OffsetDateTime.now().plusMinutes(MINUTOS_RESERVA));
 
         Cita guardada = citaRepository.save(cita);
 
@@ -175,7 +178,9 @@ public class CitaController {
         resultado.put("ok", true);
         resultado.put("citaId", guardada.getId());
         resultado.put("numeroCita", guardada.getNumeroCita());
-        resultado.put("expiraEn", guardada.getReservaExpiraEn().toString());
+        resultado.put("metodoPago", pagoEnCaja ? "CAJA" : "TARJETA");
+        resultado.put("expiraEn",
+                guardada.getReservaExpiraEn() != null ? guardada.getReservaExpiraEn().toString() : null);
         return resultado;
     }
 
@@ -221,6 +226,10 @@ public class CitaController {
         } else if (motivo.length() < 10 || motivo.length() > 2000) {
             errores.put("motivo",
                     "El motivo debe contener entre 10 y 2000 caracteres. Usted ingreso " + motivo.length() + " caracteres.");
+        }
+
+        if (!"TARJETA".equals(req.metodoPago()) && !"CAJA".equals(req.metodoPago())) {
+            errores.put("metodoPago", "Debe seleccionar un metodo de pago para continuar.");
         }
 
         return errores;

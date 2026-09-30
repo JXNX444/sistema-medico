@@ -1,10 +1,12 @@
-/* CU-03 Agendar Citas: wizard de 5 pasos, todo en una sola pagina. */
+/* CU-03 Agendar Citas: wizard de 6 pasos, todo en una sola pagina. */
 
 const seleccion = {
     sucursalId: null, sucursalNombre: null,
     especialidadId: null, especialidadNombre: null,
     medicoId: null, medicoNombre: null,
-    fecha: null, hora: null
+    fecha: null, hora: null,
+    motivo: null,
+    metodoPago: null   // "TARJETA" o "CAJA"
 };
 
 let pasoActual = 1;
@@ -20,6 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
         radio.addEventListener('change', () => {
             seleccion.sucursalId = radio.value;
             seleccion.sucursalNombre = radio.dataset.nombre;
+        });
+    });
+
+    document.querySelectorAll('#listaMetodosPago input[name="metodoPago"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            seleccion.metodoPago = radio.value;
+            mostrarError(6, '');
         });
     });
 });
@@ -51,6 +60,21 @@ function validarPasoActual() {
     if (pasoActual === 4) {
         if (!seleccion.fecha || !seleccion.hora) {
             mostrarError(4, 'Debe seleccionar una fecha y hora futuras. Las citas no pueden agendarse en fechas pasadas o presentes.');
+            return false;
+        }
+    }
+    if (pasoActual === 5) {
+        const motivo = document.getElementById('motivoCita').value.trim();
+        if (motivo.length < 10 || motivo.length > 2000) {
+            mostrarError(5, 'El motivo debe contener entre 10 y 2000 caracteres. Usted ingreso ' + motivo.length + ' caracteres.');
+            return false;
+        }
+        seleccion.motivo = motivo;
+        mostrarError(5, '');
+    }
+    if (pasoActual === 6) {
+        if (!seleccion.metodoPago) {
+            mostrarError(6, 'Debe seleccionar un metodo de pago para continuar.');
             return false;
         }
     }
@@ -209,15 +233,10 @@ function renderResumen() {
     `;
 }
 
-function confirmarCita() {
-    const motivo = document.getElementById('motivoCita').value.trim();
+/* ---------- PASO 6: metodo de pago y confirmacion ---------- */
 
-    if (motivo.length === 0) {
-        mostrarError(5, 'El motivo debe contener entre 10 y 2000 caracteres. Usted ingreso 0 caracteres.');
-        return;
-    }
-    if (motivo.length < 10 || motivo.length > 2000) {
-        mostrarError(5, 'El motivo debe contener entre 10 y 2000 caracteres. Usted ingreso ' + motivo.length + ' caracteres.');
+function confirmarCita() {
+    if (!validarPasoActual()) {
         return;
     }
 
@@ -234,47 +253,40 @@ function confirmarCita() {
             medicoId: seleccion.medicoId,
             fecha: seleccion.fecha,
             hora: seleccion.hora,
-            motivo: motivo
+            motivo: seleccion.motivo,
+            metodoPago: seleccion.metodoPago
         })
     })
         .then(r => r.json())
         .then(resp => {
             if (!resp.ok) {
                 const primerError = Object.values(resp.errores)[0];
-                mostrarError(5, primerError);
+                mostrarError(6, primerError);
                 btn.disabled = false;
                 btn.innerHTML = '<i class="ti ti-calendar-check"></i> Confirmar cita';
                 return;
             }
-            // CU-03 -> CU-04: la cita quedo PENDIENTE_PAGO, vamos al pago.
+            if (resp.metodoPago === 'CAJA') {
+                // Pago en caja [CU-06]: sin temporizador, solo se muestra el numero de cita.
+                mostrarExito(resp);
+                return;
+            }
+            // CU-03 -> CU-04: la cita quedo PENDIENTE_PAGO, vamos al pago en linea.
             window.location.href = CTX + 'citas/pago/' + resp.citaId;
         })
         .catch(() => {
-            mostrarError(5, 'Ocurrio un error de conexion. Intente de nuevo.');
+            mostrarError(6, 'Ocurrio un error de conexion. Intente de nuevo.');
             btn.disabled = false;
             btn.innerHTML = '<i class="ti ti-calendar-check"></i> Confirmar cita';
         });
 }
 
-/* ---------- Pantalla final e Y [FA03] temporizador de reserva ---------- */
+/* ---------- Pantalla final (pago en caja) ---------- */
 
 function mostrarExito(resp) {
-    document.getElementById('paso5').classList.add('oculto');
+    document.getElementById('paso6').classList.add('oculto');
     document.getElementById('pasoExito').classList.remove('oculto');
+    document.getElementById('indicadorPasos').classList.add('oculto');
     document.getElementById('numeroCitaTexto').textContent = resp.numeroCita;
-
-    const expiraEn = new Date(resp.expiraEn).getTime();
-    const contador = document.getElementById('contadorReserva');
-
-    const intervalo = setInterval(() => {
-        const restanteMs = expiraEn - Date.now();
-        if (restanteMs <= 0) {
-            clearInterval(intervalo);
-            contador.textContent = '0:00';
-            return;
-        }
-        const minutos = Math.floor(restanteMs / 60000);
-        const segundos = Math.floor((restanteMs % 60000) / 1000);
-        contador.textContent = minutos + ':' + String(segundos).padStart(2, '0');
-    }, 1000);
+    document.getElementById('sucursalExitoTexto').textContent = seleccion.sucursalNombre;
 }
