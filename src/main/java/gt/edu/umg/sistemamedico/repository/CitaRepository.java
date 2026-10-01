@@ -4,6 +4,7 @@ import gt.edu.umg.sistemamedico.domain.Cita;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,12 +17,11 @@ public interface CitaRepository extends JpaRepository<Cita, Integer> {
     Optional<Cita> findByNumeroCitaIgnoreCase(String numeroCita);
 
     /**
-     * Citas en un estado especifico cuya fecha/hora ya paso. Se usa para
-     * detectar automaticamente los "No Asistio": citas CONFIRMADA (pagadas)
-     * cuya hora ya llego y el paciente nunca se presento (nunca se registro
-     * hora_llegada, porque de haberlo hecho ya no estaria en CONFIRMADA).
+     * Citas cuyo estado (por codigo) esta dentro de una lista dada, ordenadas
+     * por fecha/hora. [CU-07] El panel de enfermeria la usa para traer, en
+     * una sola consulta, tanto "Paciente Presente" como "Signos Vitales".
      */
-    List<Cita> findByEstadoCita_CodigoAndFechaHoraBefore(String codigo, OffsetDateTime instante);
+    List<Cita> findByEstadoCita_CodigoInOrderByFechaHoraAsc(Collection<String> codigos);
 
     /**
      * Citas de un medico dentro de un rango de fecha/hora, sin contar las
@@ -48,4 +48,11 @@ public interface CitaRepository extends JpaRepository<Cita, Integer> {
      * y liberar el horario.
      */
     List<Cita> findByEstadoCita_CodigoAndReservaExpiraEnBefore(String codigo, OffsetDateTime instante);
+
+    /**
+     * Citas en un estado especifico cuya fecha/hora ya paso. [NoAsistioScheduler]
+     * Detecta automaticamente las citas CONFIRMADA cuya hora ya llego y el
+     * paciente nunca registro su llegada en recepcion.
+     */
+    List<Cita> findByEstadoCita_CodigoAndFechaHoraBefore(String codigo, OffsetDateTime instante);
 }
