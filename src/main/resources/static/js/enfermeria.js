@@ -9,6 +9,20 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(cargarPanel, 15000); // refresca la fila cada 15s
 });
 
+/* ---------- Mensajes en pantalla (en vez de alert() del navegador) ---------- */
+
+function mostrarMensaje(texto, tipo) {
+    const cont = document.getElementById('mensajeGlobal');
+    cont.className = 'mensaje-caja ' + (tipo === 'error' ? 'mensaje-error' : 'mensaje-exito');
+    cont.textContent = texto;
+    cont.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Los mensajes de exito se ocultan solos despues de unos segundos; los de error se quedan.
+    if (tipo !== 'error') {
+        setTimeout(() => { cont.className = 'oculto'; }, 6000);
+    }
+}
+
 /* ---------- Paso 1 flujo normal: lista de pacientes ---------- */
 
 async function cargarPanel() {
@@ -69,10 +83,10 @@ async function llamarPaciente(citaId) {
             anunciarPorVoz(data.anuncio);
             cargarPanel();
         } else {
-            alert(data.mensaje);
+            mostrarMensaje(data.mensaje, 'error');
         }
     } catch (e) {
-        alert('Error al llamar al paciente.');
+        mostrarMensaje('Error al llamar al paciente.', 'error');
     }
 }
 
@@ -158,7 +172,7 @@ async function registrarSignos() {
         const data = await resp.json();
 
         if (data.ok) {
-            alert(data.mensaje);
+            mostrarMensaje(data.mensaje, 'exito');
             cerrarFormulario();
             cargarPanel();
         } else {
@@ -169,6 +183,6 @@ async function registrarSignos() {
             }
         }
     } catch (e) {
-        alert('Error al registrar los signos vitales.');
+        mostrarMensaje('Error al registrar los signos vitales.', 'error');
     }
 }
