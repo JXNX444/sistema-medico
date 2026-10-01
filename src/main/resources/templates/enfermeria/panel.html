@@ -20,12 +20,22 @@
     <!-- Mensajes de exito/error, en vez de alert() del navegador -->
     <div id="mensajeGlobal" class="oculto"></div>
 
-    <!-- Lista: Paciente Presente -->
-    <div style="font-size:14px;font-weight:700;margin:20px 0 10px;">En sala de espera</div>
+    <!-- Encabezado: En sala de espera -->
+    <div style="display:flex;align-items:center;gap:10px;margin:22px 0 12px;">
+        <div class="sv-icono sv-icono--claro"><i class="ti ti-clock" aria-hidden="true"></i></div>
+        <div style="font-size:15px;font-weight:700;color:var(--sm-ink);">En sala de espera</div>
+        <div id="countPresentes" class="sv-contador sv-contador--oscuro">0</div>
+    </div>
     <div id="listaPresentes"></div>
 
-    <!-- Lista: Signos Vitales (ya llamados) -->
-    <div style="font-size:14px;font-weight:700;margin:28px 0 10px;">Llamados a toma de signos</div>
+    <div style="height:1px;background:var(--sm-border);margin:22px 0 18px;"></div>
+
+    <!-- Encabezado: Llamados a toma de signos -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div class="sv-icono sv-icono--oscuro"><i class="ti ti-stethoscope" aria-hidden="true"></i></div>
+        <div style="font-size:15px;font-weight:700;color:var(--sm-ink);">Llamados a toma de signos</div>
+        <div id="countEnSignos" class="sv-contador sv-contador--gris">0</div>
+    </div>
     <div id="listaEnSignos"></div>
 
     <!-- Formulario de registro, oculto hasta que se seleccione un paciente -->
@@ -84,11 +94,23 @@
 
 <style>
     .oculto { display:none !important; }
-    .mensaje-caja {
-        padding:14px 16px; border-radius:10px; font-size:14px; margin-bottom:16px;
-    }
+    .mensaje-caja { padding:14px 16px; border-radius:10px; font-size:14px; margin-bottom:16px; }
     .mensaje-exito { background:var(--sm-success-bg); color:var(--sm-success-ink); }
     .mensaje-error { background:var(--sm-danger-bg); color:var(--sm-danger); }
+
+    .sv-icono {
+        width:30px; height:30px; border-radius:8px;
+        display:flex; align-items:center; justify-content:center; font-size:16px;
+    }
+    .sv-icono--claro { background:var(--sm-cyan-25); color:var(--sm-cyan-dark); }
+    .sv-icono--oscuro { background:var(--sm-ink); color:var(--sm-cyan-bright); }
+
+    .sv-contador {
+        font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px;
+    }
+    .sv-contador--oscuro { background:var(--sm-ink); color:#fff; }
+    .sv-contador--gris { background:var(--sm-line); color:var(--sm-slate-500); }
+    .sv-contador--alerta { background:var(--sm-warning-bg); color:var(--sm-warning); }
 </style>
 
 <script th:inline="javascript">

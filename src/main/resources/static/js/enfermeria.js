@@ -17,7 +17,6 @@ function mostrarMensaje(texto, tipo) {
     cont.textContent = texto;
     cont.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-    // Los mensajes de exito se ocultan solos despues de unos segundos; los de error se quedan.
     if (tipo !== 'error') {
         setTimeout(() => { cont.className = 'oculto'; }, 6000);
     }
@@ -38,6 +37,9 @@ async function cargarPanel() {
 
 function renderListaPresentes(citas) {
     const cont = document.getElementById('listaPresentes');
+    const contador = document.getElementById('countPresentes');
+    contador.textContent = citas.length;
+
     if (citas.length === 0) {
         cont.innerHTML = '<p class="sm-error" style="color:var(--sm-slate-400);">No hay pacientes esperando.</p>';
         return;
@@ -54,6 +56,10 @@ function renderListaPresentes(citas) {
 
 function renderListaEnSignos(citas) {
     const cont = document.getElementById('listaEnSignos');
+    const contador = document.getElementById('countEnSignos');
+    contador.textContent = citas.length;
+    contador.className = 'sv-contador ' + (citas.length > 0 ? 'sv-contador--alerta' : 'sv-contador--gris');
+
     if (citas.length === 0) {
         cont.innerHTML = '<p class="sm-error" style="color:var(--sm-slate-400);">Nadie en toma de signos ahora mismo.</p>';
         return;
@@ -90,7 +96,6 @@ async function llamarPaciente(citaId) {
     }
 }
 
-/** [paso 2] Sintesis de voz nativa del navegador, sin necesitar backend extra. */
 function anunciarPorVoz(texto) {
     if (!('speechSynthesis' in window)) return;
     const utterance = new SpeechSynthesisUtterance(texto);
@@ -176,7 +181,6 @@ async function registrarSignos() {
             cerrarFormulario();
             cargarPanel();
         } else {
-            // FA02: errores por campo
             for (const campo in data.errores) {
                 const el = document.getElementById('err_' + campo);
                 if (el) el.textContent = data.errores[campo];
