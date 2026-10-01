@@ -24,11 +24,12 @@ import org.springframework.security.web.SecurityFilterChain;
  * para saber a donde regresar en caso de error y a donde redirigir
  * en caso de exito.
  *
- * /usuarios/**   -> solo rol Administrador. [RN-GLOBAL-007]
- * /citas/**      -> solo rol Paciente.      [CU-03]
- * /perfil/**     -> solo rol Paciente.      [Mi Perfil]
- * /recepcion/**  -> solo rol Recepcionista. [CU-05]
- * /caja/**       -> rol Cajero (o Administrador). [CU-06]
+ * /usuarios/**    -> solo rol Administrador. [RN-GLOBAL-007]
+ * /citas/**       -> solo rol Paciente.      [CU-03]
+ * /perfil/**      -> solo rol Paciente.      [Mi Perfil]
+ * /recepcion/**   -> solo rol Recepcionista. [CU-05]
+ * /caja/**        -> rol Cajero (o Administrador). [CU-06]
+ * /enfermeria/**  -> rol Enfermero. [CU-07]
  */
 @Configuration
 public class SecurityConfig {
@@ -51,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/perfil/**").hasRole("Paciente")
                         .requestMatchers("/recepcion/**").hasRole("Recepcionista")
                         .requestMatchers("/caja/**").hasAnyRole("Cajero", "Administrador")
+                        .requestMatchers("/enfermeria/**").hasAnyRole("Enfermero", "Administrador")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
