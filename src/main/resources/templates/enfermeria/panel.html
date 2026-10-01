@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Panel de Enfermería', null)}"></head>
+<body>
+
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <div style="display:flex;align-items:center;gap:16px;font-size:14px;color:var(--sm-slate-600);">
+        <span style="font-weight:700;color:var(--sm-ink);" th:text="${nombre}">Enfermería</span>
+        <a th:href="@{/panel/inicio}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver al panel</a>
+    </div>
+</nav>
+
+<main style="max-width:960px;margin:0 auto;padding:40px 24px;">
+    <div style="font-size:24px;font-weight:800;">Toma de signos vitales</div>
+    <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:28px;">
+        Pacientes en sala de espera, listos para ser llamados a toma de signos vitales
+    </div>
+
+    <!-- Lista: Paciente Presente -->
+    <div style="font-size:14px;font-weight:700;margin-bottom:10px;">En sala de espera</div>
+    <div id="listaPresentes"></div>
+
+    <!-- Lista: Signos Vitales (ya llamados) -->
+    <div style="font-size:14px;font-weight:700;margin:28px 0 10px;">Llamados a toma de signos</div>
+    <div id="listaEnSignos"></div>
+
+    <!-- Formulario de registro, oculto hasta que se seleccione un paciente -->
+    <div id="formSignos" class="sm-card oculto" style="padding:24px;margin-top:28px;">
+        <div style="font-size:16px;font-weight:800;margin-bottom:2px;">Registrar signos vitales</div>
+        <div id="formContexto" style="font-size:13px;color:var(--sm-slate-500);margin-bottom:20px;">—</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div>
+                <label style="font-size:12px;font-weight:600;">Presión sistólica (mmHg)</label>
+                <input id="inpSistolica" class="sm-input" type="number" onblur="chequearAlertas()">
+                <p class="sm-error" id="err_presionArterial"></p>
+            </div>
+            <div>
+                <label style="font-size:12px;font-weight:600;">Presión diastólica (mmHg)</label>
+                <input id="inpDiastolica" class="sm-input" type="number" onblur="chequearAlertas()">
+            </div>
+
+            <div>
+                <label style="font-size:12px;font-weight:600;">Temperatura (°C)</label>
+                <input id="inpTemperatura" class="sm-input" type="number" step="0.1" onblur="chequearAlertas()">
+                <p class="sm-error" id="err_temperatura"></p>
+            </div>
+            <div>
+                <label style="font-size:12px;font-weight:600;">Frecuencia cardíaca (lpm)</label>
+                <input id="inpFrecuencia" class="sm-input" type="number" onblur="chequearAlertas()">
+                <p class="sm-error" id="err_frecuenciaCardiaca"></p>
+            </div>
+
+            <div>
+                <label style="font-size:12px;font-weight:600;">Peso (kg)</label>
+                <input id="inpPeso" class="sm-input" type="number" step="0.01">
+                <p class="sm-error" id="err_peso"></p>
+            </div>
+            <div>
+                <label style="font-size:12px;font-weight:600;">Talla (cm)</label>
+                <input id="inpTalla" class="sm-input" type="number" step="0.01">
+                <p class="sm-error" id="err_talla"></p>
+            </div>
+        </div>
+
+        <!-- FA03: alertas clinicas en tiempo real -->
+        <div id="alertasEnVivo" style="margin-top:10px;"></div>
+
+        <!-- FA01: indicador de emergencia -->
+        <label style="display:flex;align-items:center;gap:8px;margin-top:18px;font-size:13px;font-weight:600;">
+            <input id="inpEmergencia" type="checkbox"> ¿Es Emergencia?
+        </label>
+
+        <div style="display:flex;gap:10px;margin-top:20px;">
+            <button class="sm-btn sm-btn--ghost" onclick="cerrarFormulario()">Cancelar</button>
+            <button class="sm-btn sm-btn--primary" onclick="registrarSignos()">Registrar Signos Vitales</button>
+        </div>
+    </div>
+</main>
+
+<style>
+    .oculto { display:none !important; }
+</style>
+
+<script th:inline="javascript">
+    const CTX = /*[[@{/}]]*/ '/';
+</script>
+<script th:src="@{/js/enfermeria.js}"></script>
+
+</body>
+</html>
