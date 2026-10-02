@@ -24,6 +24,19 @@ public interface CitaRepository extends JpaRepository<Cita, Integer> {
     List<Cita> findByEstadoCita_CodigoInOrderByFechaHoraAsc(Collection<String> codigos);
 
     /**
+     * Citas de UN medico cuyo estado esta dentro de una lista dada. [CU-08 paso 1]
+     * El panel del medico la usa para traer "En Espera", "Consulta Medica" y
+     * "Evaluado" en una sola consulta. Ordena primero por prioridad (las de
+     * emergencia, prioridad 2, que marca enfermeria en CU-07 FA01) y luego
+     * por fecha/hora.
+     */
+    List<Cita> findByMedicoIdAndEstadoCita_CodigoInOrderByPrioridadDescFechaHoraAsc(
+            Integer medicoId, Collection<String> codigos);
+
+    /** Cuantas citas de seguimiento salieron de una consulta. [CU-08 FA02] */
+    long countByParentConsultaId(Integer parentConsultaId);
+
+    /**
      * Citas de un medico dentro de un rango de fecha/hora, sin contar las
      * canceladas ni las eliminadas (state=2). [CU-03 paso 4]
      * Se usa para saber que horarios ya estan ocupados y no ofrecerlos
