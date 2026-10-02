@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -50,6 +51,7 @@ public class ConsultaService {
     private final Cie10Service cie10Service;
     private final DisponibilidadService disponibilidadService;
     private final TarifaService tarifaService;
+    private final CorreoService correoService;
 
     public ConsultaService(CitaRepository citaRepository,
                            ConsultaRepository consultaRepository,
@@ -61,7 +63,8 @@ public class ConsultaService {
                            EstadoCitaService estadoCitaService,
                            Cie10Service cie10Service,
                            DisponibilidadService disponibilidadService,
-                           TarifaService tarifaService) {
+                           TarifaService tarifaService,
+                           CorreoService correoService) {
         this.citaRepository = citaRepository;
         this.consultaRepository = consultaRepository;
         this.signosVitalesRepository = signosVitalesRepository;
@@ -73,6 +76,7 @@ public class ConsultaService {
         this.cie10Service = cie10Service;
         this.disponibilidadService = disponibilidadService;
         this.tarifaService = tarifaService;
+        this.correoService = correoService;
     }
 
     // =====================================================================
@@ -481,6 +485,7 @@ public class ConsultaService {
      * tipo (follow_up_type): 0 = Monitoreo de tratamiento, 1 = Revision de resultados de laboratorio.
      * La nueva cita queda PENDIENTE_PAGO sin temporizador (origen interno), igual que las
      * citas internas de Recepcion, y ligada a la consulta original con parent_consulta_id.
+     * [FA02 paso 4] Se avisa al paciente por correo (CorreoService, tolerante a fallos).
      */
     @Transactional
     public Resultado agendarSeguimiento(Integer citaId, Usuario medico, LocalDate fecha, LocalTime hora, Short tipo) {
@@ -506,8 +511,8 @@ public class ConsultaService {
             return Resultado.errores(errores);
         }
 
-        String motivo = (tipo == 0 ? "Seguimiento: monitoreo de tratamiento" : "Seguimiento: revision de resultados de laboratorio")
-                + " (cita origen " + cita.getNumeroCita() + ")";
+        String tipoTexto = tipo == 0 ? "Monitoreo de tratamiento" : "Revision de resultados de laboratorio";
+        String motivo = "Seguimiento: " + tipoTexto.toLowerCase() + " (cita origen " + cita.getNumeroCita() + ")";
 
         Cita nueva = new Cita();
         nueva.setNumeroCita(generarNumeroCita());
@@ -530,8 +535,23 @@ public class ConsultaService {
         nueva.setState((short) 1);
         citaRepository.save(nueva);
 
-        return Resultado.exito("Cita de seguimiento agendada para el " + fecha.format(FMT_FECHA)
-                + " a las " + hora.format(FMT_HORA) + ". Se enviara notificacion al paciente.");
+        String fechaTexto = fecha.format(FMT_FECHA);
+        String horaTexto = hora.format(FMT_HORA);
+
+        // FA02 paso 4: aviso al paciente. Si el correo falla, la cita igual queda agendada.
+        correoService.enviarCitaSeguimiento(
+                cita.getPaciente().getCorreo(),
+                cita.getPaciente().getNombreCompleto(),
+                nueva.getNumeroCita(),
+                tipoTexto,
+                cita.getMedico().getNombreCompleto(),
+                cita.getEspecialidad().getNombre(),
+                cita.getSucursal().getNombre(),
+                fechaTexto + " " + horaTexto,
+                nueva.getMonto().setScale(2, RoundingMode.HALF_UP).toPlainString());
+
+        return Resultado.exito("Cita de seguimiento agendada para el " + fechaTexto
+                + " a las " + horaTexto + ". Se enviara notificacion al paciente.");
     }
 
     private String generarNumeroCita() {
