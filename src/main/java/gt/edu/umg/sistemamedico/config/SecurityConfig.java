@@ -30,6 +30,7 @@ import org.springframework.security.web.SecurityFilterChain;
  * /recepcion/**   -> solo rol Recepcionista. [CU-05]
  * /caja/**        -> rol Cajero (o Administrador). [CU-06]
  * /enfermeria/**  -> rol Enfermero. [CU-07]
+ * /medico/**      -> solo rol Medico. [CU-08] (el panel filtra por el medico logueado)
  */
 @Configuration
 public class SecurityConfig {
@@ -53,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/recepcion/**").hasRole("Recepcionista")
                         .requestMatchers("/caja/**").hasAnyRole("Cajero", "Administrador")
                         .requestMatchers("/enfermeria/**").hasAnyRole("Enfermero", "Administrador")
+                        .requestMatchers("/medico/**").hasRole("Medico")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
