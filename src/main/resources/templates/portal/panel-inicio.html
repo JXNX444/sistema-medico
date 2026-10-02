@@ -70,6 +70,16 @@
             <div class="sm-feature__desc">Llamar pacientes en espera y registrar sus signos vitales.</div>
         </a>
 
+        <a th:if="${rol == 'Medico'}" th:href="@{/medico/panel}"
+           class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 4H5a2 2 0 0 0-2 2v3.5a5.5 5.5 0 0 0 11 0V6a2 2 0 0 0-2-2h-1"/><path d="M8.5 15v1a5.5 5.5 0 0 0 11 0v-3"/><circle cx="19.5" cy="11" r="2"/></svg>
+            </div>
+            <div class="sm-feature__title">Consulta Médica</div>
+            <div class="sm-feature__desc">Atender pacientes en espera, registrar diagnóstico, órdenes, recetas y seguimientos.</div>
+        </a>
+
     </div>
 </section>
 
