@@ -38,13 +38,25 @@ public class CacheConfig {
     /** Cache del catalogo de estados de cita (tabla his.estado_cita). [CU-03] */
     public static final String ESTADOS_CITA = "estadosCita";
 
+    /** Cache del catalogo CIE-10 (tabla his.cie10). [CU-08 paso 7] */
+    public static final String CIE10 = "cie10";
+
+    /** Cache del catalogo de examenes (tabla his.examen_laboratorio). [CU-08 FA01] */
+    public static final String EXAMENES_LABORATORIO = "examenesLaboratorio";
+
+    /** Cache del catalogo de medicamentos (tabla his.medicamento). [CU-08 FA04] */
+    public static final String MEDICAMENTOS = "medicamentos";
+
     @Bean
     public CacheManager cacheManager() {
         return new ConcurrentMapCacheManager(
                 ROLES,
                 ESPECIALIDADES,
                 SUCURSALES,
-                ESTADOS_CITA
+                ESTADOS_CITA,
+                CIE10,
+                EXAMENES_LABORATORIO,
+                MEDICAMENTOS
         );
     }
 }
