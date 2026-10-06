@@ -323,9 +323,27 @@ public class ConsultaService {
     // FA01: orden de laboratorio
     // =====================================================================
 
+    /**
+     * Version anterior (sin "orden externa"). Se conserva para que el
+     * proyecto siga compilando mientras se actualiza ConsultaController;
+     * crea siempre una orden interna.
+     */
     @Transactional
     public Resultado generarOrdenLaboratorio(Integer citaId, Usuario medico,
                                              List<Integer> examenIds, String observaciones) {
+        return generarOrdenLaboratorio(citaId, medico, examenIds, observaciones, false);
+    }
+
+    /**
+     * @param esExterna [CU-09 FA01 paso 1] true si el paciente realizara los
+     *                  examenes en un laboratorio externo. Laboratorio (CU-09)
+     *                  la muestra con la etiqueta "Externa" y no registra
+     *                  resultados; tampoco se cobra en caja (CU-10).
+     */
+    @Transactional
+    public Resultado generarOrdenLaboratorio(Integer citaId, Usuario medico,
+                                             List<Integer> examenIds, String observaciones,
+                                             boolean esExterna) {
         Cita cita = citaDelMedico(citaId, medico);
         Resultado invalida = validarEvaluada(cita);
         if (invalida != null) {
@@ -361,6 +379,7 @@ public class ConsultaService {
         orden.setMedico(medico);
         orden.setSucursal(cita.getSucursal());
         orden.setNotas(notas);
+        orden.setEsExterna(esExterna);   // [CU-09 FA01]
 
         BigDecimal total = BigDecimal.ZERO;
         for (ExamenLaboratorio ex : examenes) {
@@ -374,9 +393,12 @@ public class ConsultaService {
         ordenLaboratorioRepository.save(orden);
 
         String lista = examenes.stream().map(ExamenLaboratorio::getNombre).collect(Collectors.joining(", "));
+        String indicacion = esExterna
+                ? ". Orden externa: el paciente realizara los examenes en un laboratorio externo"
+                + " y presentara los resultados en su cita de seguimiento."
+                : ". El paciente debe dirigirse al area de laboratorio.";
         return Resultado.exito("Orden de laboratorio generada exitosamente. Numero de orden: "
-                + orden.getNumeroOrden() + ". Examenes: " + lista
-                + ". El paciente debe dirigirse al area de laboratorio.");
+                + orden.getNumeroOrden() + ". Examenes: " + lista + indicacion);
     }
 
     private String generarNumeroOrden() {
