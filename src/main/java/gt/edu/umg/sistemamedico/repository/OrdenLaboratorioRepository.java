@@ -12,10 +12,7 @@ public interface OrdenLaboratorioRepository extends JpaRepository<OrdenLaborator
 
     /**
      * Correlativo mas alto ya usado en numero_orden para un anio dado.
-     * Formato "LAB-<anio>-<00000>": corta los ultimos 5 digitos y devuelve
-     * el maximo, o 0 si aun no hay ordenes ese anio. [CU-08 FA01 paso 6]
-     * Mismo patron que PagoRepository.maxCorrelativoDelAnio (a prueba de
-     * huecos por borrados, a diferencia de count()+1).
+     * Formato "LAB-<anio>-<00000>". [CU-08 FA01 paso 6]
      */
     @Query(value = """
             SELECT COALESCE(MAX(CAST(RIGHT(numero_orden, 5) AS INTEGER)), 0)
@@ -24,21 +21,10 @@ public interface OrdenLaboratorioRepository extends JpaRepository<OrdenLaborator
             """, nativeQuery = true)
     int maxCorrelativoDelAnio(@Param("anio") int anio);
 
-    /** Cuantas ordenes tiene una consulta, para mostrarlo en la tarjeta "Evaluados". */
+    /** Cuantas ordenes tiene una consulta, para la tarjeta "Evaluados". */
     long countByConsultaIdAndState(Integer consultaId, Short state);
 
-    /**
-     * [CU-09 paso 1] Tabla de ordenes con filtros por estado, paciente y medico.
-     *
-     * - todosLosEstados = true  -> ignora el filtro de estado.
-     * - paciente = ''           -> ignora el filtro (busca en nombre o DPI).
-     * - medico = ''             -> ignora el filtro (busca en nombre).
-     *
-     * Los textos deben llegar ya en minusculas (lo hace el service).
-     *
-     * JOIN FETCH: como open-in-view esta en false, el paciente y el medico
-     * se traen en la misma consulta; si no, fallarian al leerlos despues.
-     */
+    /** [CU-09 paso 1] Tabla de ordenes con filtros por estado, paciente y medico. */
     @Query("""
             SELECT o FROM OrdenLaboratorio o
               JOIN FETCH o.paciente p
@@ -57,10 +43,7 @@ public interface OrdenLaboratorioRepository extends JpaRepository<OrdenLaborator
                                             @Param("paciente") String paciente,
                                             @Param("medico") String medico);
 
-    /**
-     * [CU-09 pasos 2-3] Una orden con su paciente, medico y todos sus examenes,
-     * en una sola consulta. Cada detalle trae su ExamenLaboratorio (EAGER).
-     */
+    /** [CU-09 pasos 2-3] Una orden con su paciente, medico y todos sus examenes. */
     @Query("""
             SELECT DISTINCT o FROM OrdenLaboratorio o
               JOIN FETCH o.paciente
@@ -70,4 +53,24 @@ public interface OrdenLaboratorioRepository extends JpaRepository<OrdenLaborator
                AND o.state = 1
             """)
     Optional<OrdenLaboratorio> buscarConDetalles(@Param("id") Integer id);
+
+    /**
+     * [CU-10 pasos 2-3] Ordenes PENDIENTES de pago (order_status = 0) y NO externas,
+     * buscando por numero de orden (porNumero = true) o por DPI del paciente.
+     * Trae paciente, sucursal y detalles (para contar examenes) en una sola consulta.
+     */
+    @Query("""
+            SELECT DISTINCT o FROM OrdenLaboratorio o
+              JOIN FETCH o.paciente p
+              JOIN FETCH o.sucursal
+              LEFT JOIN FETCH o.detalles
+             WHERE o.state = 1
+               AND o.estadoOrden = 0
+               AND o.esExterna = false
+               AND ((:porNumero = true  AND UPPER(o.numeroOrden) = UPPER(:valor))
+                 OR (:porNumero = false AND p.dpi = :valor))
+             ORDER BY o.createdAt DESC
+            """)
+    List<OrdenLaboratorio> buscarPendientesPago(@Param("porNumero") boolean porNumero,
+                                                @Param("valor") String valor);
 }
