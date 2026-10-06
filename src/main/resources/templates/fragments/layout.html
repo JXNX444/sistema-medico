@@ -16,6 +16,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${titulo}">Sistema Médico</title>
     <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <!-- Listas, calendario y avisos con el estilo del sistema (todas las paginas) -->
+    <link rel="stylesheet" th:href="@{/css/controles.css}">
+    <script th:src="@{/js/controles.js}" defer></script>
     <!-- CSS específico de la página (opcional): pasar el nombre del archivo o null -->
     <link th:if="${pageCss}" rel="stylesheet" th:href="@{'/css/' + ${pageCss}}">
 </head>
