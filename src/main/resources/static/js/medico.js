@@ -12,77 +12,9 @@ let catalogoExamenes = null;
 let catalogoMedicamentos = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('select.sm-select').forEach(embellecerSelect);
-    document.addEventListener('click', cerrarSelects);
     cargarPanel();
     setInterval(cargarPanel, 30000); // [paso 1] se actualiza cada 30 segundos
 });
-
-/* ---------- Selects con el estilo del sistema ----------
-   La lista desplegable nativa la dibuja el sistema operativo y no se
-   puede estilizar. Se oculta el <select> real y se muestra un boton +
-   lista propios; el <select> sigue siendo el que guarda el valor. */
-
-function embellecerSelect(sel) {
-    if (sel.dataset.bonito) return;
-    sel.dataset.bonito = '1';
-
-    const wrap = document.createElement('div');
-    wrap.className = 'sel';
-    sel.parentNode.insertBefore(wrap, sel);
-    wrap.appendChild(sel);
-
-    const boton = document.createElement('button');
-    boton.type = 'button';
-    boton.className = 'sel__boton';
-    boton.innerHTML = '<span class="sel__texto"></span><i class="ti ti-chevron-down sel__flecha" aria-hidden="true"></i>';
-
-    const lista = document.createElement('div');
-    lista.className = 'sel__lista';
-
-    wrap.append(boton, lista);
-
-    boton.addEventListener('click', e => {
-        e.stopPropagation();
-        const estabaAbierto = wrap.classList.contains('abierto');
-        cerrarSelects();
-        if (!estabaAbierto) wrap.classList.add('abierto');
-    });
-
-    lista.addEventListener('click', e => {
-        e.stopPropagation();
-        const op = e.target.closest('.sel__opcion');
-        if (!op) return;
-        sel.value = op.dataset.value;
-        sel.dispatchEvent(new Event('change'));
-        wrap.classList.remove('abierto');
-    });
-
-    sel.addEventListener('change', () => sincronizarSelect(sel));
-    // Si las opciones cambian (ej: horas del seguimiento), se redibuja sola
-    new MutationObserver(() => sincronizarSelect(sel)).observe(sel, { childList: true });
-
-    sincronizarSelect(sel);
-}
-
-/** Redibuja texto y opciones. Llamarlo si se cambia sel.value desde codigo. */
-function sincronizarSelect(sel) {
-    const wrap = sel.parentNode;
-    if (!wrap || !wrap.classList.contains('sel')) return;
-
-    const actual = sel.options[sel.selectedIndex];
-    const texto = wrap.querySelector('.sel__texto');
-    texto.textContent = actual ? actual.text : '';
-    texto.classList.toggle('placeholder', !actual || actual.value === '');
-
-    wrap.querySelector('.sel__lista').innerHTML = [...sel.options].map(o => `
-        <div class="sel__opcion ${o.value === sel.value ? 'activa' : ''} ${o.value === '' ? 'vacia' : ''}"
-             data-value="${esc(o.value)}">${esc(o.text)}</div>`).join('');
-}
-
-function cerrarSelects() {
-    document.querySelectorAll('.sel.abierto').forEach(w => w.classList.remove('abierto'));
-}
 
 /* ---------- Mensajes en pantalla (mismo estilo que CU-07) ---------- */
 
@@ -270,9 +202,7 @@ async function abrirConsulta(citaId) {
         document.getElementById('inpPlan').value = c?.planTratamiento ?? '';
         document.getElementById('inpNotas').value = c?.notas ?? '';
 
-        const estado = document.getElementById('selEstadoConsulta');
-        estado.value = '0';
-        sincronizarSelect(estado);
+        document.getElementById('selEstadoConsulta').value = '0';
 
         if (c?.cie10) {
             cie10Seleccionado = c.cie10.id;
@@ -454,8 +384,7 @@ function agregarItemReceta() {
             <input class="sm-input it-indicaciones" placeholder="Indicaciones">
         </div>
         <button class="sm-btn sm-btn--ghost sm-btn--sm" style="margin-top:8px;" onclick="this.closest('.receta-item').remove()">Quitar</button>`;
-    document.getElementById('itemsReceta').appendChild(div);
-    embellecerSelect(div.querySelector('.it-medicamento'));
+    document.getElementById('itemsReceta').appendChild(div); // controles.js le da estilo al select solo
 }
 
 async function guardarReceta() {
@@ -581,13 +510,10 @@ function cerrarFormularios() {
         form.querySelectorAll('input, textarea').forEach(i => {
             if (i.type === 'checkbox') i.checked = false; else i.value = '';
         });
-        form.querySelectorAll('select').forEach(s => {
-            s.selectedIndex = 0;
-            sincronizarSelect(s);
-        });
+        form.querySelectorAll('select').forEach(s => { s.selectedIndex = 0; });
         limpiarErrores(id);
     });
-    cerrarSelects();
+    if (window.Controles) Controles.cerrar();
     document.getElementById('sugerenciasCie10').innerHTML = '';
     citaConsulta = null;
     citaEvaluada = null;
