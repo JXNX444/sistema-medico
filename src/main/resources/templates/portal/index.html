@@ -302,7 +302,11 @@
             const respuesta = await fetch('/portal/verificar-dpi', { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body:'dpi=' + dpi });
             const datos = await respuesta.json();
             if (datos.accion === 'LOGIN'){ window.location.href = '/login'; }
-            else if (datos.accion === 'REGISTRO'){ alert(datos.mensaje); window.location.href = '/registro'; }
+            else if (datos.accion === 'REGISTRO'){
+                cerrarModal();
+                Aviso.mostrar(datos.mensaje, { titulo: 'DPI no registrado', boton: 'Ir al registro' })
+                    .then(() => { window.location.href = '/registro'; });
+            }
             else { mostrarError(datos.mensaje); }
         } catch(e){ mostrarError('No se pudo conectar con el servidor. Intente de nuevo más tarde.'); }
         finally { boton.disabled = false; boton.innerHTML = 'Verificar DPI'; }

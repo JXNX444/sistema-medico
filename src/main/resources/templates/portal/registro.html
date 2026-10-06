@@ -10,7 +10,10 @@
         <div style="width:320px;flex-shrink:0;background:var(--sm-ink);padding:40px 36px;
                 display:flex;flex-direction:column;gap:16px;">
             <a th:href="@{/}" style="font-size:13px;color:var(--sm-slate-300);"
-               onclick="return confirm('¿Deseas cancelar el registro? Los datos ingresados se perderán.');">← Volver al portal</a>
+               onclick="event.preventDefault();
+                        Aviso.confirmar('Los datos ingresados se perderán.', {
+                            titulo: '¿Deseas cancelar el registro?', aceptar: 'Sí, salir', cancelar: 'Seguir registrándome'
+                        }).then(salir => { if (salir) window.location.href = this.href; });">← Volver al portal</a>
             <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','sm-logo--lg')}"
                  style="flex-direction:column;"></div>
             <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.2;">Cree su cuenta</div>
