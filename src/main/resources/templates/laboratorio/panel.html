@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Laboratorio', null)}"></head>
+<body>
+
+<!-- Iconos Tabler (mismo set que usa el panel del medico) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <div style="display:flex;align-items:center;gap:16px;font-size:14px;color:var(--sm-slate-600);">
+        <span style="font-weight:700;color:var(--sm-ink);" th:text="${nombre}">Laboratorista</span>
+        <a th:href="@{/panel/inicio}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver al panel</a>
+    </div>
+</nav>
+
+<main style="max-width:1040px;margin:0 auto;padding:40px 24px;">
+
+    <!-- Mensajes de exito/error, en vez de alert() del navegador -->
+    <div id="mensajeGlobal" class="oculto"></div>
+
+    <!-- ===================== Vista 1: tabla de ordenes (paso 1) ===================== -->
+    <div id="vistaLista">
+        <div style="font-size:24px;font-weight:800;">Órdenes de laboratorio</div>
+        <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:20px;">
+            Seleccione una orden para ver sus exámenes. La lista se actualiza automáticamente cada 30 segundos.
+        </div>
+
+        <!-- Filtros por estado, paciente y medico -->
+        <div class="lab-filtros">
+            <div class="sm-field">
+                <label>Estado</label>
+                <select id="filtroEstado" class="sm-select">
+                    <option value="">Todos</option>
+                    <option value="0">Pendiente</option>
+                    <option value="1">En proceso</option>
+                    <option value="2">Completada</option>
+                </select>
+            </div>
+            <div class="sm-field">
+                <label>Paciente (nombre o DPI)</label>
+                <input id="filtroPaciente" class="sm-input" placeholder="Ej: Oliva" autocomplete="off">
+            </div>
+            <div class="sm-field">
+                <label>Médico</label>
+                <input id="filtroMedico" class="sm-input" placeholder="Ej: Gómez" autocomplete="off">
+            </div>
+        </div>
+
+        <!-- Encabezado de la tabla con contador -->
+        <div style="display:flex;align-items:center;gap:10px;margin:24px 0 12px;">
+            <div class="lab-icono"><i class="ti ti-flask" aria-hidden="true"></i></div>
+            <div style="font-size:15px;font-weight:700;">Órdenes</div>
+            <div id="countOrdenes" class="lab-contador">0</div>
+        </div>
+
+        <div class="sm-card" style="padding:8px 16px;">
+            <table class="sm-table">
+                <thead>
+                <tr>
+                    <th>No. orden</th>
+                    <th>Paciente</th>
+                    <th>Médico</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th style="text-align:right;">Total</th>
+                </tr>
+                </thead>
+                <tbody id="cuerpoOrdenes">
+                <tr><td colspan="6" class="lab-vacio">Cargando órdenes...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===================== Vista 2: detalle de la orden (pasos 2-14) ===================== -->
+    <div id="vistaDetalle" class="oculto">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:8px;">
+            <div>
+                <div id="detalleTitulo" style="font-size:24px;font-weight:800;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">—</div>
+                <div id="detalleContexto" style="font-size:14px;color:var(--sm-slate-500);margin-top:4px;">—</div>
+                <div id="detalleNotas" style="font-size:14px;color:var(--sm-slate-500);margin-top:2px;"></div>
+            </div>
+            <button class="sm-btn sm-btn--ghost sm-btn--sm" onclick="volverALista()">← Volver</button>
+        </div>
+
+        <div id="detalleResumen" class="lab-resumen"></div>
+
+        <!-- Aviso: pendiente de pago / externa (FA01) / completada -->
+        <div id="detalleAviso" class="oculto"></div>
+
+        <!-- Encabezado de examenes -->
+        <div style="display:flex;align-items:center;gap:10px;margin:20px 0 12px;">
+            <div class="lab-icono lab-icono--oscuro"><i class="ti ti-test-pipe" aria-hidden="true"></i></div>
+            <div style="font-size:15px;font-weight:700;">Exámenes de la orden</div>
+        </div>
+
+        <div id="listaExamenes"></div>
+    </div>
+</main>
+
+<style>
+    .oculto { display:none !important; }
+    .mensaje-caja { padding:14px 16px; border-radius:10px; font-size:14px; margin-bottom:16px; }
+    .mensaje-exito { background:var(--sm-success-bg); color:var(--sm-success-ink); }
+    .mensaje-error { background:var(--sm-danger-bg); color:var(--sm-danger); }
+
+    /* Iconos y contadores de encabezado (mismo estilo que enfermeria y medico) */
+    .lab-icono {
+        width:30px; height:30px; border-radius:8px; font-size:16px;
+        display:flex; align-items:center; justify-content:center;
+        background:var(--sm-cyan-25); color:var(--sm-cyan-dark);
+    }
+    .lab-icono--oscuro { background:var(--sm-ink); color:var(--sm-cyan-bright); }
+    .lab-contador {
+        font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px;
+        background:var(--sm-ink); color:#fff;
+    }
+
+    /* Filtros */
+    .lab-filtros { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; }
+
+    /* Tabla */
+    .lab-fila { cursor:pointer; }
+    .lab-vacio { text-align:center; color:var(--sm-slate-400); padding:28px 8px !important; }
+    .lab-sub { font-size:12px; color:var(--sm-slate-500); font-weight:400; }
+    .lab-tag {
+        display:inline-flex; font-size:11px; font-weight:700; padding:2px 8px; margin-left:6px;
+        border-radius:var(--sm-r-badge); background:var(--sm-line); color:var(--sm-slate-600);
+        border:1px solid var(--sm-border); vertical-align:middle;
+    }
+
+    /* Detalle */
+    .lab-resumen { display:flex; gap:20px; align-items:center; font-size:14px; margin:12px 0 16px; }
+    .lab-aviso { padding:14px 16px; border-radius:10px; font-size:14px; margin-bottom:8px; }
+    .lab-aviso--amarillo { background:var(--sm-warning-bg); color:#92400E; }
+    .lab-aviso--gris { background:var(--sm-line); color:var(--sm-slate-700); border:1px solid var(--sm-border); }
+    .lab-aviso--verde { background:var(--sm-success-bg); color:var(--sm-success-ink); }
+
+    /* Tarjeta de cada examen */
+    .lab-ex { padding:18px 20px; margin-bottom:12px; }
+    .lab-ex__fila { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .lab-ex__titulo { font-size:15px; font-weight:700; }
+    .lab-ex__badges { display:flex; gap:6px; flex-wrap:wrap; }
+    .lab-ex__botones { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
+    .lab-resultado { font-size:14px; margin:8px 0 4px; }
+    .lab-badge-gris { background:var(--sm-line); color:var(--sm-slate-500); }
+    .lab-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; }
+    .lab-check { display:flex; align-items:center; gap:8px; font-size:14px; margin-top:10px; cursor:pointer; }
+    .lab-check input { accent-color:var(--sm-danger); width:16px; height:16px; margin:0; }
+</style>
+
+<script th:inline="javascript">
+    const CTX = /*[[@{/}]]*/ '/';
+</script>
+<script th:src="@{/js/laboratorio.js}"></script>
+
+</body>
+</html>
