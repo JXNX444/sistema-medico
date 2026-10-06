@@ -15,17 +15,15 @@ public interface PagoRepository extends JpaRepository<Pago, Integer> {
     /** Pago aprobado de una cita (evita cobrar dos veces la misma cita). */
     Optional<Pago> findFirstByCitaIdAndEstadoPago(Integer citaId, Short estadoPago);
 
+    /** [CU-10] Pago aprobado de una orden de laboratorio (evita cobrarla dos veces). */
+    Optional<Pago> findFirstByOrdenIdAndEstadoPago(Integer ordenId, Short estadoPago);
+
     /** Para generar el consecutivo de numero_transaccion. */
     long count();
 
     /**
-     * Correlativo mas alto ya usado en numero_transaccion para un anio dado,
-     * a prueba de huecos por borrados. Espera el formato "TRX-<anio>-<00000>":
-     * corta los ultimos 5 digitos, los pasa a entero y devuelve el maximo.
-     * Devuelve 0 si aun no hay pagos de ese anio.
-     *
-     * Se usa en vez de count()+1 porque count se rompe si se borran filas
-     * de pago en pruebas (podria repetir un numero ya existente).
+     * Correlativo mas alto ya usado en numero_transaccion para un anio dado.
+     * Formato "TRX-<anio>-<00000>". Devuelve 0 si aun no hay pagos ese anio.
      */
     @Query(value = """
             SELECT COALESCE(MAX(CAST(RIGHT(numero_transaccion, 5) AS INTEGER)), 0)
