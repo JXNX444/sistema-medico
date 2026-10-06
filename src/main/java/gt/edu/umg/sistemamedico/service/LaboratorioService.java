@@ -28,6 +28,10 @@ import java.util.Map;
  * Una vez publicado, el resultado no se puede cambiar [RNF-024]:
  * la BD lo bloquea con el trigger tr_resultado_inmutable, y aqui lo
  * validamos antes para dar un mensaje claro en vez de un error de BD.
+ *
+ * El Medico (actor secundario) puede CONSULTAR en modo solo lectura las
+ * ordenes de sus propios pacientes [postcondicion + FA02 paso 3].
+ * No puede guardar ni publicar resultados.
  */
 @Service
 public class LaboratorioService {
@@ -59,6 +63,11 @@ public class LaboratorioService {
         };
     }
 
+    /** true si el usuario tiene rol Medico (entra en modo solo lectura). */
+    public static boolean esMedico(Usuario usuario) {
+        return usuario != null && "Medico".equalsIgnoreCase(usuario.getNombreRol());
+    }
+
     // ---------- Paso 1: tabla de ordenes con filtros ----------
 
     /**
@@ -74,6 +83,17 @@ public class LaboratorioService {
                 todos ? PENDIENTE : estado,   // si es "todos", este valor se ignora
                 normalizar(paciente),
                 normalizar(medico));
+    }
+
+    /**
+     * Modo medico: las mismas ordenes, pero SOLO las que pidio ese medico
+     * (el "medico tratante" del CU). El filtro por nombre de medico no aplica.
+     */
+    @Transactional(readOnly = true)
+    public List<OrdenLaboratorio> listarOrdenesDelMedico(Usuario medico, Short estado, String paciente) {
+        return listarOrdenes(estado, paciente, null).stream()
+                .filter(o -> o.getMedico().getId().equals(medico.getId()))
+                .toList();
     }
 
     // ---------- Pasos 2-3: detalle de una orden ----------
@@ -94,6 +114,19 @@ public class LaboratorioService {
         return new DetalleOrden(orden, examenes);
     }
 
+    /**
+     * Modo medico: el detalle solo si la orden es suya.
+     * Si es de otro medico devuelve null, igual que si no existiera.
+     */
+    @Transactional(readOnly = true)
+    public DetalleOrden obtenerDetalleParaMedico(Integer ordenId, Usuario medico) {
+        DetalleOrden detalle = obtenerDetalle(ordenId);
+        if (detalle == null || !detalle.orden().getMedico().getId().equals(medico.getId())) {
+            return null;
+        }
+        return detalle;
+    }
+
     // ---------- Pasos 9-10 + FA02: guardar resultado de un examen ----------
 
     public record ResultadoOperacion(boolean ok, Map<String, String> errores,
@@ -103,6 +136,11 @@ public class LaboratorioService {
     public ResultadoOperacion guardarResultado(Integer detalleId, Usuario laboratorista,
                                                String valor, String unidad, LocalDate fecha,
                                                boolean fueraRango, String notas) {
+
+        // El medico solo consulta; registrar resultados es del laboratorio
+        if (esMedico(laboratorista)) {
+            return error("general", "Solo el personal de laboratorio puede registrar resultados.", null);
+        }
 
         OrdenLaboratorioDetalle detalle = detalleRepository.buscarConOrden(detalleId).orElse(null);
         String errorEstado = validarQueSePuedeOperar(detalle);
@@ -163,6 +201,11 @@ public class LaboratorioService {
 
     @Transactional
     public ResultadoOperacion publicarResultado(Integer detalleId, Usuario laboratorista) {
+
+        // El medico solo consulta; publicar resultados es del laboratorio
+        if (esMedico(laboratorista)) {
+            return error("general", "Solo el personal de laboratorio puede publicar resultados.", null);
+        }
 
         OrdenLaboratorioDetalle detalle = detalleRepository.buscarConOrden(detalleId).orElse(null);
         String errorEstado = validarQueSePuedeOperar(detalle);
