@@ -401,7 +401,8 @@ async function guardarOrden() {
     const body = {
         citaId: citaEvaluada,
         examenIds,
-        observaciones: document.getElementById('inpObsOrden').value
+        observaciones: document.getElementById('inpObsOrden').value,
+        esExterna: document.getElementById('chkOrdenExterna').checked   // [CU-09 FA01]
     };
     try {
         const data = await postJson('medico/api/orden-laboratorio', body);
