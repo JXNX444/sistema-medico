@@ -32,6 +32,9 @@ import org.springframework.security.web.SecurityFilterChain;
  * /enfermeria/**  -> rol Enfermero. [CU-07]
  * /medico/**      -> solo rol Medico. [CU-08] (el panel filtra por el medico logueado)
  * /laboratorio/** -> rol Laboratorista (o Administrador). [CU-09]
+ *                    El Medico tambien entra, pero en modo solo lectura:
+ *                    ve solo sus ordenes y LaboratorioService le bloquea
+ *                    guardar y publicar resultados.
  */
 @Configuration
 public class SecurityConfig {
@@ -56,7 +59,7 @@ public class SecurityConfig {
                         .requestMatchers("/caja/**").hasAnyRole("Cajero", "Administrador")
                         .requestMatchers("/enfermeria/**").hasAnyRole("Enfermero", "Administrador")
                         .requestMatchers("/medico/**").hasRole("Medico")
-                        .requestMatchers("/laboratorio/**").hasAnyRole("Laboratorista", "Administrador")
+                        .requestMatchers("/laboratorio/**").hasAnyRole("Laboratorista", "Administrador", "Medico")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
