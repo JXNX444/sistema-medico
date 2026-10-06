@@ -107,7 +107,7 @@ async function cargarOrdenes() {
         const ordenes = await resp.json();
         renderTabla(ordenes);
     } catch (e) {
-        mostrarMensaje('No se pudo cargar la lista de ordenes.', 'error');
+        mostrarMensaje('No se pudo cargar la lista de órdenes.', 'error');
     }
 }
 
@@ -117,7 +117,7 @@ function renderTabla(ordenes) {
 
     if (ordenes.length === 0) {
         cuerpo.innerHTML = `<tr><td colspan="6" class="lab-vacio">
-            No hay ordenes que coincidan con los filtros.</td></tr>`;
+            No hay órdenes que coincidan con los filtros.</td></tr>`;
         return;
     }
 
@@ -267,6 +267,12 @@ function renderExamen(ex, sePuedeOperar) {
         </div>`;
     }
 
+    // La unidad solo es obligatoria si el examen la tiene en el catalogo
+    // (ej: una radiografia no tiene unidad). Debe coincidir con el service.
+    const unidadObligatoria = !!(ex.unidadSugerida && ex.unidadSugerida.trim() !== '');
+    const etiquetaUnidad = unidadObligatoria ? 'Unidad *' : 'Unidad';
+    const placeholderUnidad = unidadObligatoria ? '' : 'Opcional';
+
     const id = ex.detalleId;
     const esEdicion = editando.has(id);
     return `
@@ -281,8 +287,9 @@ function renderExamen(ex, sePuedeOperar) {
                 <p class="sm-error" data-error="valor-${id}"></p>
             </div>
             <div class="sm-field">
-                <label>Unidad *</label>
-                <input id="unidad-${id}" class="sm-input" maxlength="50" value="${esc(ex.unidad || ex.unidadSugerida)}">
+                <label>${etiquetaUnidad}</label>
+                <input id="unidad-${id}" class="sm-input" maxlength="50" placeholder="${placeholderUnidad}"
+                       value="${esc(ex.unidad || ex.unidadSugerida)}">
                 <p class="sm-error" data-error="unidad-${id}"></p>
             </div>
             <div class="sm-field">
@@ -307,8 +314,9 @@ function renderExamen(ex, sePuedeOperar) {
 }
 
 function resumenResultado(ex) {
+    const unidad = ex.unidad ? ' ' + esc(ex.unidad) : '';
     return `<div class="lab-resultado">
-        <b>${esc(ex.valor)} ${esc(ex.unidad)}</b> · ${fechaBonita(ex.fecha)}
+        <b>${esc(ex.valor)}${unidad}</b> · ${fechaBonita(ex.fecha)}
         ${ex.notas ? `<div class="lab-sub">${esc(ex.notas)}</div>` : ''}
     </div>`;
 }
