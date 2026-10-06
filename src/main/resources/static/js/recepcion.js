@@ -176,11 +176,11 @@ async function registrarLlegada(citaId) {
         if (data.ok) {
             mostrarExito(data.mensaje);
         } else {
-            alert(data.mensaje);
+            Aviso.mostrar(data.mensaje, { tipo: 'error' });
             if (data.cita) reemplazarTarjeta(data.cita);
         }
     } catch (e) {
-        alert('Error al registrar la llegada.');
+        Aviso.mostrar('Error al registrar la llegada.', { tipo: 'error' });
     }
 }
 
@@ -190,7 +190,11 @@ async function reprogramarHoy(citaId, emergencia) {
     const confirmacion = emergencia
         ? '¿Confirma reprogramar esta cita para HOY con prioridad de EMERGENCIA?'
         : '¿Confirma reprogramar esta cita para HOY?';
-    if (!confirm(confirmacion)) return;
+    const confirmado = await Aviso.confirmar(confirmacion, {
+        titulo: emergencia ? 'Reprogramar con emergencia' : 'Reprogramar cita',
+        aceptar: 'Sí, reprogramar'
+    });
+    if (!confirmado) return;
 
     try {
         const resp = await fetch(`${CTX}recepcion/api/reprogramar-hoy`, {
@@ -201,13 +205,13 @@ async function reprogramarHoy(citaId, emergencia) {
         const data = await resp.json();
 
         if (data.ok) {
-            alert(data.mensaje);
+            Aviso.mostrar(data.mensaje, { tipo: 'exito' });
             if (data.cita) reemplazarTarjeta(data.cita);
         } else {
-            alert(data.mensaje);
+            Aviso.mostrar(data.mensaje, { tipo: 'error' });
         }
     } catch (e) {
-        alert('Error al reprogramar la cita.');
+        Aviso.mostrar('Error al reprogramar la cita.', { tipo: 'error' });
     }
 }
 
@@ -389,10 +393,10 @@ async function enviarWalkIn() {
             if (data.errores.fechaHora) document.getElementById('wiErrorFechaHora').textContent = data.errores.fechaHora;
             if (data.errores.motivo) document.getElementById('wiErrorMotivo').textContent = data.errores.motivo;
             if (data.errores.medicoId) document.getElementById('wiErrorFechaHora').textContent = data.errores.medicoId;
-            if (data.errores.dpi) alert(data.errores.dpi);
+            if (data.errores.dpi) Aviso.mostrar(data.errores.dpi, { tipo: 'error' });
         }
     } catch (e) {
-        alert('Error al crear la cita.');
+        Aviso.mostrar('Error al crear la cita.', { tipo: 'error' });
     }
 }
 
