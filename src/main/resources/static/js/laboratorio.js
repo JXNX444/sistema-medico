@@ -3,6 +3,10 @@
    Una sola pagina con dos vistas:
      - vistaLista:   tabla de ordenes con filtros       [paso 1]
      - vistaDetalle: examenes de una orden               [pasos 2-14, FA01, FA02]
+
+   SOLO_LECTURA (lo define panel.html): true si entro un medico.
+   En ese modo no se dibujan formularios ni botones, y los examenes
+   sin publicar se muestran como "Pendiente de publicacion".
    ============================================================ */
 
 const PENDIENTE = 0;
@@ -100,7 +104,8 @@ async function cargarOrdenes() {
     const params = new URLSearchParams();
     if (estado !== '') params.append('estado', estado);
     if (paciente.trim() !== '') params.append('paciente', paciente.trim());
-    if (medico.trim() !== '') params.append('medico', medico.trim());
+    // El medico solo ve sus ordenes: no se manda el filtro por medico
+    if (!SOLO_LECTURA && medico.trim() !== '') params.append('medico', medico.trim());
 
     try {
         const resp = await fetch(`${CTX}laboratorio/api/ordenes?${params}`);
@@ -184,7 +189,7 @@ function renderDetalle(orden, examenes) {
         `<span>Total: <b>${quetzales(orden.montoTotal)}</b></span>
          <span class="lab-sub">Publicados: ${publicados} de ${examenes.length}</span>`;
 
-    // Aviso segun el estado de la orden
+    // Aviso segun el estado de la orden (el texto cambia si es el medico quien consulta)
     const aviso = document.getElementById('detalleAviso');
     if (orden.esExterna) {
         // FA01
@@ -194,7 +199,9 @@ function renderDetalle(orden, examenes) {
     } else if (orden.estado === PENDIENTE) {
         // Pasos 4-5 + RN-CU09-01
         aviso.className = 'lab-aviso lab-aviso--amarillo';
-        aviso.textContent = `La orden aún no ha sido pagada en caja. Informe al paciente el monto total `
+        aviso.textContent = SOLO_LECTURA
+            ? 'La orden aún no ha sido pagada en caja: los exámenes todavía no se han procesado.'
+            : `La orden aún no ha sido pagada en caja. Informe al paciente el monto total `
             + `(${quetzales(orden.montoTotal)}): el pago es requerido antes de la toma de muestras.`;
     } else if (orden.estado === COMPLETADA) {
         // Paso 14
@@ -204,8 +211,8 @@ function renderDetalle(orden, examenes) {
         aviso.className = 'oculto';
     }
 
-    // Solo se registran resultados si la orden esta En proceso y no es externa
-    const sePuedeOperar = orden.estado === EN_PROCESO && !orden.esExterna;
+    // Solo se registran resultados si NO es el medico, la orden esta En proceso y no es externa
+    const sePuedeOperar = !SOLO_LECTURA && orden.estado === EN_PROCESO && !orden.esExterna;
 
     document.getElementById('listaExamenes').innerHTML =
         examenes.map(ex => renderExamen(ex, sePuedeOperar)).join('');
@@ -223,7 +230,7 @@ function renderExamen(ex, sePuedeOperar) {
         ? `<span class="sm-badge sm-badge--danger">Fuera de rango${ex.rangoReferencia ? ' (' + esc(ex.rangoReferencia) + ')' : ''}</span>`
         : '';
 
-    // Estado 3: publicado (solo lectura, RNF-024)
+    // Estado 3: publicado (solo lectura, RNF-024). Igual para laboratorio y medico.
     if (ex.publicado) {
         return `
         <div class="sm-card lab-ex">
@@ -233,6 +240,20 @@ function renderExamen(ex, sePuedeOperar) {
             </div>
             ${resumenResultado(ex)}
             <div class="lab-sub">Publicado el ${esc(ex.publicadoEn)}</div>
+        </div>`;
+    }
+
+    // Modo medico: un resultado sin publicar es un borrador del laboratorio,
+    // no se muestra (el servidor tampoco lo envia)
+    if (SOLO_LECTURA) {
+        const rangoMedico = ex.rangoReferencia
+            ? `<div class="lab-sub">Rango de referencia: ${esc(ex.rangoReferencia)}</div>` : '';
+        return `
+        <div class="sm-card lab-ex">
+            <div class="lab-ex__fila">${encabezado}
+                <span class="sm-badge lab-badge-gris">Pendiente de publicación</span></div>
+            <div class="lab-sub" style="margin-top:4px;">El resultado aún no ha sido publicado por laboratorio.</div>
+            ${rangoMedico}
         </div>`;
     }
 
