@@ -122,8 +122,12 @@ public class LaboratorioService {
             errores.put("valor", "El valor del resultado no puede exceder 200 caracteres.");
         }
 
+        // La unidad solo es obligatoria si el examen la tiene en el catalogo.
+        // Examenes como una radiografia dan un resultado en texto, sin unidad.
         if (unidadLimpia == null) {
-            errores.put("unidad", "La unidad de medida es obligatoria.");
+            if (examenTieneUnidad(detalle)) {
+                errores.put("unidad", "La unidad de medida es obligatoria.");
+            }
         } else if (unidadLimpia.length() > 50) {
             errores.put("unidad", "La unidad no puede exceder 50 caracteres.");
         }
@@ -186,7 +190,7 @@ public class LaboratorioService {
             orden.setEstadoOrden(COMPLETADA);
             ordenRepository.save(orden);
             mensaje += " Todos los resultados fueron publicados: la orden "
-                    + orden.getNumeroOrden() + " quedo Completada.";
+                    + orden.getNumeroOrden() + " quedó Completada.";
         }
 
         return new ResultadoOperacion(true, null, mensaje, detalle);
@@ -206,20 +210,26 @@ public class LaboratorioService {
 
         // FA01: los examenes de una orden externa se hacen fuera del hospital
         if (orden.isEsExterna()) {
-            return "Esta orden es externa: los examenes se realizan en un laboratorio externo.";
+            return "Esta orden es externa: los exámenes se realizan en un laboratorio externo.";
         }
         // Paso 7 + RN-CU09-01: el cobro va antes de la toma de muestras
         if (orden.getEstadoOrden() == PENDIENTE) {
-            return "La orden aun no ha sido pagada en caja. El pago es requerido antes de la toma de muestras.";
+            return "La orden aún no ha sido pagada en caja. El pago es requerido antes de la toma de muestras.";
         }
         if (orden.getEstadoOrden() == COMPLETADA) {
-            return "La orden ya esta completada.";
+            return "La orden ya está completada.";
         }
         // RNF-024: un resultado publicado no se modifica
         if (detalle.isPublicado()) {
             return "El resultado ya fue publicado y no puede modificarse.";
         }
         return null;
+    }
+
+    /** true si el examen tiene una unidad configurada en el catalogo (ej: "mg/dL"). */
+    private boolean examenTieneUnidad(OrdenLaboratorioDetalle detalle) {
+        String unidadCatalogo = detalle.getExamen().getUnidad();
+        return unidadCatalogo != null && !unidadCatalogo.isBlank();
     }
 
     private ResultadoOperacion error(String campo, String mensaje, OrdenLaboratorioDetalle detalle) {
