@@ -1,0 +1,102 @@
+/* ============================================================
+   Controles con estilo propio: listas desplegables, calendario y avisos.
+   Los arma /js/controles.js en todas las paginas.
+   ============================================================ */
+
+.ctl { position:relative; display:block; width:100%; }
+
+/* El control nativo sigue ahi (guarda el valor y se envia en el form), pero invisible */
+.ctl-nativo {
+    position:absolute !important; left:50% !important; bottom:0 !important;
+    width:1px !important; height:1px !important; min-width:0 !important; min-height:0 !important;
+    padding:0 !important; margin:0 !important; border:0 !important;
+    opacity:0 !important; pointer-events:none !important;
+}
+
+/* Boton visible (mismo aspecto que .sm-input) */
+.ctl-boton {
+    width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    font-family:var(--sm-font); font-size:14px; line-height:1.3; color:var(--sm-ink); text-align:left;
+    background:#fff; border:1px solid var(--sm-border); border-radius:var(--sm-r-input);
+    padding:12px 14px; cursor:pointer; transition:.15s ease;
+}
+.ctl-boton:hover { border-color:var(--sm-slate-300); }
+.ctl-boton:focus-visible,
+.ctl--abierto .ctl-boton { outline:none; border-color:var(--sm-cyan); box-shadow:0 0 0 3px rgba(6,182,212,.15); }
+.ctl-texto { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ctl-placeholder { color:var(--sm-slate-400); }
+.ctl-icono { display:flex; flex-shrink:0; color:var(--sm-slate-500); transition:transform .15s ease, color .15s ease; }
+.ctl--select.ctl--abierto .ctl-icono { transform:rotate(180deg); color:var(--sm-cyan-dark); }
+.ctl--fecha.ctl--abierto .ctl-icono { color:var(--sm-cyan-dark); }
+.ctl--deshabilitado .ctl-boton,
+.ctl--deshabilitado .ctl-boton:hover { background:var(--sm-panel); border-color:var(--sm-border); color:var(--sm-slate-400); cursor:not-allowed; }
+
+/* Panel flotante (se pega al <body>, asi ninguna tarjeta lo recorta) */
+.ctl-panel {
+    position:fixed; z-index:3000; background:#fff; font-family:var(--sm-font);
+    border:1px solid var(--sm-border); border-radius:12px; box-shadow:var(--sm-shadow);
+    animation:ctlAbrir .12s ease;
+}
+@keyframes ctlAbrir { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
+
+/* Lista de opciones */
+.ctl-lista { padding:6px; max-height:260px; overflow-y:auto; }
+.ctl-opcion { padding:9px 12px; border-radius:8px; font-size:14px; color:var(--sm-ink); cursor:pointer; white-space:nowrap; }
+.ctl-opcion:hover, .ctl-opcion--foco { background:var(--sm-cyan-25); }
+.ctl-opcion--activa { background:var(--sm-cyan-50); color:var(--sm-cyan-dark); font-weight:600; }
+.ctl-opcion--vacia { color:var(--sm-slate-400); }
+.ctl-opcion--deshabilitada { color:var(--sm-slate-300); background:none !important; cursor:not-allowed; }
+
+/* Calendario */
+.ctl-calendario { width:300px; padding:14px; }
+.ctl-cal-cab { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.ctl-cal-titulo { font-size:14px; font-weight:800; color:var(--sm-ink); }
+.ctl-cal-nav {
+    width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--sm-border); border-radius:8px; background:#fff; color:var(--sm-slate-600); cursor:pointer;
+}
+.ctl-cal-nav:hover:not(:disabled) { border-color:var(--sm-cyan); color:var(--sm-cyan-dark); }
+.ctl-cal-nav:disabled { opacity:.35; cursor:not-allowed; }
+.ctl-cal-semana, .ctl-cal-dias { display:grid; grid-template-columns:repeat(7, 1fr); gap:2px; }
+.ctl-cal-semana span { padding:4px 0; text-align:center; font-size:11px; font-weight:700; color:var(--sm-slate-400); }
+.ctl-dia {
+    height:36px; border:0; border-radius:8px; background:none; cursor:pointer;
+    font-family:var(--sm-font); font-size:13px; font-weight:600; color:var(--sm-ink);
+}
+.ctl-dia:hover:not(:disabled) { background:var(--sm-cyan-25); color:var(--sm-cyan-dark); }
+.ctl-dia--hoy { box-shadow:inset 0 0 0 1px var(--sm-cyan); color:var(--sm-cyan-dark); }
+.ctl-dia--sel, .ctl-dia--sel:hover { background:var(--sm-cyan) !important; color:#fff !important; box-shadow:none; }
+.ctl-dia:disabled { color:var(--sm-slate-300); cursor:not-allowed; }
+.ctl-cal-pie { display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid var(--sm-line); }
+.ctl-cal-link {
+    padding:6px 10px; border:0; border-radius:6px; background:none; cursor:pointer;
+    font-family:var(--sm-font); font-size:13px; font-weight:600; color:var(--sm-slate-500);
+}
+.ctl-cal-link:hover:not(:disabled) { background:var(--sm-panel); }
+.ctl-cal-link--fuerte { color:var(--sm-cyan-dark); }
+.ctl-cal-link:disabled { opacity:.4; cursor:not-allowed; }
+
+/* Avisos (reemplazo de alert/confirm) */
+.aviso-velo {
+    position:fixed; inset:0; z-index:4000; display:flex; align-items:center; justify-content:center; padding:16px;
+    background:rgba(15,23,42,.45); backdrop-filter:blur(3px); animation:avisoVelo .15s ease;
+}
+.aviso-velo--saliendo { opacity:0; transition:opacity .12s ease; }
+.aviso {
+    width:100%; max-width:420px; background:#fff; border-radius:var(--sm-r-card); box-shadow:var(--sm-shadow);
+    padding:28px 28px 22px; font-family:var(--sm-font); animation:avisoEntrar .18s ease;
+}
+.aviso-icono { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+.aviso-icono--info        { background:var(--sm-cyan-50);    color:var(--sm-cyan-dark); }
+.aviso-icono--exito       { background:var(--sm-success-bg); color:var(--sm-success-ink); }
+.aviso-icono--error       { background:var(--sm-danger-bg);  color:var(--sm-danger); }
+.aviso-icono--advertencia { background:var(--sm-warning-bg); color:#B45309; }
+.aviso-titulo { font-size:17px; font-weight:800; color:var(--sm-ink); margin-bottom:6px; }
+.aviso-texto { font-size:14px; line-height:1.6; color:var(--sm-slate-600); white-space:pre-line; }
+.aviso-botones { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
+.aviso-botones button:focus { outline:none; box-shadow:0 0 0 3px rgba(6,182,212,.25); }
+@keyframes avisoVelo { from { opacity:0; } to { opacity:1; } }
+@keyframes avisoEntrar { from { opacity:0; transform:translateY(8px) scale(.98); } to { opacity:1; transform:none; } }
+
+/* Casillas y radios con el color del sistema */
+input[type="checkbox"], input[type="radio"] { accent-color:var(--sm-cyan); }
