@@ -21,9 +21,19 @@
 
     <!-- ===================== Vista 1: tabla de ordenes (paso 1) ===================== -->
     <div id="vistaLista">
-        <div style="font-size:24px;font-weight:800;">Órdenes de laboratorio</div>
-        <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:20px;">
-            Seleccione una orden para ver sus exámenes. La lista se actualiza automáticamente cada 30 segundos.
+        <div style="font-size:24px;font-weight:800;"
+             th:text="${soloLectura} ? 'Resultados de laboratorio' : 'Órdenes de laboratorio'">Órdenes de laboratorio</div>
+        <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:20px;"
+             th:text="${soloLectura}
+                      ? 'Órdenes de sus pacientes. Seleccione una para ver los resultados.'
+                      : 'Seleccione una orden para ver sus exámenes. La lista se actualiza automáticamente cada 30 segundos.'">
+            Seleccione una orden para ver sus exámenes.
+        </div>
+
+        <!-- Modo medico: aviso de solo lectura [CU-09 postcondicion + FA02 paso 3] -->
+        <div th:if="${soloLectura}" class="lab-aviso lab-aviso--azul">
+            <i class="ti ti-eye" aria-hidden="true"></i>
+            Modo consulta: solo lectura. Los resultados los registra y publica el personal de laboratorio.
         </div>
 
         <!-- Filtros por estado, paciente y medico -->
@@ -41,7 +51,8 @@
                 <label>Paciente (nombre o DPI)</label>
                 <input id="filtroPaciente" class="sm-input" placeholder="Ej: Oliva" autocomplete="off">
             </div>
-            <div class="sm-field">
+            <!-- El medico solo ve sus ordenes: este filtro no aplica y se oculta -->
+            <div class="sm-field" th:classappend="${soloLectura} ? 'oculto'">
                 <label>Médico</label>
                 <input id="filtroMedico" class="sm-input" placeholder="Ej: Gómez" autocomplete="off">
             </div>
@@ -136,6 +147,7 @@
     .lab-aviso--amarillo { background:var(--sm-warning-bg); color:#92400E; }
     .lab-aviso--gris { background:var(--sm-line); color:var(--sm-slate-700); border:1px solid var(--sm-border); }
     .lab-aviso--verde { background:var(--sm-success-bg); color:var(--sm-success-ink); }
+    .lab-aviso--azul { background:var(--sm-cyan-25); color:var(--sm-cyan-dark); border:1px solid var(--sm-cyan-50); margin-bottom:16px; }
 
     /* Tarjeta de cada examen */
     .lab-ex { padding:18px 20px; margin-bottom:12px; }
@@ -152,6 +164,8 @@
 
 <script th:inline="javascript">
     const CTX = /*[[@{/}]]*/ '/';
+    // true si entro un medico: la pantalla se dibuja sin formularios ni botones
+    const SOLO_LECTURA = /*[[${soloLectura}]]*/ false;
 </script>
 <script th:src="@{/js/laboratorio.js}"></script>
 
