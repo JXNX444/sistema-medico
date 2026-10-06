@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Despacho de Medicamentos', null)}"></head>
+<body>
+
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <div style="display:flex;align-items:center;gap:16px;font-size:14px;color:var(--sm-slate-600);">
+        <span style="font-weight:700;color:var(--sm-ink);" th:text="${nombre}">Farmaceutico</span>
+        <a th:href="@{/panel/inicio}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver al panel</a>
+    </div>
+</nav>
+
+<main style="max-width:1000px;margin:0 auto;padding:40px 24px;">
+
+    <!-- ===== Vista 1: busqueda (pasos 1-3) ===== -->
+    <section id="vistaBusqueda">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+            <div>
+                <div style="font-size:24px;font-weight:800;">Despacho de Medicamentos</div>
+                <div style="font-size:14px;color:var(--sm-slate-500);">Busque la receta por ID de receta o ID de consulta</div>
+            </div>
+            <button type="button" id="btnNuevoDespacho" class="boton-secundario">Nuevo Despacho</button>
+        </div>
+
+        <div class="sm-panel tarjeta-buscador">
+            <div class="fila-filtros">
+                <div class="grupo">
+                    <label for="filtroReceta">ID de Receta</label>
+                    <input type="text" id="filtroReceta" inputmode="numeric" placeholder="Ej: 12" autocomplete="off">
+                </div>
+                <div class="grupo">
+                    <label for="filtroConsulta">ID de Consulta</label>
+                    <input type="text" id="filtroConsulta" inputmode="numeric" placeholder="Ej: 34" autocomplete="off">
+                </div>
+                <button type="button" id="btnBuscar" class="boton-principal">Buscar</button>
+            </div>
+            <p class="error-texto" id="errorBusqueda"></p>
+        </div>
+
+        <p class="cargando oculto" id="cargando">Buscando...</p>
+
+        <div id="zonaTabla" class="oculto sm-panel" style="margin-top:20px;padding:0;overflow-x:auto;">
+            <table class="tabla">
+                <thead>
+                <tr>
+                    <th>ID</th><th>Consulta</th><th>Paciente</th><th>Emisión</th>
+                    <th>Vigencia</th><th>Notas</th><th></th>
+                </tr>
+                </thead>
+                <tbody id="cuerpoTabla"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===== Vista 2: detalle y despacho (pasos 4-9 + FA01/FA02/FA03) ===== -->
+    <section id="vistaDetalle" class="oculto">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;">
+            <div>
+                <div style="font-size:24px;font-weight:800;" id="dtTitulo">Receta #</div>
+                <div style="font-size:14px;color:var(--sm-slate-500);" id="dtSubtitulo"></div>
+            </div>
+            <button type="button" id="btnVolver" class="boton-secundario">← Volver</button>
+        </div>
+
+        <div id="zonaAlertas"></div>
+
+        <div class="sm-panel" style="padding:0;overflow-x:auto;">
+            <table class="tabla">
+                <thead>
+                <tr>
+                    <th>Medicamento</th><th>Dosis</th><th>Recetado</th><th>Precio</th>
+                    <th>Disponibilidad</th><th>A despachar</th><th>Sustituir</th>
+                </tr>
+                </thead>
+                <tbody id="cuerpoItems"></tbody>
+            </table>
+        </div>
+
+        <div class="grupo" style="margin-top:16px;">
+            <label for="notasDespacho">Notas (opcional)</label>
+            <textarea id="notasDespacho" rows="2" maxlength="500"></textarea>
+        </div>
+
+        <div class="barra-total">
+            <span>Total del Despacho: <strong id="txtTotal">Q0.00</strong></span>
+            <span class="ayuda">El cobro se realiza fuera del sistema.</span>
+        </div>
+
+        <p class="error-texto" id="errorDespacho"></p>
+
+        <div class="acciones">
+            <button type="button" id="btnNoAdquiere" class="boton-peligro">Paciente no adquiere</button>
+            <button type="button" id="btnConfirmar" class="boton-principal">Confirmar Despacho</button>
+        </div>
+    </section>
+
+    <!-- ===== Vista 3: resumen (pasos 10-12 + FA04) ===== -->
+    <section id="vistaResumen" class="oculto">
+        <div class="sm-panel">
+            <div class="exito" id="rsMensaje"></div>
+            <div id="rsSustituciones"></div>
+            <div id="rsAlertas"></div>
+
+            <table class="tabla" style="margin-top:12px;">
+                <thead>
+                <tr><th>Medicamento</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr>
+                </thead>
+                <tbody id="rsCuerpo"></tbody>
+            </table>
+            <div class="barra-total"><span>Total: <strong id="rsTotal"></strong></span></div>
+
+            <div class="acciones">
+                <button type="button" id="btnOtroDespacho" class="boton-principal">Nuevo Despacho</button>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<style>
+    .oculto { display:none !important; }
+
+    .boton-principal, .boton-secundario, .boton-peligro {
+        display:inline-flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;
+        font-family:inherit; font-size:14px; font-weight:700; padding:12px 20px; border-radius:var(--sm-r-input); }
+    .boton-principal { background:var(--sm-cyan); color:#fff; border:none; }
+    .boton-principal:hover { background:var(--sm-cyan-dark); }
+    .boton-principal:disabled, .boton-despachar:disabled { opacity:.5; cursor:not-allowed; }
+    .boton-secundario { background:#fff; color:var(--sm-ink); border:1px solid var(--sm-border); }
+    .boton-peligro { background:#fff; color:var(--sm-danger); border:1px solid var(--sm-danger); }
+
+    .tarjeta-buscador { display:flex; flex-direction:column; gap:8px; }
+    .fila-filtros { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
+    .fila-filtros .grupo { flex:1; min-width:180px; margin:0; }
+
+    .grupo { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+    .grupo label { font-size:12px; font-weight:600; }
+    .grupo input, .grupo textarea, .grupo select, .tabla input, .tabla select {
+        width:100%; font-family:inherit; font-size:14px; color:var(--sm-ink);
+        border:1px solid var(--sm-border); border-radius:var(--sm-r-input); padding:10px 12px; outline:none; }
+    .tabla input[type=checkbox] { width:auto; }
+    .error-texto { color:var(--sm-danger); font-size:13px; margin:6px 0 0; }
+    .cargando { color:var(--sm-slate-500); margin-top:16px; }
+    .ayuda { font-size:12px; color:var(--sm-slate-400); }
+
+    .tabla { width:100%; border-collapse:collapse; font-size:13px; }
+    .tabla th { text-align:left; padding:12px 14px; color:var(--sm-slate-500); font-weight:600;
+        border-bottom:1px solid var(--sm-border); white-space:nowrap; }
+    .tabla td { padding:12px 14px; border-bottom:1px solid var(--sm-line); vertical-align:top; }
+    .tabla tr:last-child td { border-bottom:none; }
+
+    .boton-despachar { background:var(--sm-cyan); color:#fff; border:none; cursor:pointer;
+        font-family:inherit; font-size:13px; font-weight:700; padding:8px 14px; border-radius:8px; }
+
+    .etiqueta { display:inline-block; font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; white-space:nowrap; }
+    .etiqueta.verde { background:#DCFCE7; color:#15803D; }
+    .etiqueta.roja  { background:#FEE2E2; color:#B91C1C; }
+    .etiqueta.gris  { background:var(--sm-line); color:var(--sm-slate-600); }
+    .etiqueta.ambar { background:#FEF3C7; color:#B45309; }
+
+    .alerta { border-radius:10px; padding:10px 14px; font-size:13px; margin-bottom:10px; }
+    .alerta.ambar { background:#FEF3C7; color:#92400E; }
+    .alerta.roja  { background:#FEE2E2; color:#991B1B; }
+    .alerta.azul  { background:var(--sm-cyan-50); color:var(--sm-cyan-dark); }
+
+    .fila-sustitucion td { background:var(--sm-panel); }
+    .fila-sustitucion .contenido { display:flex; gap:12px; flex-wrap:wrap; }
+    .fila-sustitucion .contenido > div { flex:1; min-width:220px; }
+
+    .barra-total { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+        margin-top:16px; font-size:16px; }
+    .barra-total strong { color:var(--sm-cyan-dark); font-size:18px; }
+    .acciones { display:flex; justify-content:flex-end; gap:12px; margin-top:20px; flex-wrap:wrap; }
+    .exito { font-size:15px; font-weight:700; color:#15803D; margin-bottom:12px; }
+</style>
+
+<script th:inline="javascript">
+    const CTX = /*[[@{/}]]*/ '/';
+</script>
+<script th:src="@{/js/farmacia.js}"></script>
+
+</body>
+</html>
