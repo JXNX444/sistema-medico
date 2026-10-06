@@ -151,14 +151,16 @@ public class ConsultaController {
         }).toList();
     }
 
-    public record OrdenRequest(Integer citaId, List<Integer> examenIds, String observaciones) {}
+    /** esExterna: casilla "Orden Externa" del formulario [CU-09 FA01 paso 1]. */
+    public record OrdenRequest(Integer citaId, List<Integer> examenIds, String observaciones,
+                               boolean esExterna) {}
 
     @PostMapping("/api/orden-laboratorio")
     @ResponseBody
     public Map<String, Object> generarOrden(@RequestBody OrdenRequest req,
                                             @AuthenticationPrincipal UsuarioDetails ud) {
         return respuesta(consultaService.generarOrdenLaboratorio(
-                req.citaId(), ud.getUsuario(), req.examenIds(), req.observaciones()));
+                req.citaId(), ud.getUsuario(), req.examenIds(), req.observaciones(), req.esExterna()));
     }
 
     // ---------- FA04: receta medica ----------
