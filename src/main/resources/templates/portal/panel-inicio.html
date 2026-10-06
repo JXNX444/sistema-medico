@@ -91,6 +91,17 @@
             <div class="sm-feature__desc">Ver órdenes de laboratorio, registrar y publicar resultados de exámenes.</div>
         </a>
 
+        <!-- CU-09 (postcondicion + FA02 paso 3): el medico consulta los resultados en solo lectura -->
+        <a th:if="${rol == 'Medico'}" th:href="@{/laboratorio/panel}"
+           class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 3h6"/><path d="M10 3v6.5L4.6 18.8A1.5 1.5 0 0 0 5.9 21h12.2a1.5 1.5 0 0 0 1.3-2.2L14 9.5V3"/><path d="M7 15h10"/></svg>
+            </div>
+            <div class="sm-feature__title">Resultados de Laboratorio</div>
+            <div class="sm-feature__desc">Consultar las órdenes de sus pacientes y sus resultados publicados.</div>
+        </a>
+
     </div>
 </section>
 
