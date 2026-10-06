@@ -80,6 +80,17 @@
             <div class="sm-feature__desc">Atender pacientes en espera, registrar diagnóstico, órdenes, recetas y seguimientos.</div>
         </a>
 
+        <!-- CU-09 Gestion de Laboratorio -->
+        <a th:if="${rol == 'Laboratorista' or rol == 'Administrador'}" th:href="@{/laboratorio/panel}"
+           class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 3h6"/><path d="M10 3v6.5L4.6 18.8A1.5 1.5 0 0 0 5.9 21h12.2a1.5 1.5 0 0 0 1.3-2.2L14 9.5V3"/><path d="M7 15h10"/></svg>
+            </div>
+            <div class="sm-feature__title">Gestión de Laboratorio</div>
+            <div class="sm-feature__desc">Ver órdenes de laboratorio, registrar y publicar resultados de exámenes.</div>
+        </a>
+
     </div>
 </section>
 
