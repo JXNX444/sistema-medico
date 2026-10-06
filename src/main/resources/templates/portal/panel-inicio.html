@@ -113,6 +113,17 @@
             <div class="sm-feature__desc">Consultar las órdenes de sus pacientes y sus resultados publicados.</div>
         </a>
 
+        <!-- CU-11 Despacho de Medicamentos -->
+        <a th:if="${rol == 'Farmaceutico' or rol == 'Administrador'}" th:href="@{/farmacia/despacho}"
+           class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.5 20.5 3.5 13.5a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 1 1-7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+            </div>
+            <div class="sm-feature__title">Despacho de Medicamentos</div>
+            <div class="sm-feature__desc">Buscar recetas, verificar inventario y despachar medicamentos al paciente.</div>
+        </a>
+
     </div>
 </section>
 
