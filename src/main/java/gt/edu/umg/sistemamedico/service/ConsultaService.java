@@ -6,9 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,8 +32,6 @@ public class ConsultaService {
     private static final Set<String> ESTADOS_PANEL = Set.of("EN_ESPERA", "CONSULTA_MEDICA", "EVALUADO");
     private static final Short ACTIVO = 1;
     private static final ZoneId ZONA_GT = ZoneId.of("America/Guatemala");
-    private static final DateTimeFormatter FMT_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final DateTimeFormatter FMT_HORA = DateTimeFormatter.ofPattern("HH:mm");
 
     private static final String MSG_FA05 =
             "No es posible finalizar la consulta sin registrar un diagnostico. El campo Diagnostico es obligatorio.";
@@ -51,7 +47,7 @@ public class ConsultaService {
     private final Cie10Service cie10Service;
     private final DisponibilidadService disponibilidadService;
     private final TarifaService tarifaService;
-    private final CorreoService correoService;
+    private final NotificacionService notificacionService;
 
     public ConsultaService(CitaRepository citaRepository,
                            ConsultaRepository consultaRepository,
@@ -64,7 +60,7 @@ public class ConsultaService {
                            Cie10Service cie10Service,
                            DisponibilidadService disponibilidadService,
                            TarifaService tarifaService,
-                           CorreoService correoService) {
+                           NotificacionService notificacionService) {
         this.citaRepository = citaRepository;
         this.consultaRepository = consultaRepository;
         this.signosVitalesRepository = signosVitalesRepository;
@@ -76,7 +72,7 @@ public class ConsultaService {
         this.cie10Service = cie10Service;
         this.disponibilidadService = disponibilidadService;
         this.tarifaService = tarifaService;
-        this.correoService = correoService;
+        this.notificacionService = notificacionService;
     }
 
     // =====================================================================
@@ -489,7 +485,7 @@ public class ConsultaService {
     }
 
     // =====================================================================
-    // FA02: cita de seguimiento
+    // FA02 / CU-12: cita de seguimiento
     // =====================================================================
 
     /** Horarios libres del medico en la sede de la cita para una fecha. Reusa DisponibilidadService (CU-03). */
@@ -503,14 +499,37 @@ public class ConsultaService {
         return disponibilidadService.obtenerHorariosDisponibles(medico.getId(), cita.getSucursal().getId(), fecha);
     }
 
+    /** [RN-CU11-03] Las observaciones del seguimiento van en cita.motivo (la BD exige 10-2000). */
+    private static final String MSG_OBSERVACIONES =
+            "Las observaciones son obligatorias. Deben contener entre 10 y 2000 caracteres.";
+
     /**
-     * tipo (follow_up_type): 0 = Monitoreo de tratamiento, 1 = Revision de resultados de laboratorio.
-     * La nueva cita queda PENDIENTE_PAGO sin temporizador (origen interno), igual que las
-     * citas internas de Recepcion, y ligada a la consulta original con parent_consulta_id.
-     * [FA02 paso 4] Se avisa al paciente por correo (CorreoService, tolerante a fallos).
+     * Version anterior (sin observaciones ni prioridad). Se conserva para que el
+     * proyecto siga compilando mientras se actualiza ConsultaController; arma las
+     * observaciones automaticamente y usa prioridad Normal.
      */
     @Transactional
     public Resultado agendarSeguimiento(Integer citaId, Usuario medico, LocalDate fecha, LocalTime hora, Short tipo) {
+        Cita cita = citaDelMedico(citaId, medico);
+        String observaciones = "Seguimiento de la cita " + (cita == null ? "" : cita.getNumeroCita());
+        return agendarSeguimiento(citaId, medico, fecha, hora, tipo, observaciones, (short) 0);
+    }
+
+    /**
+     * CU-12 Agendamiento de Cita de Seguimiento (antes FA02 de CU-08).
+     *
+     * tipo (follow_up_type): 0 = Monitoreo de tratamiento, 1 = Revision de resultados de laboratorio.
+     * prioridad: 0 = Normal, 1 = Alta, 2 = Urgente (mismo campo que usa CU-07 para emergencias).
+     *
+     * La nueva cita queda PENDIENTE_PAGO sin temporizador (origen interno), igual que las
+     * citas internas de Recepcion, y ligada a la consulta original con parent_consulta_id.
+     *
+     * [RN-CU11-04 / RN-CU11-05] Los correos no se envian aqui: se programan en la cola
+     * (NotificacionService) la notificacion para ya y el recordatorio para 24 h antes.
+     */
+    @Transactional
+    public Resultado agendarSeguimiento(Integer citaId, Usuario medico, LocalDate fecha, LocalTime hora,
+                                        Short tipo, String observaciones, Short prioridad) {
         Cita cita = citaDelMedico(citaId, medico);
         Resultado invalida = validarEvaluada(cita);
         if (invalida != null) {
@@ -519,22 +538,38 @@ public class ConsultaService {
         Consulta consulta = consultaFinalizada(citaId);
 
         Map<String, String> errores = new LinkedHashMap<>();
+
+        // RN-CU11-01
         if (tipo == null || (tipo != 0 && tipo != 1)) {
-            errores.put("tipoSeguimiento", "Seleccione el tipo de seguimiento.");
+            errores.put("tipoSeguimiento", "Debe seleccionar el tipo de seguimiento.");
         }
-        if (fecha == null || hora == null) {
-            errores.put("fechaHora", "Debe seleccionar una fecha y una hora.");
-        } else if (fecha.isBefore(LocalDate.now(ZONA_GT))) {
-            errores.put("fechaHora", "La cita de seguimiento debe ser en una fecha futura.");
+
+        // RN-CU11-02 + FA01 (conflicto de horario)
+        if (fecha == null || hora == null || fecha.isBefore(LocalDate.now(ZONA_GT))) {
+            errores.put("fechaHora", "Seleccione una fecha futura dentro de los horarios disponibles del médico.");
         } else if (!horariosSeguimiento(citaId, medico, fecha).contains(hora)) {
-            errores.put("fechaHora", "El horario seleccionado ya no esta disponible. Elija otro.");
+            // La hora se ocupo entre que el medico la eligio y confirmo.
+            // Clave propia para que la pantalla recargue los horarios.
+            errores.put("conflictoHorario",
+                    "El horario seleccionado ya no está disponible. Por favor, elija otro horario.");
         }
+
+        // RN-CU11-03
+        String obs = limpiar(observaciones);
+        if (obs == null || obs.length() < 10 || obs.length() > 2000) {
+            errores.put("observaciones", MSG_OBSERVACIONES);
+        }
+
+        // Paso 6: prioridad
+        if (prioridad == null || prioridad < 0 || prioridad > 2) {
+            errores.put("prioridad", "Seleccione la prioridad del seguimiento.");
+        }
+
         if (!errores.isEmpty()) {
             return Resultado.errores(errores);
         }
 
-        String tipoTexto = tipo == 0 ? "Monitoreo de tratamiento" : "Revision de resultados de laboratorio";
-        String motivo = "Seguimiento: " + tipoTexto.toLowerCase() + " (cita origen " + cita.getNumeroCita() + ")";
+        String tipoTexto = tipo == 0 ? "Monitoreo de tratamiento" : "Revisión de resultados de laboratorio";
 
         Cita nueva = new Cita();
         nueva.setNumeroCita(generarNumeroCita());
@@ -543,13 +578,14 @@ public class ConsultaService {
         nueva.setEspecialidad(cita.getEspecialidad());
         nueva.setSucursal(cita.getSucursal());
         nueva.setEstadoCita(estadoCitaService.buscarPorCodigo("PENDIENTE_PAGO"));
-        nueva.setFechaHora(fecha.atTime(hora).atZone(ZoneId.systemDefault()).toOffsetDateTime());
+        // Hora de Guatemala explicita: con systemDefault() quedaria corrida si el servidor esta en UTC
+        nueva.setFechaHora(fecha.atTime(hora).atZone(ZONA_GT).toOffsetDateTime());
         nueva.setDuracionMin((short) 30);
-        nueva.setMotivo(motivo);
+        nueva.setMotivo(obs);                      // RN-CU11-03
         nueva.setMonto(tarifaService.precioConsulta(cita.getEspecialidad()));
         nueva.setEsEmergencia(false);
-        nueva.setPrioridad((short) 0);
-        nueva.setOrigen((short) 1);           // interno: no usa el timer de 5 minutos
+        nueva.setPrioridad(prioridad);             // paso 6
+        nueva.setOrigen((short) 1);                // interno: no usa el timer de 5 minutos
         nueva.setEsSeguimiento(true);
         nueva.setFollowUpType(tipo);
         nueva.setParentConsultaId(consulta.getId());
@@ -557,23 +593,11 @@ public class ConsultaService {
         nueva.setState((short) 1);
         citaRepository.save(nueva);
 
-        String fechaTexto = fecha.format(FMT_FECHA);
-        String horaTexto = hora.format(FMT_HORA);
+        // RN-CU11-04 y RN-CU11-05: a la cola de correos (los envia NotificacionScheduler)
+        notificacionService.programarSeguimiento(nueva, tipoTexto, obs);
 
-        // FA02 paso 4: aviso al paciente. Si el correo falla, la cita igual queda agendada.
-        correoService.enviarCitaSeguimiento(
-                cita.getPaciente().getCorreo(),
-                cita.getPaciente().getNombreCompleto(),
-                nueva.getNumeroCita(),
-                tipoTexto,
-                cita.getMedico().getNombreCompleto(),
-                cita.getEspecialidad().getNombre(),
-                cita.getSucursal().getNombre(),
-                fechaTexto + " " + horaTexto,
-                nueva.getMonto().setScale(2, RoundingMode.HALF_UP).toPlainString());
-
-        return Resultado.exito("Cita de seguimiento agendada para el " + fechaTexto
-                + " a las " + horaTexto + ". Se enviara notificacion al paciente.");
+        return Resultado.exito("Cita de seguimiento agendada exitosamente. Tipo: " + tipoTexto
+                + ". Paciente: " + cita.getPaciente().getNombreCompleto() + ".");
     }
 
     private String generarNumeroCita() {
