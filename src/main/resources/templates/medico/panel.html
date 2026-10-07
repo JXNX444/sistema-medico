@@ -160,14 +160,27 @@
         </div>
     </div>
 
-    <!-- ===================== FA02: Cita de seguimiento ===================== -->
+    <!-- ===================== CU-12: Cita de seguimiento ===================== -->
     <div id="formSeguimiento" class="sm-card oculto" style="padding:24px;margin-top:28px;">
         <div style="font-size:16px;font-weight:800;margin-bottom:2px;">Agendar cita de seguimiento</div>
         <div id="seguimientoContexto" style="font-size:13px;color:var(--sm-slate-500);margin-bottom:16px;">—</div>
 
+        <!-- [CU-12 paso 3] Banner verde con los datos precargados de la consulta -->
+        <div class="seg-banner">
+            <div class="seg-banner__titulo">
+                <i class="ti ti-circle-check" aria-hidden="true"></i> Datos precargados de la consulta
+            </div>
+            <div class="seg-banner__datos">
+                <div><span>Paciente</span><b id="segPaciente">—</b></div>
+                <div><span>Médico</span><b id="segMedico">—</b></div>
+                <div><span>Especialidad</span><b id="segEspecialidad">—</b></div>
+                <div><span>Sede</span><b id="segSucursal">—</b></div>
+            </div>
+        </div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
             <div class="sm-field">
-                <label>Tipo de seguimiento</label>
+                <label>Tipo de seguimiento *</label>
                 <select id="selTipoSeg" class="sm-select">
                     <option value="">Seleccione...</option>
                     <option value="0">Monitoreo de tratamiento</option>
@@ -176,19 +189,42 @@
                 <p class="sm-error" data-error="tipoSeguimiento"></p>
             </div>
             <div class="sm-field">
-                <label>Fecha</label>
+                <label>Fecha *</label>
                 <input id="inpFechaSeg" class="sm-input" type="date" onchange="cargarHorarios()">
             </div>
             <div class="sm-field">
-                <label>Hora</label>
+                <label>Hora *</label>
                 <select id="selHoraSeg" class="sm-select"></select>
             </div>
         </div>
         <p class="sm-error" data-error="fechaHora"></p>
+
+        <!-- [CU-12 FA01] Alerta roja si la hora se ocupo mientras tanto (se oculta sola si esta vacia) -->
+        <p class="seg-conflicto" data-error="conflictoHorario"></p>
+
+        <div style="display:grid;grid-template-columns:3fr 1fr;gap:14px;margin-top:14px;">
+            <div class="sm-field">
+                <label>Observaciones * <span style="color:var(--sm-slate-400);font-weight:400;">(10 a 2000 caracteres)</span></label>
+                <textarea id="inpObsSeg" class="sm-textarea" rows="3" maxlength="2000"
+                          oninput="contarObservaciones()"></textarea>
+                <div id="contadorObsSeg" style="font-size:11px;color:var(--sm-slate-400);text-align:right;">0 / 2000</div>
+                <p class="sm-error" data-error="observaciones"></p>
+            </div>
+            <div class="sm-field">
+                <label>Prioridad *</label>
+                <select id="selPrioridadSeg" class="sm-select">
+                    <option value="0">Normal</option>
+                    <option value="1">Alta</option>
+                    <option value="2">Urgente</option>
+                </select>
+                <p class="sm-error" data-error="prioridad"></p>
+            </div>
+        </div>
         <p class="sm-error" data-error="general"></p>
 
         <div style="display:flex;gap:10px;margin-top:20px;">
-            <button class="sm-btn sm-btn--ghost" onclick="cerrarFormularios()">Cancelar</button>
+            <!-- [CU-12 FA02] Volver: cierra sin guardar nada -->
+            <button class="sm-btn sm-btn--ghost" onclick="cerrarFormularios()">← Volver</button>
             <button class="sm-btn sm-btn--primary" onclick="guardarSeguimiento()">Agendar seguimiento</button>
         </div>
     </div>
@@ -232,6 +268,23 @@
     /* Casilla "Orden externa" (CU-09 FA01): misma tarjeta que los examenes, ocupa todo el ancho */
     .orden-externa { align-items:flex-start; margin-top:12px; }
     .orden-externa input { margin-top:2px; }
+
+    /* CU-12: banner verde con los datos precargados (paso 3) */
+    .seg-banner {
+        background:var(--sm-success-bg); color:var(--sm-success-ink);
+        border-radius:10px; padding:14px 16px; margin-bottom:18px;
+    }
+    .seg-banner__titulo { font-size:13px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+    .seg-banner__datos { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:8px; font-size:13px; }
+    .seg-banner__datos span { display:block; opacity:.75; font-size:12px; }
+    .seg-banner__datos b { font-weight:700; }
+
+    /* CU-12 FA01: alerta roja de conflicto de horario; vacia no se ve */
+    .seg-conflicto {
+        margin:12px 0 0; padding:12px 14px; border-radius:10px; font-size:14px;
+        background:var(--sm-danger-bg); color:var(--sm-danger);
+    }
+    .seg-conflicto:empty { display:none; }
 </style>
 
 <script th:inline="javascript">
