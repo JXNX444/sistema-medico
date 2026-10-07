@@ -1,5 +1,6 @@
 /* ============================================================
    CU-08 Consulta Medica
+   + CU-12 Agendamiento de Cita de Seguimiento (seccion de seguimiento)
    ============================================================ */
 
 let citasPorId = {};          // ultima carga del panel, para leer nombres sin pasarlos por onclick
@@ -420,7 +421,7 @@ async function guardarReceta() {
     }
 }
 
-/* ---------- FA02: cita de seguimiento ---------- */
+/* ---------- CU-12: cita de seguimiento (antes FA02 de CU-08) ---------- */
 
 function hoyLocal() {
     const d = new Date();
@@ -432,11 +433,31 @@ function abrirSeguimiento(citaId) {
     cerrarFormularios();
     citaEvaluada = citaId;
     document.getElementById('seguimientoContexto').textContent = contextoDe(citaId);
+
+    // [CU-12 paso 3] Banner verde: datos precargados de la consulta
+    const c = citasPorId[citaId] || {};
+    document.getElementById('segPaciente').textContent = c.pacienteNombre || '—';
+    document.getElementById('segMedico').textContent = c.medicoNombre || '—';
+    document.getElementById('segEspecialidad').textContent = c.especialidad || '—';
+    document.getElementById('segSucursal').textContent = c.sucursal || '—';
+
     const fecha = document.getElementById('inpFechaSeg');
     fecha.min = hoyLocal();
     fecha.value = '';
     document.getElementById('selHoraSeg').innerHTML = '<option value="">Primero elija una fecha</option>';
+    contarObservaciones();   // el contador vuelve a 0 / 2000
     mostrarFormulario('formSeguimiento');
+}
+
+/** [RN-CU11-03] Contador de caracteres de las observaciones (10 a 2000). */
+function contarObservaciones() {
+    const texto = document.getElementById('inpObsSeg').value.trim();
+    const contador = document.getElementById('contadorObsSeg');
+    contador.textContent = `${texto.length} / 2000`;
+    // En ambar mientras no llegue al minimo de 10
+    contador.style.color = texto.length > 0 && texto.length < 10
+        ? 'var(--sm-warning, #B45309)'
+        : 'var(--sm-slate-400)';
 }
 
 async function cargarHorarios() {
@@ -457,11 +478,14 @@ async function cargarHorarios() {
 async function guardarSeguimiento() {
     limpiarErrores('formSeguimiento');
     const tipo = document.getElementById('selTipoSeg').value;
+    const prioridad = document.getElementById('selPrioridadSeg').value;
     const body = {
         citaId: citaEvaluada,
         fecha: document.getElementById('inpFechaSeg').value,
         hora: document.getElementById('selHoraSeg').value,
-        tipo: tipo === '' ? null : Number(tipo)
+        tipo: tipo === '' ? null : Number(tipo),
+        observaciones: document.getElementById('inpObsSeg').value,     // [RN-CU11-03]
+        prioridad: prioridad === '' ? null : Number(prioridad)          // [CU-12 paso 6]
     };
     try {
         const data = await postJson('medico/api/seguimiento', body);
@@ -471,6 +495,11 @@ async function guardarSeguimiento() {
             cargarPanel();
         } else {
             mostrarErrores('formSeguimiento', data.errores);
+            // [CU-12 FA01] La hora se ocupo: se recargan los horarios para que elija otra.
+            // Tipo, fecha, observaciones y prioridad se conservan.
+            if (data.errores && data.errores.conflictoHorario) {
+                await cargarHorarios();
+            }
         }
     } catch (e) {
         mostrarMensaje('Error al agendar el seguimiento.', 'error');
