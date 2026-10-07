@@ -186,7 +186,7 @@ public class ConsultaController {
         return respuesta(consultaService.generarReceta(req.citaId(), ud.getUsuario(), req.items(), req.notas()));
     }
 
-    // ---------- FA02: cita de seguimiento ----------
+    // ---------- FA02 / CU-12: cita de seguimiento ----------
 
     @GetMapping("/api/horarios")
     @ResponseBody
@@ -203,7 +203,11 @@ public class ConsultaController {
                 .toList();
     }
 
-    public record SeguimientoRequest(Integer citaId, String fecha, String hora, Short tipo) {}
+    /**
+     * [CU-12] observaciones (RN-CU11-03) y prioridad (paso 6): 0 Normal, 1 Alta, 2 Urgente.
+     */
+    public record SeguimientoRequest(Integer citaId, String fecha, String hora, Short tipo,
+                                     String observaciones, Short prioridad) {}
 
     @PostMapping("/api/seguimiento")
     @ResponseBody
@@ -220,7 +224,8 @@ public class ConsultaController {
             error.put("errores", Map.of("fechaHora", "Formato de fecha u hora invalido."));
             return error;
         }
-        return respuesta(consultaService.agendarSeguimiento(req.citaId(), ud.getUsuario(), fecha, hora, req.tipo()));
+        return respuesta(consultaService.agendarSeguimiento(req.citaId(), ud.getUsuario(), fecha, hora,
+                req.tipo(), req.observaciones(), req.prioridad()));
     }
 
     // ---------- Pasos 11-12: Finalizar Atencion ----------
@@ -252,6 +257,8 @@ public class ConsultaController {
         m.put("numeroCita", c.getNumeroCita());
         m.put("pacienteNombre", c.getPaciente().getNombreCompleto());
         m.put("especialidad", c.getEspecialidad().getNombre());
+        m.put("medicoNombre", c.getMedico().getNombreCompleto());   // [CU-12 paso 3] banner del seguimiento
+        m.put("sucursal", c.getSucursal().getNombre());              // [CU-12 paso 3] banner del seguimiento
         m.put("fechaHora", c.getFechaLocal().format(FMT));
         m.put("estado", c.getEstadoCita().getNombre());
         m.put("esEmergencia", c.isEsEmergencia());
