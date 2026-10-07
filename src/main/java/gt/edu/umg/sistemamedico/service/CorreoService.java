@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
  * CU-02 paso 14: correo de bienvenida al paciente recien registrado.
  * CU-04 paso 14: comprobante de pago.
  * CU-08 FA02 paso 4: aviso de cita de seguimiento.
+ * CU-12: correos de la cola his.notificacion (RN-CU11-04 y RN-CU11-05).
+ *        Aqui solo se ARMAN (asunto + HTML); los guarda NotificacionService
+ *        y los envia NotificacionScheduler con enviarAhora().
  *
  * Los tres usan la misma plantilla (plantilla()) con la estetica actual
  * del sistema (theme.css): navy #0F172A, cian #06B6D4 / #0891B2, grises
@@ -83,6 +86,101 @@ public class CorreoService {
                 construirHtmlSeguimiento(nombrePaciente, numeroCita, tipoSeguimiento,
                         medico, especialidad, sucursal, fechaHora, monto),
                 "aviso de seguimiento");
+    }
+
+    // =====================================================================
+    // CU-12: correos que van a la cola (his.notificacion)
+    // =====================================================================
+
+    /** Un correo listo para guardar en la cola: asunto + HTML. */
+    public record CorreoArmado(String asunto, String html) {}
+
+    /**
+     * [RN-CU11-04] Notificacion de cita de seguimiento agendada.
+     * Asunto: "Cita de Seguimiento Agendada - [Hospital]".
+     * Cuerpo: fecha, hora, tipo de seguimiento, medico, sucursal y observaciones.
+     */
+    public CorreoArmado armarSeguimientoAgendado(String nombrePaciente, String numeroCita,
+                                                 String tipoSeguimiento, String medico,
+                                                 String especialidad, String sucursal,
+                                                 String fecha, String hora,
+                                                 String observaciones, String monto) {
+        String filas = fila("No. de cita", numeroCita)
+                + fila("Fecha", fecha)
+                + fila("Hora", hora)
+                + fila("Tipo de seguimiento", tipoSeguimiento)
+                + fila("Médico", medico)
+                + fila("Especialidad", especialidad)
+                + fila("Sede", sucursal);
+
+        String avisoHtml = aviso("#ECFEFF", "#0E7490",
+                "<b>Observaciones del médico:</b><br>" + escapar(observaciones))
+                + "<div style=\"height:12px;\"></div>"
+                + aviso("#FEF3C7", "#92400E",
+                "La cita queda <b>pendiente de pago</b>. Puede pagarla en línea desde "
+                        + "<b>Mis Citas</b> o directamente en caja el día de su cita.");
+
+        String html = plantilla(
+                "CITA DE SEGUIMIENTO",
+                "Hola, " + primerNombre(nombrePaciente),
+                "Su médico le agendó una cita de seguimiento. Estos son los detalles.",
+                "FECHA Y HORA", fecha + " " + hora,
+                "DETALLE DE LA CITA", filas,
+                "Monto a pagar", "Q " + monto,
+                avisoHtml,
+                "Ver mis citas");
+
+        return new CorreoArmado("Cita de Seguimiento Agendada - " + nombreHospital, html);
+    }
+
+    /**
+     * [RN-CU11-05] Recordatorio de cita de seguimiento (se envia el dia antes).
+     * Asunto: "Recordatorio: Su Cita de Seguimiento Mañana".
+     * Cuerpo: fecha, hora, tipo de seguimiento, medico y sucursal.
+     */
+    public CorreoArmado armarRecordatorioSeguimiento(String nombrePaciente, String numeroCita,
+                                                     String tipoSeguimiento, String medico,
+                                                     String especialidad, String sucursal,
+                                                     String fecha, String hora) {
+        String filas = fila("No. de cita", numeroCita)
+                + fila("Fecha", fecha)
+                + fila("Hora", hora)
+                + fila("Tipo de seguimiento", tipoSeguimiento)
+                + fila("Médico", medico)
+                + fila("Especialidad", especialidad)
+                + fila("Sede", sucursal);
+
+        String html = plantilla(
+                "RECORDATORIO",
+                "Hola, " + primerNombre(nombrePaciente),
+                "Le recordamos que mañana tiene su cita de seguimiento.",
+                "FECHA Y HORA", fecha + " " + hora,
+                "DETALLE DE LA CITA", filas,
+                null, null,
+                aviso("#ECFEFF", "#0E7490",
+                        "Por favor preséntese en recepción 15 minutos antes de su cita."),
+                "Ver mis citas");
+
+        return new CorreoArmado("Recordatorio: Su Cita de Seguimiento Mañana", html);
+    }
+
+    /**
+     * Envia un correo YA ARMADO y, a diferencia de enviar(), si falla LANZA
+     * la excepcion. Lo usa la cola de notificaciones (NotificacionService)
+     * para saber si el envio salio bien y, si no, guardar el error y reintentar.
+     */
+    public void enviarAhora(String correoDestino, String asunto, String html) throws Exception {
+        if (remitente == null || remitente.isBlank()) {
+            throw new IllegalStateException("Correo SMTP no configurado (MAIL_USER vacio).");
+        }
+        MimeMessage mensaje = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mensaje, "UTF-8");
+        helper.setFrom(remitente);
+        helper.setTo(correoDestino);
+        helper.setSubject(asunto);
+        helper.setText(html, true); // true = HTML
+        mailSender.send(mensaje);
+        log.info("Correo '{}' enviado a {}", asunto, correoDestino);
     }
 
     // =====================================================================
@@ -317,6 +415,15 @@ public class CorreoService {
                 .replace("{{F}}", fondo)
                 .replace("{{C}}", color)
                 .replace("{{T}}", textoHtml);
+    }
+
+    /** Texto escrito por el usuario dentro del HTML: evita que los signos < o > rompan el correo. */
+    private String escapar(String texto) {
+        if (texto == null) return "";
+        return texto.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\n", "<br>");
     }
 
     private String primerNombre(String nombre) {
