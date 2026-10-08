@@ -135,6 +135,17 @@
             <div class="sm-feature__desc">Configurar qué especialidades médicas se atienden en cada sede del hospital.</div>
         </a>
 
+        <!-- CU-14 Mantenimiento de Catalogos del Sistema -->
+        <a th:if="${rol == 'Administrador'}" th:href="@{/catalogos}"
+           class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h7"/></svg>
+            </div>
+            <div class="sm-feature__title">Catálogos del Sistema</div>
+            <div class="sm-feature__desc">Especialidades, sucursales, estados de cita, laboratorios, exámenes, medicamentos, roles e inventario.</div>
+        </a>
+
     </div>
 </section>
 
