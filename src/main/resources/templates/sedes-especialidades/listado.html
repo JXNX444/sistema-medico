@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Especialidades por Sede', null)}"></head>
+<body>
+
+<div class="sm-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('sedes')}"></aside>
+
+    <div class="sm-main">
+        <header th:replace="~{fragments/layout :: topbar('Especialidades por Sede','Qué especialidades se atienden en cada sede (CU-13)')}"></header>
+
+        <div class="sm-content">
+
+            <!-- Mensajes despues de asignar o eliminar (llegan con el redirect, se ven una sola vez) -->
+            <div th:if="${mensajeExito}" class="sm-badge sm-badge--success"
+                 style="padding:10px 14px;font-size:13px;" th:text="${mensajeExito}"></div>
+            <div th:if="${mensajeError}" class="sm-badge sm-badge--danger"
+                 style="padding:10px 14px;font-size:13px;" th:text="${mensajeError}"></div>
+
+            <!-- Filtro por ID + boton Asignar (pasos 3 y 4) -->
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+                <form th:action="@{/sedes-especialidades}" method="get" style="display:flex;gap:10px;align-items:center;">
+                    <input class="sm-input" type="text" name="id" th:value="${filtroId}"
+                           placeholder="Filtrar por ID" maxlength="9" style="width:180px;">
+                    <button type="submit" class="sm-btn sm-btn--primary sm-btn--sm">Buscar</button>
+                    <a th:if="${filtroId != null and filtroId != ''}" th:href="@{/sedes-especialidades}"
+                       class="sm-btn sm-btn--ghost sm-btn--sm">Ver todas</a>
+                </form>
+                <a th:href="@{/sedes-especialidades/nuevo}" class="sm-btn sm-btn--dark sm-btn--sm">+ Asignar Especialidad</a>
+            </div>
+
+            <div th:if="${errorFiltro}" class="sm-badge sm-badge--danger"
+                 style="padding:10px 14px;font-size:13px;" th:text="${errorFiltro}"></div>
+
+            <!-- FA01: sin asignaciones -->
+            <div th:if="${pagina.totalElements == 0}" class="sm-empty">
+                <div class="sm-empty__icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+                </div>
+                <div class="sm-empty__title">No hay asignaciones registradas</div>
+                <div class="sm-empty__desc">Puede crear una nueva con el botón "Asignar Especialidad".</div>
+            </div>
+
+            <!-- Paso 3: tabla -->
+            <div th:if="${pagina.totalElements > 0}" class="sm-panel">
+                <table class="sm-table">
+                    <thead>
+                    <tr><th>ID</th><th>Sede</th><th>Especialidad</th><th>Estado</th><th style="text-align:right;">Acciones</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="a : ${pagina.content}">
+                        <td th:text="${a.id}"></td>
+                        <td th:text="${a.sucursal.nombre}"></td>
+                        <td th:text="${a.especialidad.nombre}"></td>
+                        <td>
+                            <span th:if="${a.state == 1}" class="sm-badge sm-badge--success">Activo</span>
+                            <span th:if="${a.state != 1}" class="sm-badge sm-badge--warning">Inactivo</span>
+                        </td>
+                        <td style="text-align:right;">
+                            <!-- FA02: menu de acciones con la opcion Eliminar -->
+                            <div class="se-acciones">
+                                <button type="button" class="se-acciones__boton" onclick="abrirMenu(this, event)"
+                                        aria-label="Acciones">&middot;&middot;&middot;</button>
+                                <div class="se-acciones__menu">
+                                    <button type="button" class="se-acciones__eliminar"
+                                            th:attr="data-id=${a.id}, data-sede=${a.sucursal.nombre}, data-especialidad=${a.especialidad.nombre}"
+                                            onclick="confirmarEliminar(this)">Eliminar</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- Paginacion (10 por pagina) -->
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;">
+                    <span style="font-size:13px;color:var(--sm-slate-500);"
+                          th:text="${'Página ' + (pagina.number + 1) + ' de ' + pagina.totalPages + ' · ' + pagina.totalElements + ' asignaciones'}">
+                        Página 1 de 1
+                    </span>
+                    <div class="sm-pag" th:if="${pagina.totalPages > 1}" style="margin-top:0;">
+                        <a th:each="p : ${#numbers.sequence(0, pagina.totalPages - 1)}"
+                           th:href="@{/sedes-especialidades(id=${filtroId}, page=${p})}"
+                           th:text="${p + 1}"
+                           th:classappend="${p == pagina.number} ? 'is-active'"></a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Formulario oculto que hace el POST de eliminar despues de confirmar -->
+<form id="formEliminar" method="post" style="display:none;"></form>
+
+<style>
+    .sm-pag { display:flex; gap:6px; margin-top:16px; }
+    .sm-pag a { padding:6px 12px; border:1px solid var(--sm-border); border-radius:8px;
+        font-size:13px; font-weight:600; color:var(--sm-slate-600); }
+    .sm-pag a.is-active { background:var(--sm-cyan); color:#fff; border-color:var(--sm-cyan); }
+
+    /* Menu "..." de la columna Acciones (FA02) */
+    .se-acciones { position:relative; display:inline-block; }
+    .se-acciones__boton {
+        background:#fff; border:1px solid var(--sm-border); border-radius:8px; cursor:pointer;
+        padding:4px 12px; font-size:16px; font-weight:800; line-height:1; color:var(--sm-slate-600);
+        font-family:inherit;
+    }
+    .se-acciones__boton:hover { border-color:var(--sm-cyan); color:var(--sm-cyan-dark); }
+    .se-acciones__menu {
+        display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:20; min-width:140px;
+        background:#fff; border:1px solid var(--sm-border); border-radius:10px;
+        box-shadow:var(--sm-shadow); padding:6px; text-align:left;
+    }
+    .se-acciones.abierto .se-acciones__menu { display:block; }
+    .se-acciones__eliminar {
+        width:100%; text-align:left; background:none; border:none; cursor:pointer; font-family:inherit;
+        padding:8px 12px; border-radius:8px; font-size:14px; font-weight:600; color:var(--sm-danger);
+    }
+    .se-acciones__eliminar:hover { background:var(--sm-danger-bg); }
+</style>
+
+<script th:inline="javascript">
+    const CTX = /*[[@{/}]]*/ '/';
+
+    /** Abre el menu "..." de una fila y cierra los demas. */
+    function abrirMenu(boton, evento) {
+        evento.stopPropagation();
+        const contenedor = boton.closest('.se-acciones');
+        const estabaAbierto = contenedor.classList.contains('abierto');
+        cerrarMenus();
+        if (!estabaAbierto) contenedor.classList.add('abierto');
+    }
+
+    function cerrarMenus() {
+        document.querySelectorAll('.se-acciones.abierto').forEach(m => m.classList.remove('abierto'));
+    }
+
+    // Un clic fuera del menu lo cierra
+    document.addEventListener('click', cerrarMenus);
+
+    /** FA02: confirmacion con la ventana del sistema (controles.js) y luego el POST. */
+    async function confirmarEliminar(boton) {
+        cerrarMenus();
+        const id = boton.dataset.id;
+        const texto = '¿Confirmar eliminación? ' + boton.dataset.especialidad
+            + ' dejará de ofrecerse en ' + boton.dataset.sede + '.';
+
+        const confirmado = await Aviso.confirmar(texto, { aceptar: 'Eliminar' });
+        if (!confirmado) return;
+
+        const form = document.getElementById('formEliminar');
+        form.action = CTX + 'sedes-especialidades/' + id + '/eliminar';
+        form.submit();
+    }
+</script>
+
+</body>
+</html>
