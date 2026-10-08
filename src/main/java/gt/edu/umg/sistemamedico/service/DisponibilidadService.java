@@ -19,6 +19,12 @@ import java.util.stream.Collectors;
  * A proposito NO tiene cache: la disponibilidad cambia cada vez que
  * alguien agenda o cancela una cita, asi que siempre se calcula en
  * vivo contra la base de datos.
+ *
+ * Zona horaria: todo se calcula en hora de Guatemala (ZONA_GT). La BD
+ * devuelve fecha_hora en UTC (ej: 11:00 de Guatemala llega como 17:00Z),
+ * asi que antes de comparar contra los slots del horario se convierte a
+ * hora de Guatemala; si no, las horas ocupadas nunca coincidian con los
+ * slots y se ofrecian como libres. [CU-03, CU-12 FA01]
  */
 @Service
 public class DisponibilidadService {
@@ -29,6 +35,8 @@ public class DisponibilidadService {
      * paciente no asistio, libera el slot para otro paciente.
      */
     private static final Set<String> CODIGOS_QUE_NO_OCUPAN = Set.of("CANCELADA", "NO_ASISTIO");
+
+    private static final ZoneId ZONA_GT = ZoneId.of("America/Guatemala");
 
     private final HorarioMedicoRepository horarioMedicoRepository;
     private final CitaRepository citaRepository;
@@ -62,7 +70,7 @@ public class DisponibilidadService {
         }
 
         // 2. Citas ese dia, excluyendo eliminadas (state=2) Y canceladas/no-asistio.
-        ZoneId zona = ZoneId.systemDefault();
+        ZoneId zona = ZONA_GT;
         OffsetDateTime inicioDia = fecha.atStartOfDay(zona).toOffsetDateTime();
         OffsetDateTime finDia = fecha.plusDays(1).atStartOfDay(zona).toOffsetDateTime();
 
@@ -71,7 +79,8 @@ public class DisponibilidadService {
 
         Set<LocalTime> horasOcupadas = citasDelDia.stream()
                 .filter(c -> !CODIGOS_QUE_NO_OCUPAN.contains(c.getEstadoCita().getCodigo()))
-                .map(c -> c.getFechaHora().toLocalTime())
+                // A hora de Guatemala antes de comparar (la BD la devuelve en UTC)
+                .map(c -> c.getFechaHora().atZoneSameInstant(zona).toLocalTime())
                 .collect(Collectors.toSet());
 
         // 3. Generar los slots de cada horario y descartar ocupados / ya pasados.
