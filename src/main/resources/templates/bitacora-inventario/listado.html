@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Bitácora de Inventario', null)}"></head>
+<body>
+
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <a th:href="@{/panel/inicio}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver al panel</a>
+</nav>
+
+<main style="max-width:1280px;margin:0 auto;padding:32px 24px;display:flex;flex-direction:column;gap:16px;">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div>
+            <div style="font-size:24px;font-weight:800;">Bitácora de Inventario</div>
+            <div style="font-size:14px;color:var(--sm-slate-500);">Entradas y salidas de medicamentos por sucursal (CU-15)</div>
+        </div>
+        <!-- Paso 3 -->
+        <a th:href="@{/bitacora-inventario/nuevo}" class="sm-btn sm-btn--dark sm-btn--sm">+ Nuevo Movimiento</a>
+    </div>
+
+    <!-- Mensajes (llegan con el redirect, se ven una sola vez) -->
+    <div th:if="${mensajeExito}" class="sm-badge sm-badge--success"
+         style="padding:10px 14px;font-size:13px;" th:text="${mensajeExito}"></div>
+    <div th:if="${mensajeAlerta}" class="sm-badge sm-badge--warning"
+         style="padding:10px 14px;font-size:13px;" th:text="${mensajeAlerta}"></div>
+    <div th:if="${mensajeError}" class="sm-badge sm-badge--danger"
+         style="padding:10px 14px;font-size:13px;" th:text="${mensajeError}"></div>
+
+    <!-- RN-CU13-03: resumen mensual de movimientos -->
+    <div class="sm-panel">
+        <div style="font-size:14px;font-weight:700;margin-bottom:10px;" th:text="'Resumen de ' + ${mes}">Resumen</div>
+        <div th:if="${resumen.isEmpty()}" style="font-size:13px;color:var(--sm-slate-500);">Sin movimientos este mes.</div>
+        <div th:unless="${resumen.isEmpty()}" class="bi-resumen">
+            <div th:each="r : ${resumen}" class="bi-resumen__item">
+                <span class="sm-badge" th:classappend="${r.entrada()} ? 'sm-badge--success' : 'sm-badge--danger'"
+                      th:text="${r.tipo()}"></span>
+                <div style="font-size:20px;font-weight:800;" th:text="${r.unidades()} + ' u.'">0 u.</div>
+                <div style="font-size:12px;color:var(--sm-slate-500);" th:text="${r.movimientos()} + ' movimiento(s)'"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paso 2: filtros por columna -->
+    <form th:action="@{/bitacora-inventario}" method="get" class="sm-panel bi-filtros">
+        <select class="sm-select" name="tipo">
+            <option value="">Todos los tipos</option>
+            <option th:each="t : ${tipos}" th:value="${t.valor()}" th:text="${t.texto()}"
+                    th:selected="${f['tipo'] == t.valor().toString()}"></option>
+        </select>
+        <select class="sm-select" name="medicamentoId">
+            <option value="">Todos los medicamentos</option>
+            <option th:each="m : ${medicamentos}" th:value="${m.id}" th:text="${m.nombre}"
+                    th:selected="${f['medicamentoId'] == m.id.toString()}"></option>
+        </select>
+        <select class="sm-select" name="sucursalId">
+            <option value="">Todas las sucursales</option>
+            <option th:each="s : ${sucursales}" th:value="${s.id}" th:text="${s.nombre}"
+                    th:selected="${f['sucursalId'] == s.id.toString()}"></option>
+        </select>
+        <input class="sm-input" type="text" name="referencia" th:value="${f['referencia']}" placeholder="No. de referencia">
+        <input class="sm-input" type="text" name="usuario" th:value="${f['usuario']}" placeholder="Usuario">
+        <label class="bi-fecha">Desde <input class="sm-input" type="date" name="desde" th:value="${f['desde']}" data-nativo></label>
+        <label class="bi-fecha">Hasta <input class="sm-input" type="date" name="hasta" th:value="${f['hasta']}" data-nativo></label>
+        <div style="display:flex;gap:8px;">
+            <button type="submit" class="sm-btn sm-btn--primary sm-btn--sm">Buscar</button>
+            <a th:href="@{/bitacora-inventario}" class="sm-btn sm-btn--ghost sm-btn--sm">Limpiar</a>
+        </div>
+    </form>
+
+    <!-- FA01 -->
+    <div th:if="${pagina.totalElements == 0}" class="sm-empty">
+        <div class="sm-empty__icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+        </div>
+        <div class="sm-empty__title">No se encontraron resultados.</div>
+        <div class="sm-empty__desc">Modifique los filtros o registre un nuevo movimiento.</div>
+    </div>
+
+    <!-- Paso 2: tabla -->
+    <div th:if="${pagina.totalElements > 0}" class="sm-panel" style="overflow-x:auto;">
+        <table class="sm-table">
+            <thead>
+            <tr>
+                <th>Tipo</th><th>Medicamento</th><th>Sucursal</th><th>Cantidad</th>
+                <th>Stock Anterior</th><th>Stock Nuevo</th><th>Costo</th><th>Referencia</th>
+                <th>Usuario</th><th>Fecha</th><th>Estado</th><th style="text-align:right;">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="m : ${pagina.content}">
+                <td><span class="sm-badge" th:classappend="${m.entrada} ? 'sm-badge--success' : 'sm-badge--danger'"
+                          th:text="${m.nombreTipo}"></span></td>
+                <td th:text="${m.medicamento.nombre}"></td>
+                <td th:text="${m.sucursal.nombre}"></td>
+                <td th:text="(${m.entrada} ? '+' : '−') + ${m.cantidad}"></td>
+                <td th:text="${m.stockAnterior}"></td>
+                <td style="font-weight:700;" th:text="${m.stockNuevo}"></td>
+                <td th:text="${m.costoUnitario != null} ? 'Q ' + ${#numbers.formatDecimal(m.costoUnitario, 1, 2)} : '—'"></td>
+                <td th:text="${m.numeroReferencia != null} ? ${m.numeroReferencia} : '—'"></td>
+                <td th:text="${m.usuario.username}"></td>
+                <td style="white-space:nowrap;" th:text="${#temporals.format(m.fechaLocal, 'dd/MM/yyyy HH:mm')}"></td>
+                <td>
+                    <span th:if="${m.state == 1}" class="sm-badge sm-badge--success">Activo</span>
+                    <span th:unless="${m.state == 1}" class="sm-badge sm-badge--warning">Inactivo</span>
+                </td>
+                <td style="text-align:right;white-space:nowrap;">
+                    <!-- Accion Ver -->
+                    <a th:href="@{/bitacora-inventario/{id}(id=${m.id})}" class="sm-btn sm-btn--ghost sm-btn--sm">Ver</a>
+                    <!-- Accion Desactivar / Activar -->
+                    <form th:action="@{/bitacora-inventario/{id}/estado(id=${m.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="sm-btn sm-btn--ghost sm-btn--sm"
+                                th:text="${m.state == 1} ? 'Desactivar' : 'Activar'">Desactivar</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Paginacion (10 por pagina), conserva los filtros -->
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;">
+            <span style="font-size:13px;color:var(--sm-slate-500);"
+                  th:text="${'Página ' + (pagina.number + 1) + ' de ' + pagina.totalPages + ' · ' + pagina.totalElements + ' movimientos'}"></span>
+            <div class="bi-pag" th:if="${pagina.totalPages > 1}">
+                <a th:each="p : ${#numbers.sequence(0, pagina.totalPages - 1)}"
+                   th:href="@{/bitacora-inventario(tipo=${f['tipo']}, medicamentoId=${f['medicamentoId']},
+                             sucursalId=${f['sucursalId']}, referencia=${f['referencia']}, usuario=${f['usuario']},
+                             desde=${f['desde']}, hasta=${f['hasta']}, page=${p})}"
+                   th:text="${p + 1}"
+                   th:classappend="${p == pagina.number} ? 'is-active'"></a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .bi-resumen { display:flex; gap:12px; flex-wrap:wrap; }
+    .bi-resumen__item { display:flex; flex-direction:column; gap:4px; padding:10px 14px; min-width:120px;
+        border:1px solid var(--sm-border); border-radius:10px; }
+    .bi-filtros { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:10px; align-items:end; }
+    .bi-fecha { display:flex; flex-direction:column; gap:4px; font-size:12px; font-weight:600; }
+    .bi-pag { display:flex; gap:6px; flex-wrap:wrap; }
+    .bi-pag a { padding:6px 12px; border:1px solid var(--sm-border); border-radius:8px;
+        font-size:13px; font-weight:600; color:var(--sm-slate-600); }
+    .bi-pag a.is-active { background:var(--sm-cyan); color:#fff; border-color:var(--sm-cyan); }
+</style>
+
+</body>
+</html>
