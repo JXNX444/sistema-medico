@@ -37,6 +37,7 @@ import org.springframework.security.web.SecurityFilterChain;
  *                    guardar y publicar resultados.
  * /farmacia/**    -> rol Farmaceutico (o Administrador). [CU-11]
  * /sedes-especialidades/** -> solo rol Administrador. [CU-13]
+ * /catalogos/**   -> solo rol Administrador. [CU-14]
  */
 @Configuration
 public class SecurityConfig {
@@ -64,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/laboratorio/**").hasAnyRole("Laboratorista", "Administrador", "Medico")
                         .requestMatchers("/farmacia/**").hasAnyRole("Farmaceutico", "Administrador")
                         .requestMatchers("/sedes-especialidades/**").hasRole("Administrador")
+                        .requestMatchers("/catalogos/**").hasRole("Administrador")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
