@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Nuevo Movimiento', null)}"></head>
+<body>
+
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <a th:href="@{/bitacora-inventario}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver a la Bitácora</a>
+</nav>
+
+<main style="max-width:980px;margin:0 auto;padding:32px 24px;">
+    <div style="font-size:24px;font-weight:800;margin-bottom:4px;">Nuevo Movimiento</div>
+    <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:20px;">
+        <span th:if="${esAdmin}">Como Administrador solo puede registrar ajustes de inventario (Ajuste+ / Ajuste-).</span>
+        <span th:unless="${esAdmin}">Los campos con * son obligatorios.</span>
+    </div>
+
+    <div class="bi-columnas">
+        <!-- Paso 4: formulario [RN-CU13-01] -->
+        <form th:action="@{/bitacora-inventario/nuevo}" method="post" class="sm-panel"
+              style="display:flex;flex-direction:column;gap:14px;">
+
+            <div class="sm-field" th:classappend="${errores.containsKey('medicamentoId')} ? 'bi-error'">
+                <label>Medicamento *</label>
+                <select class="sm-select" name="medicamentoId" id="medicamentoId">
+                    <option value="">Seleccione un medicamento...</option>
+                    <option th:each="m : ${medicamentos}" th:value="${m.id}" th:text="${m.nombre}"
+                            th:selected="${form.medicamentoId() == m.id.toString()}"></option>
+                </select>
+                <p class="sm-error" th:if="${errores.containsKey('medicamentoId')}" th:text="${errores.get('medicamentoId')}"></p>
+            </div>
+
+            <div class="sm-field" th:classappend="${errores.containsKey('sucursalId')} ? 'bi-error'">
+                <label>Sucursal *</label>
+                <select class="sm-select" name="sucursalId" id="sucursalId">
+                    <option value="">Seleccione una sucursal...</option>
+                    <option th:each="s : ${sucursales}" th:value="${s.id}" th:text="${s.nombre}"
+                            th:selected="${form.sucursalId() == s.id.toString()}"></option>
+                </select>
+                <p class="sm-error" th:if="${errores.containsKey('sucursalId')}" th:text="${errores.get('sucursalId')}"></p>
+            </div>
+
+            <div class="sm-field" th:classappend="${errores.containsKey('tipo')} ? 'bi-error'">
+                <label>Tipo de Movimiento *</label>
+                <!-- El 6 (Despacho) es automatico y no aparece aqui -->
+                <select class="sm-select" name="tipo" id="tipo">
+                    <option value="">Seleccione el tipo...</option>
+                    <option th:each="t : ${tipos}" th:value="${t.valor()}" th:text="${t.texto()}"
+                            th:attr="data-entrada=${t.entrada()}"
+                            th:selected="${form.tipo() == t.valor().toString()}"></option>
+                </select>
+                <p class="sm-error" th:if="${errores.containsKey('tipo')}" th:text="${errores.get('tipo')}"></p>
+            </div>
+
+            <div class="sm-field" th:classappend="${errores.containsKey('cantidad')} ? 'bi-error'">
+                <label>Cantidad *</label>
+                <input class="sm-input" type="text" inputmode="numeric" name="cantidad" id="cantidad"
+                       th:value="${form.cantidad()}" maxlength="9" placeholder="0">
+                <p class="sm-error" th:if="${errores.containsKey('cantidad')}" th:text="${errores.get('cantidad')}"></p>
+            </div>
+
+            <div class="sm-field" th:classappend="${errores.containsKey('costoUnitario')} ? 'bi-error'">
+                <label id="etiquetaCosto">Costo Unitario (Q)</label>
+                <input class="sm-input" type="text" inputmode="decimal" name="costoUnitario" id="costoUnitario"
+                       th:value="${form.costoUnitario()}" maxlength="12" placeholder="0.00">
+                <p class="sm-error" th:if="${errores.containsKey('costoUnitario')}" th:text="${errores.get('costoUnitario')}"></p>
+            </div>
+
+            <div class="sm-field" th:classappend="${errores.containsKey('numeroReferencia')} ? 'bi-error'">
+                <!-- Etiqueta dinamica: Factura / Devolucion / Venta / Reclamo -->
+                <label id="etiquetaReferencia">Número de Referencia</label>
+                <input class="sm-input" type="text" name="numeroReferencia" id="numeroReferencia"
+                       th:value="${form.numeroReferencia()}" maxlength="50">
+                <p class="sm-error" th:if="${errores.containsKey('numeroReferencia')}" th:text="${errores.get('numeroReferencia')}"></p>
+            </div>
+
+            <!-- Motivo dinamico segun el tipo (no se muestra en Venta) -->
+            <div class="sm-field" id="bloqueMotivo" th:classappend="${errores.containsKey('motivo')} ? 'bi-error'">
+                <label id="etiquetaMotivo">Motivo / Notas</label>
+                <textarea class="sm-input" rows="3" name="motivo" id="motivo" maxlength="500"
+                          th:text="${form.motivo()}"></textarea>
+                <div style="font-size:12px;color:var(--sm-slate-500);"><span id="contadorMotivo">0</span>/500</div>
+                <p class="sm-error" th:if="${errores.containsKey('motivo')}" th:text="${errores.get('motivo')}"></p>
+            </div>
+
+            <!-- Errores que no son de un campo (sin inventario, concurrencia) -->
+            <div th:if="${errores.containsKey('general')}" class="bi-error-general" th:text="${errores.get('general')}"></div>
+
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px;">
+                <!-- FA04 -->
+                <a th:href="@{/bitacora-inventario}" class="sm-btn sm-btn--ghost">Cancelar</a>
+                <button type="submit" class="sm-btn sm-btn--primary">Registrar Movimiento</button>
+            </div>
+        </form>
+
+        <!-- RN-CU13-03: panel informativo de inventario en tiempo real -->
+        <aside class="sm-panel bi-panel">
+            <div style="font-size:14px;font-weight:700;">Inventario</div>
+            <div id="panelVacio" style="font-size:13px;color:var(--sm-slate-500);">
+                Seleccione medicamento y sucursal para ver el stock.
+            </div>
+            <div id="panelSinInventario" class="bi-error-general oculto">
+                No hay inventario registrado para esta combinación.
+            </div>
+            <div id="panelDatos" class="oculto">
+                <div class="bi-dato"><span>Stock actual</span><strong id="pStockActual">—</strong></div>
+                <div class="bi-dato"><span>Stock mínimo</span><strong id="pStockMinimo">—</strong></div>
+                <div class="bi-dato"><span>Stock proyectado</span><strong id="pStockProyectado">—</strong></div>
+                <div class="bi-dato"><span>Operación</span><strong id="pOperacion">—</strong></div>
+            </div>
+            <!-- FA05: alerta preventiva de stock minimo -->
+            <div id="alertaStock" class="bi-alerta oculto"></div>
+        </aside>
+    </div>
+</main>
+
+<style>
+    .oculto { display:none !important; }
+    .bi-columnas { display:grid; grid-template-columns:minmax(0,1fr) 280px; gap:20px; align-items:start; }
+    @media (max-width: 800px) { .bi-columnas { grid-template-columns:1fr; } }
+    .bi-panel { display:flex; flex-direction:column; gap:12px; position:sticky; top:20px; }
+    .bi-dato { display:flex; justify-content:space-between; font-size:14px; padding:6px 0;
+        border-bottom:1px solid var(--sm-line); }
+    .bi-dato span { color:var(--sm-slate-500); }
+    .bi-alerta { padding:10px 12px; border-radius:10px; font-size:13px; font-weight:600;
+        background:var(--sm-warning-bg); color:var(--sm-warning); }
+    /* FA03: campos con error en rojo */
+    .bi-error .sm-input, .bi-error .sm-select, .bi-error .ctl-boton { border-color:var(--sm-danger) !important; }
+    .bi-error > label { color:var(--sm-danger); }
+    .bi-error-general { padding:12px 14px; border-radius:10px; font-size:14px;
+        background:var(--sm-danger-bg); color:var(--sm-danger); }
+    textarea.sm-input { resize:vertical; font-family:inherit; }
+</style>
+
+<script th:inline="javascript">
+    const CTX = /*[[@{/}]]*/ '/';
+</script>
+<script th:src="@{/js/bitacora-inventario.js}"></script>
+
+</body>
+</html>
