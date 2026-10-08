@@ -27,10 +27,10 @@
 
 <!--
   Accesos: cada tarjeta solo la ve el actor de su CU.
-    Administrador -> CU-01, CU-13, CU-14
+    Administrador -> CU-01, CU-13, CU-14, CU-15 (ajustes)
     Recepcionista -> CU-05 | Cajero -> CU-06, CU-10 | Enfermero -> CU-07
     Medico -> CU-08 (+ resultados de CU-09 en solo lectura)
-    Laboratorista -> CU-09 | Farmaceutico -> CU-11
+    Laboratorista -> CU-09 | Farmaceutico -> CU-11, CU-15
 -->
 <section style="background:var(--sm-panel);padding:36px 48px;min-height:40vh;">
     <div style="max-width:1180px;margin:0 auto;display:grid;
@@ -133,6 +133,19 @@
             </div>
             <div class="sm-feature__title">Despacho de Medicamentos</div>
             <div class="sm-feature__desc">Buscar recetas, verificar inventario y despachar medicamentos al paciente.</div>
+        </a>
+
+        <!-- CU-15 Bitacora de Movimientos de Inventario (Farmacia: todo; Administrador: ajustes) -->
+        <a th:if="${rol == 'Farmaceutico' or rol == 'Administrador'}" th:href="@{/bitacora-inventario}"
+           class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 8V21H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+            </div>
+            <div class="sm-feature__title">Bitácora de Inventario</div>
+            <div class="sm-feature__desc" th:text="${rol == 'Administrador'}
+                    ? 'Consultar movimientos y registrar ajustes de inventario.'
+                    : 'Registrar compras, devoluciones, ventas, reclamos y ajustes de stock.'">Bitácora</div>
         </a>
 
         <!-- CU-13 Configuracion de Sedes y Especialidades -->
