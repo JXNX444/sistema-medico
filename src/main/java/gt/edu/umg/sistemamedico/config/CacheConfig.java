@@ -47,6 +47,9 @@ public class CacheConfig {
     /** Cache del catalogo de medicamentos (tabla his.medicamento). [CU-08 FA04] */
     public static final String MEDICAMENTOS = "medicamentos";
 
+    /** Cache del catalogo de laboratorios (tabla his.laboratorio). [CU-14] */
+    public static final String LABORATORIOS = "laboratorios";
+
     @Bean
     public CacheManager cacheManager() {
         return new ConcurrentMapCacheManager(
@@ -56,7 +59,8 @@ public class CacheConfig {
                 ESTADOS_CITA,
                 CIE10,
                 EXAMENES_LABORATORIO,
-                MEDICAMENTOS
+                MEDICAMENTOS,
+                LABORATORIOS
         );
     }
 }
