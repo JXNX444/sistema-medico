@@ -124,6 +124,17 @@
             <div class="sm-feature__desc">Buscar recetas, verificar inventario y despachar medicamentos al paciente.</div>
         </a>
 
+        <!-- CU-13 Configuracion de Sedes y Especialidades -->
+        <a th:if="${rol == 'Administrador'}" th:href="@{/sedes-especialidades}"
+           class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M12 7v4M10 9h4"/></svg>
+            </div>
+            <div class="sm-feature__title">Especialidades por Sede</div>
+            <div class="sm-feature__desc">Configurar qué especialidades médicas se atienden en cada sede del hospital.</div>
+        </a>
+
     </div>
 </section>
 
