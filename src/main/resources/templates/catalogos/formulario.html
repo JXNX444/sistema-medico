@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${catalogo.titulo()}, null)}"></head>
+<body>
+
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <a th:href="@{/catalogos/{clave}(clave=${catalogo.clave()})}" class="sm-btn sm-btn--ghost sm-btn--sm"
+       th:text="'← Volver a ' + ${catalogo.titulo()}">← Volver</a>
+</nav>
+
+<main style="max-width:620px;margin:0 auto;padding:40px 24px;">
+    <div style="font-size:24px;font-weight:800;margin-bottom:4px;"
+         th:text="(${id == null} ? 'Crear registro' : 'Editar registro') + ' · ' + ${catalogo.titulo()}">Crear</div>
+    <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:20px;">
+        Los campos con * son obligatorios.
+    </div>
+
+    <!-- Paso 4 (crear) / FA02 paso 2 (editar): campos segun la tabla 2.3 -->
+    <form method="post" class="sm-panel" style="display:flex;flex-direction:column;gap:14px;"
+          th:action="${id == null}
+                ? @{/catalogos/{clave}/nuevo(clave=${catalogo.clave()})}
+                : @{/catalogos/{clave}/{id}/editar(clave=${catalogo.clave()}, id=${id})}">
+
+        <div th:each="c : ${campos}" class="sm-field"
+             th:classappend="${errores.containsKey(c.nombre())} ? 'cat-campo--error'">
+
+            <label th:unless="${c.tipo() == 'casilla'}"
+                   th:text="${c.etiqueta() + (c.obligatorio() ? ' *' : '')}">Campo</label>
+
+            <input th:if="${c.tipo() == 'texto'}" class="sm-input" type="text"
+                   th:name="${c.nombre()}" th:value="${valores.get(c.nombre())}"
+                   th:attr="maxlength=${c.max()}" th:disabled="${c.soloLectura()}">
+
+            <textarea th:if="${c.tipo() == 'area'}" class="sm-input" rows="3"
+                      th:name="${c.nombre()}" th:text="${valores.get(c.nombre())}"
+                      th:attr="maxlength=${c.max()}" th:disabled="${c.soloLectura()}"></textarea>
+
+            <input th:if="${c.tipo() == 'decimal'}" class="sm-input" type="text" inputmode="decimal"
+                   placeholder="0.00" th:name="${c.nombre()}" th:value="${valores.get(c.nombre())}"
+                   th:attr="maxlength=${c.max()}" th:disabled="${c.soloLectura()}">
+
+            <input th:if="${c.tipo() == 'entero'}" class="sm-input" type="text" inputmode="numeric"
+                   th:name="${c.nombre()}" th:value="${valores.get(c.nombre())}"
+                   th:attr="maxlength=${c.max()}" th:disabled="${c.soloLectura()}">
+
+            <select th:if="${c.tipo() == 'lista'}" class="sm-select"
+                    th:name="${c.nombre()}" th:disabled="${c.soloLectura()}">
+                <option th:unless="${c.nombre() == 'state'}" value="">Seleccione...</option>
+                <option th:each="o : ${c.opciones()}" th:value="${o.valor()}" th:text="${o.texto()}"
+                        th:selected="${o.valor() == valores.get(c.nombre())}"></option>
+            </select>
+
+            <!-- Casilla (ej: Medicamento controlado). Sin marcar no se envia = false -->
+            <label th:if="${c.tipo() == 'casilla'}" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <input type="checkbox" value="true" th:name="${c.nombre()}"
+                       th:checked="${valores.get(c.nombre()) == 'true'}" th:disabled="${c.soloLectura()}">
+                <span th:text="${c.etiqueta()}">Casilla</span>
+            </label>
+
+            <!-- FA05: mensaje especifico del campo -->
+            <p class="sm-error" th:if="${errores.containsKey(c.nombre())}" th:text="${errores.get(c.nombre())}"></p>
+        </div>
+
+        <!-- Errores que no son de un campo (ej: duplicado de inventario) -->
+        <div th:if="${errores.containsKey('general')}" class="cat-error-general" th:text="${errores.get('general')}"></div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px;">
+            <!-- FA04: Cancelar descarta los datos y vuelve al listado -->
+            <a th:href="@{/catalogos/{clave}(clave=${catalogo.clave()})}" class="sm-btn sm-btn--ghost">Cancelar</a>
+            <button type="submit" class="sm-btn sm-btn--primary" th:text="${id == null} ? 'Crear' : 'Actualizar'">Crear</button>
+        </div>
+    </form>
+</main>
+
+<style>
+    /* FA05: campos con error resaltados en rojo */
+    .cat-campo--error .sm-input,
+    .cat-campo--error .sm-select,
+    .cat-campo--error .ctl-boton { border-color:var(--sm-danger) !important; }
+    .cat-campo--error > label { color:var(--sm-danger); }
+    .cat-error-general {
+        padding:12px 14px; border-radius:10px; font-size:14px;
+        background:var(--sm-danger-bg); color:var(--sm-danger);
+    }
+    textarea.sm-input { resize:vertical; font-family:inherit; }
+</style>
+
+</body>
+</html>
