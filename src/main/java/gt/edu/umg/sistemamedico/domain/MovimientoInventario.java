@@ -3,24 +3,41 @@ package gt.edu.umg.sistemamedico.domain;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 
 /**
- * Kardex: cada entrada o salida de inventario. Tabla: his.movimiento_inventario  [CU-11]
+ * Kardex: cada entrada o salida de inventario. Tabla: his.movimiento_inventario
+ * [CU-11 despacho] [CU-14 ajustes del catalogo] [CU-15 bitacora]
  *
- * ck_mov_coherencia: tipos 0,1,4 SUMAN (stock_nuevo = anterior + cantidad);
- *                    tipos 2,3,5,6 RESTAN (stock_nuevo = anterior - cantidad).
- * ck_mov_motivo: los tipos 1,3,4,5 exigen motivo (10-500 caracteres).
- * ck_mov_costo:  el tipo 0 exige costo_unitario > 0.
+ * Tipos de movimiento [CU-15 / RN-CU13-01]:
+ *   0 Compra      (entrada)  -> exige costo_unitario > 0 (ck_mov_costo)
+ *   1 Devolucion  (entrada)  -> exige motivo 10-500 (ck_mov_motivo)
+ *   2 Venta       (salida)
+ *   3 Reclamo     (salida)   -> exige motivo
+ *   4 Ajuste+     (entrada)  -> exige motivo
+ *   5 Ajuste-     (salida)   -> exige motivo
+ *   6 Despacho    (salida)   -> AUTOMATICO, lo genera CU-11; no se ofrece en el formulario
  *
- * CU-11 solo usa SALIDA_DESPACHO (2): resta y no exige motivo ni costo.
+ * ck_mov_coherencia: 0,1,4 SUMAN (stock_nuevo = anterior + cantidad);
+ *                    2,3,5,6 RESTAN (stock_nuevo = anterior - cantidad).
  */
 @Entity
 @Table(name = "movimiento_inventario", schema = "his")
 public class MovimientoInventario {
 
-    /** tipo_movimiento usado por el despacho de farmacia. */
-    public static final short SALIDA_DESPACHO = 2;
+    public static final short COMPRA = 0;
+    public static final short DEVOLUCION = 1;
+    public static final short VENTA = 2;
+    public static final short RECLAMO = 3;
+    public static final short AJUSTE_ENTRADA = 4;
+    public static final short AJUSTE_SALIDA = 5;
+
+    /** [CU-15] El despacho de farmacia (CU-11) es el tipo 6, no el 2 (Venta). */
+    public static final short SALIDA_DESPACHO = 6;
+
+    private static final ZoneId ZONA_GT = ZoneId.of("America/Guatemala");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,7 +76,7 @@ public class MovimientoInventario {
     @Column(name = "despacho_id")
     private Integer despachoId;
 
-    /** Farmaceutico que hizo el movimiento. */
+    /** Usuario que hizo el movimiento. */
     @Column(name = "usuario_id", nullable = false)
     private Integer usuarioId;
 
@@ -69,9 +86,56 @@ public class MovimientoInventario {
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
+    // ---- Relaciones SOLO LECTURA para la bitacora (CU-15) ----
+    // Usan las mismas columnas de arriba; insertable/updatable = false para que
+    // Hibernate no las escriba dos veces. Se llenan al LEER de la BD.
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "medicamento_id", insertable = false, updatable = false)
+    private Medicamento medicamento;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sucursal_id", insertable = false, updatable = false)
+    private Sucursal sucursal;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "usuario_id", insertable = false, updatable = false)
+    private Usuario usuario;
+
     @PrePersist
     protected void alCrear() {
         this.createdAt = OffsetDateTime.now();
+    }
+
+    // ---- Ayudas para la pantalla ----
+
+    /** Nombre visible de cada tipo. */
+    public static String nombreTipo(Short tipo) {
+        if (tipo == null) return "Desconocido";
+        return switch (tipo) {
+            case COMPRA -> "Compra";
+            case DEVOLUCION -> "Devolución";
+            case VENTA -> "Venta";
+            case RECLAMO -> "Reclamo";
+            case AJUSTE_ENTRADA -> "Ajuste+";
+            case AJUSTE_SALIDA -> "Ajuste-";
+            case SALIDA_DESPACHO -> "Despacho";
+            default -> "Desconocido";
+        };
+    }
+
+    /** true si el tipo SUMA al stock (0, 1, 4). */
+    public static boolean esEntrada(Short tipo) {
+        return tipo != null && (tipo == COMPRA || tipo == DEVOLUCION || tipo == AJUSTE_ENTRADA);
+    }
+
+    public String getNombreTipo() { return nombreTipo(tipoMovimiento); }
+
+    public boolean isEntrada() { return esEntrada(tipoMovimiento); }
+
+    /** Fecha en hora de Guatemala (la BD la guarda en UTC). */
+    public LocalDateTime getFechaLocal() {
+        return createdAt == null ? null : createdAt.atZoneSameInstant(ZONA_GT).toLocalDateTime();
     }
 
     // ---- Getters / setters ----
@@ -104,4 +168,7 @@ public class MovimientoInventario {
     public void setState(Short state) { this.state = state; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+    public Medicamento getMedicamento() { return medicamento; }
+    public Sucursal getSucursal() { return sucursal; }
+    public Usuario getUsuario() { return usuario; }
 }
