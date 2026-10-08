@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${catalogo.titulo()}, null)}"></head>
+<body>
+
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <a th:href="@{/catalogos}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver a Catálogos</a>
+</nav>
+
+<main style="max-width:1100px;margin:0 auto;padding:40px 24px;display:flex;flex-direction:column;gap:16px;">
+    <div>
+        <div style="font-size:24px;font-weight:800;" th:text="${catalogo.titulo()}">Catálogo</div>
+        <div style="font-size:14px;color:var(--sm-slate-500);" th:text="${catalogo.descripcion()}"></div>
+    </div>
+
+    <!-- Mensajes de crear / actualizar / eliminar (llegan con el redirect, se ven una sola vez) -->
+    <div th:if="${mensajeExito}" class="sm-badge sm-badge--success"
+         style="padding:10px 14px;font-size:13px;" th:text="${mensajeExito}"></div>
+    <div th:if="${mensajeError}" class="sm-badge sm-badge--danger"
+         style="padding:10px 14px;font-size:13px;" th:text="${mensajeError}"></div>
+
+    <!-- Paso 2: filtros de busqueda + paso 3: boton Crear -->
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+        <form th:action="@{/catalogos/{clave}(clave=${catalogo.clave()})}" method="get"
+              style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input class="sm-input" type="text" name="q" th:value="${q}" placeholder="Buscar por nombre" style="width:220px;">
+            <select class="sm-select" name="estado" style="width:150px;">
+                <option value="activos" th:selected="${estado == 'activos'}">Activos</option>
+                <option value="inactivos" th:selected="${estado == 'inactivos'}">Inactivos</option>
+                <option value="todos" th:selected="${estado == 'todos'}">Todos</option>
+            </select>
+            <button type="submit" class="sm-btn sm-btn--primary sm-btn--sm">Buscar</button>
+        </form>
+        <a th:href="@{/catalogos/{clave}/nuevo(clave=${catalogo.clave()})}" class="sm-btn sm-btn--dark sm-btn--sm">+ Crear</a>
+    </div>
+
+    <!-- FA01: sin resultados (mensaje generico del documento) -->
+    <div th:if="${pagina.totalElements == 0}" class="sm-empty">
+        <div class="sm-empty__icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+        </div>
+        <div class="sm-empty__title">No se encontraron resultados.</div>
+        <div class="sm-empty__desc">Modifique los filtros o cree un nuevo registro.</div>
+    </div>
+
+    <!-- Paso 2: tabla de registros -->
+    <div th:if="${pagina.totalElements > 0}" class="sm-panel">
+        <table class="sm-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th th:each="col : ${catalogo.columnas()}" th:text="${col}"></th>
+                <th>Estado</th>
+                <th style="text-align:right;">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="f : ${pagina.content}">
+                <td th:text="${f.id()}"></td>
+                <td th:each="celda, i : ${f.celdas()}">
+                    <span th:text="${celda}"></span>
+                    <!-- Avisos junto a la primera columna: Controlado, Stock bajo, Sistema -->
+                    <th:block th:if="${i.index == 0}">
+                        <span th:each="aviso : ${f.avisos()}" class="sm-badge sm-badge--warning"
+                              style="margin-left:6px;" th:text="${aviso}"></span>
+                    </th:block>
+                </td>
+                <td>
+                    <span th:if="${f.activo()}" class="sm-badge sm-badge--success">Activo</span>
+                    <span th:unless="${f.activo()}" class="sm-badge sm-badge--warning">Inactivo</span>
+                </td>
+                <td style="text-align:right;">
+                    <!-- Menu de acciones: Editar (FA02) y Eliminar (FA03) -->
+                    <div class="cat-acciones">
+                        <button type="button" class="cat-acciones__boton" onclick="abrirMenu(this, event)"
+                                aria-label="Acciones">&middot;&middot;&middot;</button>
+                        <div class="cat-acciones__menu">
+                            <a class="cat-acciones__item"
+                               th:href="@{/catalogos/{clave}/{id}/editar(clave=${catalogo.clave()}, id=${f.id()})}">Editar</a>
+                            <button type="button" class="cat-acciones__item cat-acciones__item--peligro"
+                                    th:if="${f.activo() and f.eliminable()}"
+                                    th:attr="data-id=${f.id()}, data-nombre=${f.nombre()}"
+                                    onclick="confirmarEliminar(this)">Eliminar</button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Paginacion (10 por pagina) -->
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;">
+            <span style="font-size:13px;color:var(--sm-slate-500);"
+                  th:text="${'Página ' + (pagina.number + 1) + ' de ' + pagina.totalPages + ' · ' + pagina.totalElements + ' registros'}">
+                Página 1 de 1
+            </span>
+            <div class="cat-pag" th:if="${pagina.totalPages > 1}">
+                <a th:each="p : ${#numbers.sequence(0, pagina.totalPages - 1)}"
+                   th:href="@{/catalogos/{clave}(clave=${catalogo.clave()}, q=${q}, estado=${estado}, page=${p})}"
+                   th:text="${p + 1}"
+                   th:classappend="${p == pagina.number} ? 'is-active'"></a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Formulario oculto que hace el POST de eliminar despues de confirmar -->
+<form id="formEliminar" method="post" style="display:none;"></form>
+
+<style>
+    .cat-pag { display:flex; gap:6px; }
+    .cat-pag a { padding:6px 12px; border:1px solid var(--sm-border); border-radius:8px;
+        font-size:13px; font-weight:600; color:var(--sm-slate-600); }
+    .cat-pag a.is-active { background:var(--sm-cyan); color:#fff; border-color:var(--sm-cyan); }
+
+    .cat-acciones { position:relative; display:inline-block; }
+    .cat-acciones__boton {
+        background:#fff; border:1px solid var(--sm-border); border-radius:8px; cursor:pointer;
+        padding:4px 12px; font-size:16px; font-weight:800; line-height:1; color:var(--sm-slate-600);
+        font-family:inherit;
+    }
+    .cat-acciones__boton:hover { border-color:var(--sm-cyan); color:var(--sm-cyan-dark); }
+    .cat-acciones__menu {
+        display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:20; min-width:140px;
+        background:#fff; border:1px solid var(--sm-border); border-radius:10px;
+        box-shadow:var(--sm-shadow); padding:6px; text-align:left;
+    }
+    .cat-acciones.abierto .cat-acciones__menu { display:block; }
+    .cat-acciones__item {
+        display:block; width:100%; text-align:left; background:none; border:none; cursor:pointer;
+        font-family:inherit; padding:8px 12px; border-radius:8px; font-size:14px; font-weight:600;
+        color:var(--sm-ink); text-decoration:none;
+    }
+    .cat-acciones__item:hover { background:var(--sm-panel); }
+    .cat-acciones__item--peligro { color:var(--sm-danger); }
+    .cat-acciones__item--peligro:hover { background:var(--sm-danger-bg); }
+</style>
+
+<script th:inline="javascript">
+    const CTX = /*[[@{/}]]*/ '/';
+    const CLAVE = /*[[${catalogo.clave()}]]*/ 'especialidades';
+
+    /** Abre el menu "..." de una fila y cierra los demas. */
+    function abrirMenu(boton, evento) {
+        evento.stopPropagation();
+        const contenedor = boton.closest('.cat-acciones');
+        const estabaAbierto = contenedor.classList.contains('abierto');
+        cerrarMenus();
+        if (!estabaAbierto) contenedor.classList.add('abierto');
+    }
+
+    function cerrarMenus() {
+        document.querySelectorAll('.cat-acciones.abierto').forEach(m => m.classList.remove('abierto'));
+    }
+
+    document.addEventListener('click', cerrarMenus);
+
+    /** FA03 paso 2: confirmacion con el texto del documento, luego el POST. */
+    async function confirmarEliminar(boton) {
+        cerrarMenus();
+        const texto = '¿Está seguro que desea eliminar el registro ' + boton.dataset.nombre
+            + '? Esta acción no se puede deshacer.';
+
+        // FA04: si cancela, no pasa nada
+        const confirmado = await Aviso.confirmar(texto, { aceptar: 'Eliminar' });
+        if (!confirmado) return;
+
+        const form = document.getElementById('formEliminar');
+        form.action = CTX + 'catalogos/' + CLAVE + '/' + boton.dataset.id + '/eliminar';
+        form.submit();
+    }
+</script>
+
+</body>
+</html>
