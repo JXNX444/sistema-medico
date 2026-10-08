@@ -36,6 +36,7 @@ import org.springframework.security.web.SecurityFilterChain;
  *                    ve solo sus ordenes y LaboratorioService le bloquea
  *                    guardar y publicar resultados.
  * /farmacia/**    -> rol Farmaceutico (o Administrador). [CU-11]
+ * /sedes-especialidades/** -> solo rol Administrador. [CU-13]
  */
 @Configuration
 public class SecurityConfig {
@@ -62,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/medico/**").hasRole("Medico")
                         .requestMatchers("/laboratorio/**").hasAnyRole("Laboratorista", "Administrador", "Medico")
                         .requestMatchers("/farmacia/**").hasAnyRole("Farmaceutico", "Administrador")
+                        .requestMatchers("/sedes-especialidades/**").hasRole("Administrador")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
