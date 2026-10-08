@@ -24,18 +24,19 @@ import org.springframework.security.web.SecurityFilterChain;
  * para saber a donde regresar en caso de error y a donde redirigir
  * en caso de exito.
  *
- * /usuarios/**    -> solo rol Administrador. [RN-GLOBAL-007]
+ * Cada ruta solo la usa el ACTOR de su CU (segun los documentos):
+ * /usuarios/**    -> solo rol Administrador. [CU-01] [RN-GLOBAL-007]
  * /citas/**       -> solo rol Paciente.      [CU-03]
  * /perfil/**      -> solo rol Paciente.      [Mi Perfil]
  * /recepcion/**   -> solo rol Recepcionista. [CU-05]
- * /caja/**        -> rol Cajero (o Administrador). [CU-06, CU-10]
- * /enfermeria/**  -> rol Enfermero. [CU-07]
- * /medico/**      -> solo rol Medico. [CU-08] (el panel filtra por el medico logueado)
- * /laboratorio/** -> rol Laboratorista (o Administrador). [CU-09]
+ * /caja/**        -> solo rol Cajero.        [CU-06, CU-10]
+ * /enfermeria/**  -> solo rol Enfermero.     [CU-07]
+ * /medico/**      -> solo rol Medico.        [CU-08] (el panel filtra por el medico logueado)
+ * /laboratorio/** -> rol Laboratorista.      [CU-09]
  *                    El Medico tambien entra, pero en modo solo lectura:
  *                    ve solo sus ordenes y LaboratorioService le bloquea
  *                    guardar y publicar resultados.
- * /farmacia/**    -> rol Farmaceutico (o Administrador). [CU-11]
+ * /farmacia/**    -> solo rol Farmaceutico.  [CU-11]
  * /sedes-especialidades/** -> solo rol Administrador. [CU-13]
  * /catalogos/**   -> solo rol Administrador. [CU-14]
  */
@@ -59,11 +60,11 @@ public class SecurityConfig {
                         .requestMatchers("/citas/**").hasRole("Paciente")
                         .requestMatchers("/perfil/**").hasRole("Paciente")
                         .requestMatchers("/recepcion/**").hasRole("Recepcionista")
-                        .requestMatchers("/caja/**").hasAnyRole("Cajero", "Administrador")
-                        .requestMatchers("/enfermeria/**").hasAnyRole("Enfermero", "Administrador")
+                        .requestMatchers("/caja/**").hasRole("Cajero")
+                        .requestMatchers("/enfermeria/**").hasRole("Enfermero")
                         .requestMatchers("/medico/**").hasRole("Medico")
-                        .requestMatchers("/laboratorio/**").hasAnyRole("Laboratorista", "Administrador", "Medico")
-                        .requestMatchers("/farmacia/**").hasAnyRole("Farmaceutico", "Administrador")
+                        .requestMatchers("/laboratorio/**").hasAnyRole("Laboratorista", "Medico")
+                        .requestMatchers("/farmacia/**").hasRole("Farmaceutico")
                         .requestMatchers("/sedes-especialidades/**").hasRole("Administrador")
                         .requestMatchers("/catalogos/**").hasRole("Administrador")
                         .anyRequest().authenticated()
