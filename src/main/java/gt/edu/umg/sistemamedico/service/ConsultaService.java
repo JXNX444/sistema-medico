@@ -591,7 +591,10 @@ public class ConsultaService {
         nueva.setParentConsultaId(consulta.getId());
         nueva.setCreatedBy(medico.getId());
         nueva.setState((short) 1);
-        citaRepository.save(nueva);
+        // Se usa la cita que DEVUELVE save(): como BaseEntity arranca rowVersion en 0,
+        // Spring Data la trata como "existente" y hace merge(), que devuelve una COPIA
+        // con el id generado; el objeto original se queda con id = null.
+        nueva = citaRepository.save(nueva);
 
         // RN-CU11-04 y RN-CU11-05: a la cola de correos (los envia NotificacionScheduler)
         notificacionService.programarSeguimiento(nueva, tipoTexto, obs);
