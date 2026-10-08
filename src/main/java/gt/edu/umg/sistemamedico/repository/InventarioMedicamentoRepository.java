@@ -1,6 +1,8 @@
 package gt.edu.umg.sistemamedico.repository;
 
 import gt.edu.umg.sistemamedico.domain.InventarioMedicamento;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
@@ -19,4 +21,15 @@ public interface InventarioMedicamentoRepository extends JpaRepository<Inventari
     /** [CU-11 paso 10] Stock de UN medicamento en la sucursal (ux_inv_med_sucursal garantiza 0 o 1). */
     Optional<InventarioMedicamento> findBySucursalIdAndMedicamentoIdAndState(
             Integer sucursalId, Integer medicamentoId, Short state);
+
+    /** [CU-14 paso 2] Listado paginado filtrando por nombre del medicamento y por estado. */
+    Page<InventarioMedicamento> findByMedicamentoNombreContainingIgnoreCaseAndStateIn(
+            String nombre, Collection<Short> estados, Pageable pageable);
+
+    /**
+     * [CU-14] La combinacion medicamento + sede, este activa o no.
+     * La BD solo permite una fila por combinacion (ux_inv_med_sucursal):
+     * si estaba inactiva se reactiva en vez de crear otra.
+     */
+    Optional<InventarioMedicamento> findByMedicamentoIdAndSucursalId(Integer medicamentoId, Integer sucursalId);
 }
