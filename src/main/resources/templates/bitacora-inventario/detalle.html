@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Detalle del Movimiento', null)}"></head>
+<body>
+
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <a th:href="@{/bitacora-inventario}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver a la Bitácora</a>
+</nav>
+
+<!-- Accion "Ver" del listado [RN-CU13-03] -->
+<main style="max-width:640px;margin:0 auto;padding:40px 24px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <div style="font-size:24px;font-weight:800;" th:text="'Movimiento #' + ${m.id}">Movimiento</div>
+        <span class="sm-badge" th:classappend="${m.entrada} ? 'sm-badge--success' : 'sm-badge--danger'"
+              th:text="${m.nombreTipo}"></span>
+        <span th:if="${m.state == 1}" class="sm-badge sm-badge--success">Activo</span>
+        <span th:unless="${m.state == 1}" class="sm-badge sm-badge--warning">Inactivo</span>
+    </div>
+
+    <div class="sm-panel">
+        <div class="bi-fila"><span>Medicamento</span><strong th:text="${m.medicamento.nombre}"></strong></div>
+        <div class="bi-fila"><span>Sucursal</span><strong th:text="${m.sucursal.nombre}"></strong></div>
+        <div class="bi-fila"><span>Operación</span><strong th:text="${m.entrada} ? 'Entrada (suma al stock)' : 'Salida (resta del stock)'"></strong></div>
+        <div class="bi-fila"><span>Cantidad</span><strong th:text="${m.cantidad}"></strong></div>
+        <div class="bi-fila"><span>Stock anterior</span><strong th:text="${m.stockAnterior}"></strong></div>
+        <div class="bi-fila"><span>Stock nuevo</span><strong th:text="${m.stockNuevo}"></strong></div>
+        <div class="bi-fila"><span>Costo unitario</span>
+            <strong th:text="${m.costoUnitario != null} ? 'Q ' + ${#numbers.formatDecimal(m.costoUnitario, 1, 2)} : '—'"></strong></div>
+        <div class="bi-fila"><span>No. de referencia</span>
+            <strong th:text="${m.numeroReferencia != null} ? ${m.numeroReferencia} : '—'"></strong></div>
+        <div class="bi-fila" th:if="${m.despachoId != null}"><span>Despacho (CU-11)</span>
+            <strong th:text="'#' + ${m.despachoId}"></strong></div>
+        <div class="bi-fila bi-fila--bloque"><span>Motivo / Notas</span>
+            <div th:text="${m.motivo != null} ? ${m.motivo} : '—'"></div></div>
+        <div class="bi-fila"><span>Registrado por</span>
+            <strong th:text="${m.usuario.nombreCompleto} + ' (' + ${m.usuario.username} + ')'"></strong></div>
+        <div class="bi-fila"><span>Fecha y hora</span>
+            <strong th:text="${#temporals.format(m.fechaLocal, 'dd/MM/yyyy HH:mm')}"></strong></div>
+    </div>
+</main>
+
+<style>
+    .bi-fila { display:flex; justify-content:space-between; gap:16px; padding:10px 0;
+        border-bottom:1px solid var(--sm-line); font-size:14px; }
+    .bi-fila:last-child { border-bottom:none; }
+    .bi-fila span { color:var(--sm-slate-500); }
+    .bi-fila--bloque { flex-direction:column; gap:6px; }
+</style>
+
+</body>
+</html>
