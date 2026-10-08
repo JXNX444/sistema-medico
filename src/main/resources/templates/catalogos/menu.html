@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Catálogos del Sistema', null)}"></head>
+<body>
+
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <a th:href="@{/panel/inicio}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver al panel</a>
+</nav>
+
+<main style="max-width:1100px;margin:0 auto;padding:40px 24px;">
+    <div style="font-size:24px;font-weight:800;">Catálogos del Sistema</div>
+    <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:24px;">
+        Elija el catálogo que desea administrar (CU-14).
+    </div>
+
+    <!-- Paso 1: un acceso por catalogo (tabla 2.3) -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;">
+        <a th:each="c : ${catalogos}" th:href="@{/catalogos/{clave}(clave=${c.clave()})}"
+           class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            </div>
+            <div class="sm-feature__title" th:text="${c.titulo()}">Catálogo</div>
+            <div class="sm-feature__desc" th:text="${c.descripcion()}">Descripción</div>
+        </a>
+
+        <!-- Sucursal-Especialidad: ya implementado en CU-13 -->
+        <a th:href="@{/sedes-especialidades}" class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
+            </div>
+            <div class="sm-feature__title">Sucursal-Especialidad</div>
+            <div class="sm-feature__desc">Qué especialidades se atienden en cada sede (CU-13).</div>
+        </a>
+    </div>
+</main>
+
+</body>
+</html>
