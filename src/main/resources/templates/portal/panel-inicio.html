@@ -25,11 +25,18 @@
     </div>
 </section>
 
-<!-- Accesos -->
+<!--
+  Accesos: cada tarjeta solo la ve el actor de su CU.
+    Administrador -> CU-01, CU-13, CU-14
+    Recepcionista -> CU-05 | Cajero -> CU-06, CU-10 | Enfermero -> CU-07
+    Medico -> CU-08 (+ resultados de CU-09 en solo lectura)
+    Laboratorista -> CU-09 | Farmaceutico -> CU-11
+-->
 <section style="background:var(--sm-panel);padding:36px 48px;min-height:40vh;">
     <div style="max-width:1180px;margin:0 auto;display:grid;
               grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;">
 
+        <!-- CU-01 Mantenimiento de Usuarios -->
         <a th:if="${rol == 'Administrador'}" th:href="@{/usuarios}" class="sm-panel sm-feature"
            style="text-decoration:none;">
             <div class="sm-feature__icon">
@@ -40,7 +47,8 @@
             <div class="sm-feature__desc">Listar, crear, editar y eliminar cuentas de usuarios internos.</div>
         </a>
 
-        <a th:if="${rol == 'Recepcionista' or rol == 'Administrador'}" th:href="@{/recepcion/buscar}"
+        <!-- CU-05 Recepcion y Verificacion de Cita -->
+        <a th:if="${rol == 'Recepcionista'}" th:href="@{/recepcion/buscar}"
            class="sm-panel sm-feature" style="text-decoration:none;">
             <div class="sm-feature__icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -50,7 +58,8 @@
             <div class="sm-feature__desc">Buscar pacientes por DPI o número de cita y registrar su llegada.</div>
         </a>
 
-        <a th:if="${rol == 'Cajero' or rol == 'Administrador'}" th:href="@{/caja/cobro}"
+        <!-- CU-06 Cobro de Consulta en Caja -->
+        <a th:if="${rol == 'Cajero'}" th:href="@{/caja/cobro}"
            class="sm-panel sm-feature" style="text-decoration:none;">
             <div class="sm-feature__icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -61,7 +70,7 @@
         </a>
 
         <!-- CU-10 Cobro de Laboratorio en Caja -->
-        <a th:if="${rol == 'Cajero' or rol == 'Administrador'}" th:href="@{/caja/laboratorio}"
+        <a th:if="${rol == 'Cajero'}" th:href="@{/caja/laboratorio}"
            class="sm-panel sm-feature" style="text-decoration:none;">
             <div class="sm-feature__icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -71,7 +80,8 @@
             <div class="sm-feature__desc">Cobrar órdenes de laboratorio pendientes y emitir el comprobante.</div>
         </a>
 
-        <a th:if="${rol == 'Enfermero' or rol == 'Administrador'}" th:href="@{/enfermeria/panel}"
+        <!-- CU-07 Toma de Signos Vitales -->
+        <a th:if="${rol == 'Enfermero'}" th:href="@{/enfermeria/panel}"
            class="sm-panel sm-feature" style="text-decoration:none;">
             <div class="sm-feature__icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -81,6 +91,7 @@
             <div class="sm-feature__desc">Llamar pacientes en espera y registrar sus signos vitales.</div>
         </a>
 
+        <!-- CU-08 Consulta Medica -->
         <a th:if="${rol == 'Medico'}" th:href="@{/medico/panel}"
            class="sm-panel sm-feature" style="text-decoration:none;">
             <div class="sm-feature__icon">
@@ -92,7 +103,7 @@
         </a>
 
         <!-- CU-09 Gestion de Laboratorio -->
-        <a th:if="${rol == 'Laboratorista' or rol == 'Administrador'}" th:href="@{/laboratorio/panel}"
+        <a th:if="${rol == 'Laboratorista'}" th:href="@{/laboratorio/panel}"
            class="sm-panel sm-feature" style="text-decoration:none;">
             <div class="sm-feature__icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -114,7 +125,7 @@
         </a>
 
         <!-- CU-11 Despacho de Medicamentos -->
-        <a th:if="${rol == 'Farmaceutico' or rol == 'Administrador'}" th:href="@{/farmacia/despacho}"
+        <a th:if="${rol == 'Farmaceutico'}" th:href="@{/farmacia/despacho}"
            class="sm-panel sm-feature" style="text-decoration:none;">
             <div class="sm-feature__icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
