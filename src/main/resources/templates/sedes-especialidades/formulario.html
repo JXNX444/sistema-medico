@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Asignar Especialidad', null)}"></head>
+<body>
+
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <a th:href="@{/sedes-especialidades}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver a Especialidades por Sede</a>
+</nav>
+
+<main style="max-width:560px;margin:0 auto;padding:40px 24px;">
+    <div style="font-size:24px;font-weight:800;margin-bottom:4px;">Asignar Especialidad</div>
+    <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:20px;">
+        Elija la sede y la especialidad que se atenderá en ella.
+    </div>
+
+    <!-- Pasos 5-7: formulario de asignacion [RN-CU12-01] -->
+    <form th:action="@{/sedes-especialidades/nuevo}" method="post" class="sm-panel"
+          style="display:flex;flex-direction:column;gap:14px;">
+
+        <div class="sm-field">
+            <label>Sede *</label>
+            <select class="sm-select" name="sucursalId">
+                <option value="">Seleccione una sede...</option>
+                <option th:each="s : ${sedes}"
+                        th:value="${s.id}"
+                        th:text="${s.nombre}"
+                        th:selected="${sucursalId != null and sucursalId == s.id}"></option>
+            </select>
+        </div>
+
+        <div class="sm-field">
+            <label>Especialidad *</label>
+            <select class="sm-select" name="especialidadId">
+                <option value="">Seleccione una especialidad...</option>
+                <option th:each="e : ${especialidades}"
+                        th:value="${e.id}"
+                        th:text="${e.nombre}"
+                        th:selected="${especialidadId != null and especialidadId == e.id}"></option>
+            </select>
+        </div>
+
+        <!-- Paso 5: el estado no se elige, queda activo automaticamente -->
+        <div style="font-size:13px;color:var(--sm-slate-500);">
+            Estado: <span class="sm-badge sm-badge--success">Activo</span> (se asigna automáticamente)
+        </div>
+
+        <!-- FA03 / FA05: mensaje global debajo del formulario -->
+        <div th:if="${!errores.isEmpty()}" class="se-errores">
+            <div th:each="mensaje : ${errores.values()}" th:text="${mensaje}"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px;">
+            <!-- FA04: Cancelar descarta los datos y vuelve al listado -->
+            <a th:href="@{/sedes-especialidades}" class="sm-btn sm-btn--ghost">Cancelar</a>
+            <button type="submit" class="sm-btn sm-btn--primary">Asignar</button>
+        </div>
+    </form>
+</main>
+
+<style>
+    .se-errores {
+        padding:12px 14px; border-radius:10px; font-size:14px;
+        background:var(--sm-danger-bg); color:var(--sm-danger);
+        display:flex; flex-direction:column; gap:4px;
+    }
+</style>
+
+</body>
+</html>
