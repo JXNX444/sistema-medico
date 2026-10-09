@@ -356,7 +356,10 @@ public class DespachoService {
         // Paso 10: guardar despacho + detalles (cascade).
         despacho.setMontoTotal(escala(total));
         despacho.setNotas(armarNotas(notas, sustituciones));
-        despachoRepository.save(despacho);
+        // Se usa lo que DEVUELVE save(): Despacho arranca con row_version = 0, Spring
+        // Data lo trata como existente y hace merge(), que devuelve una COPIA con el id.
+        // Si no, despacho.getId() queda null y el kardex guardaba "DESP-null". [CU-15]
+        despacho = despachoRepository.save(despacho);
 
         // Paso 10: kardex y stock. Un movimiento por cada item.
         Map<Integer, Integer> stockAntes = new HashMap<>();
