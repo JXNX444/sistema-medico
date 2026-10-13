@@ -7,6 +7,7 @@ import gt.edu.umg.sistemamedico.repository.CitaHistorialEstadoRepository;
 import gt.edu.umg.sistemamedico.repository.CitaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,10 @@ public class ReservaExpiradaScheduler {
 
     private static final String MOTIVO_NO_PAGO =
             "Cancelada automaticamente: no se registro el pago dentro de los 5 minutos de la reserva.";
+
+    /** [RN-CU05-03] Tolerancia despues de la hora de la cita. */
+    @Value("${his.citas.minutos-tolerancia:15}")
+    private int minutosTolerancia;
 
     private final CitaRepository citaRepository;
     private final CitaHistorialEstadoRepository citaHistorialEstadoRepository;
@@ -77,6 +82,43 @@ public class ReservaExpiradaScheduler {
             citaHistorialEstadoRepository.save(historial);
 
             log.info("Cita {} cancelada automaticamente: reserva de pago expirada.", cita.getNumeroCita());
+        }
+    }
+
+    /**
+     * [RN-CU03-06] Citas que se pagan en caja (portal con "Pago en caja", walk-in de
+     * recepcion [CU-05] y seguimientos [CU-12]) no tienen temporizador de 5 minutos.
+     * Si llega la hora de la cita mas la tolerancia y siguen sin pagarse, se cancelan
+     * para que no bloqueen el horario del medico para siempre.
+     */
+    @Scheduled(fixedRate = 300_000)
+    @Transactional
+    public void cancelarCitasSinPagoVencidas() {
+
+        List<Cita> vencidas = citaRepository.findByEstadoCita_CodigoAndFechaHoraBefore(
+                "PENDIENTE_PAGO", OffsetDateTime.now().minusMinutes(minutosTolerancia));
+
+        if (vencidas.isEmpty()) {
+            return;
+        }
+
+        EstadoCita cancelada = estadoCitaService.buscarPorCodigo("CANCELADA");
+
+        for (Cita cita : vencidas) {
+            Integer estadoAnteriorId = cita.getEstadoCita().getId();
+
+            cita.setEstadoCita(cancelada);
+            citaRepository.save(cita);
+
+            CitaHistorialEstado historial = new CitaHistorialEstado();
+            historial.setCitaId(cita.getId());
+            historial.setEstadoAnteriorId(estadoAnteriorId);
+            historial.setEstadoNuevoId(cancelada.getId());
+            historial.setUsuarioId(null); // accion automatica, sin usuario
+            historial.setObservacion("Cancelada automaticamente: llego la hora de la cita y no se registro el pago.");
+            citaHistorialEstadoRepository.save(historial);
+
+            log.info("Cita {} cancelada automaticamente: no se pago antes de la hora de la cita.", cita.getNumeroCita());
         }
     }
 }

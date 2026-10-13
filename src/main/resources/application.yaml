@@ -59,6 +59,7 @@ his:
     minutos-bloqueo: 15        # RN-CU00-03
   citas:
     minutos-tolerancia: 15     # RN-CU05-03: tolerancia de llegada del paciente
+    max-pendientes-pago: 2     # RN-CU03-06: citas sin pagar que puede tener un paciente a la vez
 
 logging:
   level:

@@ -68,4 +68,11 @@ public interface CitaRepository extends JpaRepository<Cita, Integer> {
      * paciente nunca registro su llegada en recepcion.
      */
     List<Cita> findByEstadoCita_CodigoAndFechaHoraBefore(String codigo, OffsetDateTime instante);
+
+    /**
+     * [RN-CU03-06] Cuantas citas futuras tiene un paciente en un estado (ej: PENDIENTE_PAGO).
+     * Sirve para limitar cuantas citas sin pagar puede apartar a la vez.
+     */
+    long countByPacienteIdAndEstadoCita_CodigoAndFechaHoraAfter(Integer pacienteId, String codigo,
+                                                                 OffsetDateTime instante);
 }

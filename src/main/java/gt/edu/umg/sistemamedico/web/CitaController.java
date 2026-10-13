@@ -5,6 +5,7 @@ import gt.edu.umg.sistemamedico.repository.SucursalEspecialidadRepository;
 import gt.edu.umg.sistemamedico.repository.UsuarioRepository;
 import gt.edu.umg.sistemamedico.security.UsuarioDetails;
 import gt.edu.umg.sistemamedico.service.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -32,6 +33,10 @@ import java.util.Map;
 public class CitaController {
 
     private static final int MINUTOS_RESERVA = 5; // FA03
+
+    /** [RN-CU03-06] Maximo de citas sin pagar que un paciente puede tener a la vez. */
+    @Value("${his.citas.max-pendientes-pago:2}")
+    private int maxPendientesPago;
 
     private final SucursalService sucursalService;
     private final SucursalEspecialidadRepository sucursalEspecialidadRepository;
@@ -142,6 +147,15 @@ public class CitaController {
         }
 
         Usuario paciente = ud.getUsuario();
+
+        // [RN-CU03-06] Evita que un paciente aparte muchos horarios sin pagarlos.
+        long pendientes = citaRepository.countByPacienteIdAndEstadoCita_CodigoAndFechaHoraAfter(
+                paciente.getId(), "PENDIENTE_PAGO", OffsetDateTime.now());
+        if (pendientes >= maxPendientesPago) {
+            return error("metodoPago", "Ya tiene " + pendientes + " cita(s) pendiente(s) de pago. " +
+                    "Pague o espere a que venzan antes de agendar otra.");
+        }
+
         Usuario medico = usuarioRepository.findById(req.medicoId()).orElse(null);
 
         // El navegador manda el medicoId: se verifica que de verdad sea un medico activo
@@ -187,8 +201,9 @@ public class CitaController {
         cita.setState((short) 1);
 
         // [FA03] reserva temporal de 5 minutos mientras se completa el pago en linea.
-        // Si paga en caja no hay temporizador: queda PENDIENTE_PAGO hasta que
-        // el cajero la cobre [CU-06] (igual que las citas internas de CU-05).
+        // Si paga en caja no hay temporizador: queda PENDIENTE_PAGO hasta que el cajero
+        // la cobre [CU-06]. Si llega la hora de la cita (mas la tolerancia) sin pagarse,
+        // ReservaExpiradaScheduler la cancela y libera el horario [RN-CU03-06].
         boolean pagoEnCaja = "CAJA".equals(req.metodoPago());
         cita.setReservaExpiraEn(pagoEnCaja ? null : OffsetDateTime.now().plusMinutes(MINUTOS_RESERVA));
 
