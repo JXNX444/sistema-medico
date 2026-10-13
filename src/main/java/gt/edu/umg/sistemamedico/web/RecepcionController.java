@@ -124,6 +124,34 @@ public class RecepcionController {
         return mapearResultadoLlegada(resultado);
     }
 
+    // ---------- FA01: emergencia sin cita ----------
+
+    public record EmergenciaRequest(String dpi, Integer medicoId, String motivo) {}
+
+    @PostMapping("/api/emergencia")
+    @ResponseBody
+    public Map<String, Object> registrarEmergencia(@RequestBody EmergenciaRequest req) {
+        RecepcionService.ResultadoWalkIn resultado;
+        try {
+            resultado = recepcionService.registrarEmergencia(req.dpi(), req.medicoId(), req.motivo());
+        } catch (DataIntegrityViolationException e) {
+            resultado = new RecepcionService.ResultadoWalkIn(false,
+                    Map.of("general", "No se pudo registrar la emergencia. Intente de nuevo."), null);
+        }
+
+        Map<String, Object> respuesta = new LinkedHashMap<>();
+        respuesta.put("ok", resultado.ok());
+        if (!resultado.ok()) {
+            respuesta.put("errores", resultado.errores());
+        } else {
+            String nombre = resultado.cita().getPaciente().getNombreCompleto();
+            respuesta.put("mensaje", "Paciente " + nombre + " registrado con prioridad de EMERGENCIA. "
+                    + "El paciente debe pasar directamente a toma de signos vitales.");
+            respuesta.put("numeroCita", resultado.cita().getNumeroCita());
+        }
+        return respuesta;
+    }
+
     // ---------- FA07: reasignacion de medico ----------
 
     @GetMapping("/api/medicos-reasignacion")

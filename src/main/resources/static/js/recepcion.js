@@ -81,6 +81,7 @@ function renderResultado(data) {
 <button class="boton-principal" onclick="mostrarFormularioWalkIn()">
 <i class="ti ti-calendar-plus"></i> Nueva Cita (Walk-in)
 </button>
+            ${botonEmergencia()}
 </div>`;
             break;
 
@@ -91,6 +92,7 @@ function renderResultado(data) {
         case 'CITAS_ENCONTRADAS':
             zona.innerHTML =
                 `<p class="resultado-subtitulo" style="margin-bottom:12px;">${data.citas.length} cita(s) encontrada(s)</p>` +
+                botonEmergencia() +
                 data.citas.map(tarjetaCita).join('');
             break;
     }
@@ -302,6 +304,90 @@ function mostrarExito(mensaje) {
 <p>${mensaje}</p>
 </div>`;
     document.getElementById('campoValor').value = '';
+}
+
+/* ============================================================
+   FA01: Paciente que llega por emergencia sin cita
+   ============================================================ */
+
+function botonEmergencia() {
+    // Solo tiene sentido cuando se busco por DPI (se sabe quien es el paciente).
+    if (modoActual !== 'dpi' || !ultimoDpiBuscado) return '';
+    return `
+<button class="boton-principal" style="background:var(--rojo);margin:10px 0;" onclick="mostrarFormularioEmergencia()">
+<i class="ti ti-alert-triangle"></i> Emergencia (sin cita)
+</button>`;
+}
+
+function mostrarFormularioEmergencia() {
+    document.getElementById('zonaResultado').innerHTML = `
+<div class="tarjeta-resultado">
+<p class="resultado-nombre" style="margin-bottom:6px;">Registrar emergencia</p>
+<p class="resultado-subtitulo" style="margin-bottom:16px;">El paciente pasa directo a toma de signos vitales con prioridad de EMERGENCIA.</p>
+
+<label class="etiqueta-campo">Sucursal</label>
+<select id="wiSucursal" class="campo-formulario" onchange="cargarEspecialidadesWalkIn()">
+<option value="">Seleccione...</option>
+</select>
+
+<label class="etiqueta-campo">Especialidad</label>
+<select id="wiEspecialidad" class="campo-formulario" disabled onchange="cargarMedicosWalkIn()">
+<option value="">Seleccione una sucursal primero...</option>
+</select>
+
+<label class="etiqueta-campo">Medico</label>
+<select id="wiMedico" class="campo-formulario" disabled>
+<option value="">Seleccione una especialidad primero...</option>
+</select>
+<input type="hidden" id="wiFecha" value="">
+<select id="wiHora" style="display:none;"></select>
+<p class="error-campo" id="emErrorMedico"></p>
+
+<label class="etiqueta-campo">Motivo / sintomas</label>
+<textarea id="emMotivo" class="campo-formulario" placeholder="Describa la emergencia (minimo 10 caracteres)"></textarea>
+<p class="error-campo" id="emErrorMotivo"></p>
+
+<div style="display:flex;gap:10px;">
+<button class="boton-secundario" style="flex:1;" onclick="buscar()">Cancelar</button>
+<button class="boton-principal" style="flex:1;background:var(--rojo);" onclick="enviarEmergencia()">
+<i class="ti ti-alert-triangle"></i> Registrar emergencia
+</button>
+</div>
+</div>`;
+
+    cargarSucursalesWalkIn();
+}
+
+async function enviarEmergencia() {
+    document.getElementById('emErrorMedico').textContent = '';
+    document.getElementById('emErrorMotivo').textContent = '';
+
+    const medicoId = document.getElementById('wiMedico').value;
+    const motivo = document.getElementById('emMotivo').value;
+    if (!medicoId) {
+        document.getElementById('emErrorMedico').textContent = 'Seleccione sucursal, especialidad y medico.';
+        return;
+    }
+
+    try {
+        const resp = await fetch(`${CTX}recepcion/api/emergencia`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dpi: ultimoDpiBuscado, medicoId: Number(medicoId), motivo })
+        });
+        const data = await resp.json();
+
+        if (data.ok) {
+            mostrarExito(data.mensaje);
+        } else {
+            const e = data.errores || {};
+            if (e.medicoId) document.getElementById('emErrorMedico').textContent = e.medicoId;
+            if (e.motivo) document.getElementById('emErrorMotivo').textContent = e.motivo;
+            if (e.dpi || e.general) Aviso.mostrar(e.dpi || e.general, { tipo: 'error' });
+        }
+    } catch (err) {
+        Aviso.mostrar('Error al registrar la emergencia.', { tipo: 'error' });
+    }
 }
 
 /* ============================================================

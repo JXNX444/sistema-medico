@@ -239,6 +239,66 @@ public class RecepcionService {
                 cita, false);
     }
 
+    // ---------- FA01: paciente que llega por emergencia sin cita ----------
+
+    /**
+     * [CU-05 FA01] Registra al paciente con prioridad de EMERGENCIA y lo deja directo
+     * en "Paciente Presente", para que enfermeria lo vea de primero [CU-07].
+     * La cita se crea con la hora actual y no pasa por "Pendiente de pago": la
+     * atencion de una emergencia no espera al cobro.
+     */
+    @Transactional
+    public ResultadoWalkIn registrarEmergencia(String dpi, Integer medicoId, String motivo) {
+        Map<String, String> errores = new LinkedHashMap<>();
+
+        Usuario paciente = usuarioRepository.findByDpi(dpi == null ? "" : dpi.trim()).orElse(null);
+        if (paciente == null) {
+            errores.put("dpi", "No se encontro ningun paciente con ese DPI. Registrelo primero.");
+            return new ResultadoWalkIn(false, errores, null);
+        }
+        if (!"Paciente".equalsIgnoreCase(paciente.getNombreRol())) {
+            errores.put("dpi", "Ese DPI pertenece a un usuario interno, no a un paciente.");
+            return new ResultadoWalkIn(false, errores, null);
+        }
+
+        Usuario medico = medicoId == null ? null : usuarioRepository.findById(medicoId).orElse(null);
+        if (medico == null || medico.getState() != 1 || medico.getSucursal() == null
+                || !"Medico".equalsIgnoreCase(medico.getNombreRol())) {
+            errores.put("medicoId", "Debe seleccionar un medico para continuar.");
+        }
+
+        String motivoLimpio = motivo == null ? "" : motivo.trim();
+        if (motivoLimpio.length() < 10 || motivoLimpio.length() > 2000) {
+            errores.put("motivo", "El motivo debe contener entre 10 y 2000 caracteres. Usted ingreso "
+                    + motivoLimpio.length() + " caracteres.");
+        }
+        if (!errores.isEmpty()) {
+            return new ResultadoWalkIn(false, errores, null);
+        }
+
+        OffsetDateTime ahora = OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.SECONDS);
+
+        Cita cita = new Cita();
+        cita.setNumeroCita(generarNumeroCita());
+        cita.setPaciente(paciente);
+        cita.setMedico(medico);
+        cita.setEspecialidad(medico.getEspecialidad());
+        cita.setSucursal(medico.getSucursal());
+        cita.setEstadoCita(estadoCitaService.buscarPorCodigo("PACIENTE_PRESENTE"));
+        cita.setFechaHora(ahora);
+        cita.setHoraLlegada(ahora);
+        cita.setDuracionMin((short) 30);
+        cita.setMotivo(motivoLimpio);
+        cita.setMonto(tarifaService.precioConsulta(medico.getEspecialidad()));
+        cita.setEsEmergencia(true);
+        cita.setPrioridad((short) 2);
+        cita.setOrigen((short) 1); // interno
+        cita.setEsSeguimiento(false);
+        cita.setState((short) 1);
+
+        return new ResultadoWalkIn(true, null, citaRepository.save(cita));
+    }
+
     // ---------- FA07: reasignacion de medico ----------
 
     private static final Set<String> ESTADOS_REASIGNABLES = Set.of("CONFIRMADA", "PACIENTE_PRESENTE");
