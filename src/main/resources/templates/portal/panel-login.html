@@ -32,7 +32,12 @@
             <div class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;" th:if="${param.inactivo}">
                 Su cuenta esta inactiva. Contacte al administrador del sistema.
             </div>
-            <div th:if="${param.rolNoAutorizado}" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;">
+            <!-- FA09: personal del hospital intento entrar por la pestaña Paciente -->
+            <div th:if="${param.rolNoAutorizado != null and param.rolNoAutorizado[0] == 'personal'}" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;">
+                Este acceso es exclusivo para pacientes. Si es personal del hospital, use el panel administrativo.
+            </div>
+            <!-- FA09 invertido: paciente intento entrar por la pestaña Personal -->
+            <div th:if="${param.rolNoAutorizado != null and param.rolNoAutorizado[0] == 'paciente'}" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;">
                 Este acceso es exclusivo para el personal del hospital. Si es paciente, use el portal de pacientes.
             </div>
             <div th:if="${param.logout}" class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;">

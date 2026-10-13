@@ -106,7 +106,7 @@ public class SecurityConfig {
             // FA09 invertido: un Paciente no puede usar el panel administrativo
             if (esPaciente) {
                 req.getSession().invalidate();
-                res.sendRedirect("/panel?rolNoAutorizado");
+                res.sendRedirect("/panel?rolNoAutorizado=paciente");
                 return;
             }
             res.sendRedirect("/panel/inicio");
@@ -116,7 +116,7 @@ public class SecurityConfig {
         // FA09: si NO es Paciente, no puede entrar al portal de pacientes
         if (!esPaciente) {
             req.getSession().invalidate();
-            res.sendRedirect("/login?rolNoAutorizado");
+            res.sendRedirect("/login?rolNoAutorizado=personal");
             return;
         }
 
