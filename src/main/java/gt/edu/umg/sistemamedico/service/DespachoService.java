@@ -38,19 +38,22 @@ public class DespachoService {
     private final MovimientoInventarioRepository movimientoRepository;
     private final MedicamentoRepository medicamentoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final AuditoriaService auditoriaService;
 
     public DespachoService(RecetaRepository recetaRepository,
                            DespachoRepository despachoRepository,
                            InventarioMedicamentoRepository inventarioRepository,
                            MovimientoInventarioRepository movimientoRepository,
                            MedicamentoRepository medicamentoRepository,
-                           UsuarioRepository usuarioRepository) {
+                           UsuarioRepository usuarioRepository,
+                           AuditoriaService auditoriaService) {
         this.recetaRepository = recetaRepository;
         this.despachoRepository = despachoRepository;
         this.inventarioRepository = inventarioRepository;
         this.movimientoRepository = movimientoRepository;
         this.medicamentoRepository = medicamentoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.auditoriaService = auditoriaService;
     }
 
     // =====================================================================
@@ -321,8 +324,8 @@ public class DespachoService {
                     return ResultadoDespacho.error("Seleccione un medicamento alternativo distinto para " + original.getNombre() + ".");
                 }
                 entregado = medicamentoRepository.findById(item.alternativoId()).orElse(null);
-                if (entregado == null) {
-                    return ResultadoDespacho.error("El medicamento alternativo no existe.");
+                if (entregado == null || !entregado.estaActivo()) {
+                    return ResultadoDespacho.error("El medicamento alternativo no existe o esta inactivo.");
                 }
                 det.setEsSustitucion(true);
                 det.setMedicamentoOriginal(original);
@@ -351,6 +354,19 @@ public class DespachoService {
             despacho.agregarDetalle(det);
 
             total = total.add(det.getSubtotal());
+        }
+
+        // [RNF-017] Medicamentos controlados: se exige dejar en Notas la autorizacion
+        // o justificacion, y el despacho queda en la bitacora de auditoria.
+        List<String> controlados = despacho.getDetalles().stream()
+                .map(DespachoDetalle::getMedicamento)
+                .filter(Medicamento::isControlado)
+                .map(Medicamento::getNombre)
+                .distinct()
+                .toList();
+        if (!controlados.isEmpty() && (notas == null || notas.trim().length() < 10)) {
+            return ResultadoDespacho.error("Medicamento controlado (" + String.join(", ", controlados) +
+                    "): escriba en Notas el numero de autorizacion o la justificacion (minimo 10 caracteres).");
         }
 
         // Paso 10: guardar despacho + detalles (cascade).
@@ -386,6 +402,15 @@ public class DespachoService {
         }
         inventarioRepository.saveAll(tocados.values());
 
+        if (!controlados.isEmpty()) {
+            Map<String, Object> datos = new LinkedHashMap<>();
+            datos.put("recetaId", recetaId);
+            datos.put("paciente", receta.getPaciente().getNombreCompleto());
+            datos.put("medicamentosControlados", controlados);
+            datos.put("autorizacion", notas.trim());
+            auditoriaService.registrar("despacho", "DESPACHO_CONTROLADO", despacho.getId(), null, datos);
+        }
+
         // FA04: stock minimo alcanzado tras el despacho [RN-CU10-03]
         List<String> alertas = tocados.values().stream()
                 .filter(InventarioMedicamento::esStockBajo)
@@ -419,6 +444,17 @@ public class DespachoService {
         Receta receta = recetaRepository.buscarConDetalles(recetaId).orElse(null);
         if (receta == null) {
             return new ResultadoSimple(false, "La receta no existe o no esta activa.");
+        }
+        String vencida = mensajeSiVencida(receta);
+        if (vencida != null) {
+            return new ResultadoSimple(false, vencida);
+        }
+        if (despachoRepository.existsByRecetaIdAndEstadoDespachoAndState(recetaId, Despacho.DESPACHADO, ACTIVO)) {
+            return new ResultadoSimple(false, "La receta #" + recetaId + " ya fue despachada.");
+        }
+        if (despachoRepository.existsByRecetaIdAndEstadoDespachoAndState(recetaId, Despacho.NO_ADQUIRIDO, ACTIVO)) {
+            return new ResultadoSimple(false,
+                    "Ya se habia registrado que el paciente no adquirio la receta #" + recetaId + ".");
         }
         Usuario farmaceutico = usuarioRepository.findById(farmaceuticoId).orElseThrow();
         if (farmaceutico.getSucursal() == null) {
