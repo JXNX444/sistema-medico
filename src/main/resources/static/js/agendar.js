@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         radio.addEventListener('change', () => {
             seleccion.sucursalId = radio.value;
             seleccion.sucursalNombre = radio.dataset.nombre;
+            mostrarError(1, '');
         });
     });
 
@@ -87,6 +88,12 @@ function irAPaso(destino) {
         return;
     }
 
+    // Al regresar ("Atras") se borra lo elegido en ese paso y en los siguientes,
+    // porque dependen de el (otra sucursal = otras especialidades, otros medicos...).
+    if (destino < pasoActual) {
+        limpiarDesde(destino);
+    }
+
     document.getElementById('paso' + pasoActual).classList.add('oculto');
     document.getElementById('paso' + destino).classList.remove('oculto');
 
@@ -96,6 +103,50 @@ function irAPaso(destino) {
     if (destino === 2) cargarEspecialidades();
     if (destino === 3) cargarMedicos();
     if (destino === 5) renderResumen();
+}
+
+/**
+ * Borra la seleccion del paso indicado y de todos los que siguen.
+ * Ej: limpiarDesde(1) deja el wizard como recien abierto (menos el motivo escrito).
+ */
+function limpiarDesde(paso) {
+    if (paso <= 1) {
+        seleccion.sucursalId = null;
+        seleccion.sucursalNombre = null;
+        desmarcar('#listaSucursales input[name="sucursal"]');
+        mostrarError(1, '');
+    }
+    if (paso <= 2) {
+        seleccion.especialidadId = null;
+        seleccion.especialidadNombre = null;
+        desmarcar('#listaEspecialidades input[name="especialidad"]');
+        mostrarError(2, '');
+    }
+    if (paso <= 3) {
+        seleccion.medicoId = null;
+        seleccion.medicoNombre = null;
+        desmarcar('#listaMedicos input[name="medico"]');
+        mostrarError(3, '');
+    }
+    if (paso <= 4) {
+        seleccion.fecha = null;
+        seleccion.hora = null;
+        document.getElementById('fechaCita').value = '';
+        document.getElementById('listaHorarios').innerHTML = '';
+        document.getElementById('bloqueHorarios').classList.add('oculto');
+        mostrarError(4, '');
+    }
+    // El motivo (paso 5) es texto escrito: se conserva.
+    if (paso <= 6) {
+        seleccion.metodoPago = null;
+        desmarcar('#listaMetodosPago input[name="metodoPago"]');
+        mostrarError(6, '');
+    }
+}
+
+/** Quita la marca a todas las opciones (radios) que coinciden con el selector. */
+function desmarcar(selector) {
+    document.querySelectorAll(selector).forEach(r => { r.checked = false; });
 }
 
 function actualizarIndicador(pasoDestino) {
