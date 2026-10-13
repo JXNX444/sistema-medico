@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +25,8 @@ import java.util.Set;
  *
  * El "turno" que se anuncia por voz no tiene contador propio en la base
  * de datos: se calcula como la posicion de la cita dentro de la fila de
- * hoy (Paciente Presente + Signos Vitales), ordenada por hora de llegada.
+ * hoy (Paciente Presente + Signos Vitales): emergencias primero y luego
+ * por hora de llegada (ver fila()).
  */
 @Service
 public class EnfermeriaService {
@@ -47,9 +49,22 @@ public class EnfermeriaService {
 
     public record PanelEnfermeria(List<Cita> presentes, List<Cita> enSignos) {}
 
+    /**
+     * La fila de enfermeria: primero las emergencias (prioridad mas alta) y luego
+     * por orden de llegada a recepcion; si no hay hora de llegada, por hora de la cita.
+     */
+    private List<Cita> fila() {
+        return citaRepository.findByEstadoCita_CodigoInOrderByFechaHoraAsc(ESTADOS_PANEL).stream()
+                .sorted(Comparator
+                        .comparing((Cita c) -> c.getPrioridad() == null ? 0 : c.getPrioridad(),
+                                Comparator.reverseOrder())
+                        .thenComparing(c -> c.getHoraLlegada() != null ? c.getHoraLlegada() : c.getFechaHora()))
+                .toList();
+    }
+
     @Transactional(readOnly = true)
     public PanelEnfermeria listarPacientes() {
-        List<Cita> todas = citaRepository.findByEstadoCita_CodigoInOrderByFechaHoraAsc(ESTADOS_PANEL);
+        List<Cita> todas = fila();
 
         List<Cita> presentes = todas.stream()
                 .filter(c -> "PACIENTE_PRESENTE".equals(c.getEstadoCita().getCodigo()))
@@ -62,7 +77,7 @@ public class EnfermeriaService {
     }
 
     private int turnoDe(Integer citaId) {
-        List<Cita> todas = citaRepository.findByEstadoCita_CodigoInOrderByFechaHoraAsc(ESTADOS_PANEL);
+        List<Cita> todas = fila();
         for (int i = 0; i < todas.size(); i++) {
             if (todas.get(i).getId().equals(citaId)) {
                 return i + 1;
