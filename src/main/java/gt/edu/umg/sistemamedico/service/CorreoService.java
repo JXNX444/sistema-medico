@@ -59,6 +59,36 @@ public class CorreoService {
     }
 
     // =====================================================================
+    // CU-00 / CU-03: confirmacion de cita agendada [RN-CU00-02]
+    // =====================================================================
+
+    /**
+     * Se envia cuando el paciente agenda con "Pago en caja": la cita queda
+     * registrada pero pendiente de pago. (Si paga en linea, el comprobante
+     * de CU-04 ya sirve de confirmacion.)
+     */
+    public void enviarConfirmacionCita(String correoDestino, String nombrePaciente,
+                                       String numeroCita, String medico, String especialidad,
+                                       String sucursal, String fechaHora, String monto) {
+        String filas = fila("No. de cita", numeroCita)
+                + fila("Médico", medico)
+                + fila("Especialidad", especialidad)
+                + fila("Sede", sucursal);
+        String html = plantilla(
+                "CITA AGENDADA",
+                "Hola, " + primerNombre(nombrePaciente),
+                "Su cita ha sido agendada exitosamente. Estos son los detalles.",
+                "FECHA Y HORA DE LA CITA", fechaHora,
+                "DETALLE DE LA CITA", filas,
+                "Monto a pagar", "Q " + monto,
+                aviso("#FEF3C7", "#92400E",
+                        "La cita queda <b>pendiente de pago</b>. Pague en caja antes de la hora de su cita "
+                                + "o en línea desde <b>Mis Citas</b>; si no se paga, se cancela automáticamente."),
+                "Ver mis citas");
+        enviar(correoDestino, "Confirmación de Cita Médica - " + nombreHospital, html, "confirmacion de cita");
+    }
+
+    // =====================================================================
     // CU-04: comprobante de pago
     // =====================================================================
 

@@ -45,6 +45,7 @@ public class CitaController {
     private final DisponibilidadService disponibilidadService;
     private final gt.edu.umg.sistemamedico.repository.CitaRepository citaRepository;
     private final TarifaService tarifaService;
+    private final CorreoService correoService;
 
     public CitaController(SucursalService sucursalService,
                           SucursalEspecialidadRepository sucursalEspecialidadRepository,
@@ -52,7 +53,8 @@ public class CitaController {
                           EstadoCitaService estadoCitaService,
                           DisponibilidadService disponibilidadService,
                           gt.edu.umg.sistemamedico.repository.CitaRepository citaRepository,
-                          TarifaService tarifaService) {
+                          TarifaService tarifaService,
+                          CorreoService correoService) {
         this.sucursalService = sucursalService;
         this.sucursalEspecialidadRepository = sucursalEspecialidadRepository;
         this.usuarioRepository = usuarioRepository;
@@ -60,6 +62,7 @@ public class CitaController {
         this.disponibilidadService = disponibilidadService;
         this.citaRepository = citaRepository;
         this.tarifaService = tarifaService;
+        this.correoService = correoService;
     }
 
     // ---------- VISTA DEL WIZARD ----------
@@ -213,6 +216,17 @@ public class CitaController {
         } catch (DataIntegrityViolationException e) {
             // Dos pacientes confirmaron el mismo horario al mismo tiempo: gana el primero.
             return error("fechaHora", MSG_HORARIO_OCUPADO);
+        }
+
+        // [RN-CU00-02] Con pago en caja se confirma por correo de una vez
+        // (con pago en linea, el comprobante de CU-04 hace de confirmacion).
+        if (pagoEnCaja) {
+            correoService.enviarConfirmacionCita(
+                    paciente.getCorreo(), paciente.getNombreCompleto(), guardada.getNumeroCita(),
+                    medico.getNombreCompleto(), especialidad.getNombre(), sucursal.getNombre(),
+                    guardada.getFechaHora().atZoneSameInstant(ZoneId.of("America/Guatemala"))
+                            .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                    guardada.getMonto().setScale(2, java.math.RoundingMode.HALF_UP).toPlainString());
         }
 
         Map<String, Object> resultado = new LinkedHashMap<>();
