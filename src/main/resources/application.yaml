@@ -57,6 +57,8 @@ his:
   seguridad:
     max-intentos-fallidos: 5   # RN-CU00-03
     minutos-bloqueo: 15        # RN-CU00-03
+  citas:
+    minutos-tolerancia: 15     # RN-CU05-03: tolerancia de llegada del paciente
 
 logging:
   level:

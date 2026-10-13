@@ -7,6 +7,7 @@ import gt.edu.umg.sistemamedico.domain.Usuario;
 import gt.edu.umg.sistemamedico.repository.CitaHistorialEstadoRepository;
 import gt.edu.umg.sistemamedico.repository.CitaRepository;
 import gt.edu.umg.sistemamedico.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,10 @@ import java.util.Optional;
 public class RecepcionService {
 
     private static final ZoneId ZONA_GT = ZoneId.of("America/Guatemala");
+
+    /** [RN-CU05-03] Minutos que el paciente puede llegar tarde a su cita. */
+    @Value("${his.citas.minutos-tolerancia:15}")
+    private int minutosTolerancia;
 
     private final CitaRepository citaRepository;
     private final UsuarioRepository usuarioRepository;
@@ -172,6 +177,16 @@ public class RecepcionService {
                     "Esta cita esta programada para el " + fechaCita + ", que aun no ha llegado. " +
                             "Si el paciente necesita ser atendido hoy, puede reprogramar la cita para hoy.",
                     cita, true);
+        }
+
+        // [RN-CU05-03] Pasada la tolerancia ya no se registra la llegada; NoAsistioScheduler
+        // la marcara como No Asistio en su siguiente vuelta (corre cada 5 minutos).
+        OffsetDateTime limiteLlegada = cita.getFechaHora().plusMinutes(minutosTolerancia);
+        if (OffsetDateTime.now().isAfter(limiteLlegada)) {
+            return new ResultadoLlegada(false,
+                    "El paciente llego fuera del tiempo de tolerancia (" + minutosTolerancia +
+                            " minutos). La cita se marca como No Asistio; debe agendar una nueva cita.",
+                    cita, false);
         }
 
         EstadoCita pacientePresente = estadoCitaService.buscarPorCodigo("PACIENTE_PRESENTE");

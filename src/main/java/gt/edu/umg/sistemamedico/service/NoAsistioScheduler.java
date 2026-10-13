@@ -7,6 +7,7 @@ import gt.edu.umg.sistemamedico.repository.CitaHistorialEstadoRepository;
 import gt.edu.umg.sistemamedico.repository.CitaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,10 @@ import java.time.format.DateTimeFormatter;
  * Asistio manualmente en la tarjeta del paciente en espera"). Aqui
  * solo se cubre el caso donde la cita nunca llego a esa etapa: sigue
  * en CONFIRMADA (pagada, pero el paciente nunca llego a recepcion)
- * y su fecha/hora ya paso. Eso es un no-show objetivo que no requiere
+ * y ya paso su hora mas la tolerancia de llegada [RN-CU05-03], que por
+ * defecto son 15 minutos (his.citas.minutos-tolerancia en application.yaml).
+ * Ejemplo: cita a las 10:00 -> el paciente puede llegar hasta las 10:15.
+ * Eso es un no-show objetivo que no requiere
  * criterio medico, a diferencia de una cita que si llego a Signos
  * Vitales o Consulta y quedo inconclusa (eso si es CU-08).
  *
@@ -42,6 +46,9 @@ public class NoAsistioScheduler {
     private static final DateTimeFormatter FMT_HORA =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", new Locale("es", "GT"));
 
+    @Value("${his.citas.minutos-tolerancia:15}")
+    private int minutosTolerancia;
+
     private final CitaRepository citaRepository;
     private final CitaHistorialEstadoRepository citaHistorialEstadoRepository;
     private final EstadoCitaService estadoCitaService;
@@ -55,16 +62,17 @@ public class NoAsistioScheduler {
     }
 
     /**
-     * Corre cada 5 minutos: no necesita la precision de 30s del
-     * scheduler de reservas, porque aqui la ventana de tolerancia
-     * es la cita completa, no un timer de minutos.
+     * Corre cada 5 minutos. Solo marca las citas cuya hora de inicio
+     * ya paso hace mas de la tolerancia [RN-CU05-03]; si el paciente
+     * llega dentro de ese margen, recepcion todavia puede registrarlo.
      */
     @Scheduled(fixedRate = 300_000)
     @Transactional
     public void marcarNoAsistio() {
 
         List<Cita> vencidas = citaRepository
-                .findByEstadoCita_CodigoAndFechaHoraBefore("CONFIRMADA", OffsetDateTime.now());
+                .findByEstadoCita_CodigoAndFechaHoraBefore("CONFIRMADA",
+                        OffsetDateTime.now().minusMinutes(minutosTolerancia));
 
         if (vencidas.isEmpty()) {
             return;
@@ -86,7 +94,8 @@ public class NoAsistioScheduler {
             historial.setUsuarioId(null); // accion automatica, sin usuario
             historial.setObservacion(
                     "Marcada como No Asistio automaticamente: la cita estaba pagada y confirmada para el " +
-                            horaCita + ", pero el paciente nunca registro su llegada en recepcion.");
+                            horaCita + ", pero el paciente no registro su llegada en recepcion dentro de los " +
+                            minutosTolerancia + " minutos de tolerancia.");
             citaHistorialEstadoRepository.save(historial);
 
             log.info("Cita {} marcada como No Asistio: fecha vencida sin llegada registrada.", cita.getNumeroCita());
