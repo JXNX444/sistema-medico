@@ -25,9 +25,13 @@ import java.util.*;
  * - Tareas (his.tarea): crear, completar/descompletar, eliminar (borrado logico) [FA06].
  *
  * Restricciones de fecha (decision del equipo):
- * - Inicio y fin de un evento, y fecha limite de una tarea: no antes de HOY
- *   (hoy si se permite, a cualquier hora).
+ * - Evento con hora: inicio y fin desde la fecha y hora ACTUAL en adelante (por minuto).
+ * - Evento de todo el dia: inicio y fin desde HOY en adelante (hoy si, porque no tiene hora).
+ * - Tarea: fecha limite desde la fecha y hora ACTUAL en adelante (por minuto).
  * - Un evento que ya termino (fin <= ahora) no se puede editar; si se puede eliminar.
+ * - Un evento EN CURSO (ya empezo pero no ha terminado) si se puede editar: si no se le
+ *   cambia el inicio, se acepta aunque ya haya pasado; asi se puede extender o corregir
+ *   el titulo. El fin nunca puede quedar antes de la hora actual.
  *
  * Todas las fechas se interpretan en hora de Guatemala (ZONA_GT).
  *
@@ -148,7 +152,7 @@ public class AgendaService {
     @Transactional
     public Resultado crearEvento(Integer medicoId, DatosEvento datos) {
         Map<String, String> errores = new LinkedHashMap<>();
-        Rango rango = validarEvento(datos, errores);
+        Rango rango = validarEvento(datos, errores, null);
         if (!errores.isEmpty()) {
             return Resultado.errores(errores);
         }
@@ -185,8 +189,9 @@ public class AgendaService {
             return Resultado.error("general", "No se puede editar un evento que ya pasó.");
         }
 
+        // Evento en curso: se le pasa su inicio actual para aceptarlo si no cambia
         Map<String, String> errores = new LinkedHashMap<>();
-        Rango rango = validarEvento(datos, errores);
+        Rango rango = validarEvento(datos, errores, e.getFechaInicio());
         if (!errores.isEmpty()) {
             return Resultado.errores(errores);
         }
@@ -253,12 +258,12 @@ public class AgendaService {
             errores.put("prioridad", "Debe seleccionar la prioridad.");
         }
 
-        // RN-CU14-02: fecha limite obligatoria; decision del equipo: no antes de hoy
+        // RN-CU14-02: fecha limite obligatoria; decision del equipo: desde la hora actual
         OffsetDateTime fechaLimite = leerFechaHora(datos.fechaLimite());
         if (fechaLimite == null) {
             errores.put("fechaLimite", "La fecha límite es obligatoria.");
-        } else if (antesDeHoy(fechaLimite)) {
-            errores.put("fechaLimite", "La fecha límite no puede ser anterior a hoy.");
+        } else if (fechaLimite.isBefore(ahora())) {
+            errores.put("fechaLimite", "La fecha límite no puede ser anterior a la fecha y hora actual.");
         }
 
         if (!errores.isEmpty()) {
@@ -309,8 +314,14 @@ public class AgendaService {
     /** Inicio y fin ya convertidos a fecha-hora de Guatemala. */
     private record Rango(OffsetDateTime inicio, OffsetDateTime fin) {}
 
-    /** Llena 'errores' y devuelve el rango (null si las fechas no sirven). */
-    private Rango validarEvento(DatosEvento d, Map<String, String> errores) {
+    /**
+     * Llena 'errores' y devuelve el rango (null si las fechas no sirven).
+     *
+     * @param inicioOriginal inicio guardado del evento que se edita (null si es nuevo).
+     *                       Si el inicio no cambia, se acepta aunque ya haya pasado
+     *                       (evento en curso).
+     */
+    private Rango validarEvento(DatosEvento d, Map<String, String> errores, OffsetDateTime inicioOriginal) {
         validarTitulo(limpiar(d.titulo()), errores);
 
         String descripcion = limpiar(d.descripcion());
@@ -334,9 +345,12 @@ public class AgendaService {
             if (diaFin == null) errores.put("fechaFin", "La fecha de fin es obligatoria.");
             if (diaInicio == null || diaFin == null) return null;
 
-            // Decision del equipo: ni inicio ni fin antes de hoy (hoy si)
+            // Decision del equipo: ni inicio ni fin antes de hoy (hoy si, no tiene hora).
+            // Un evento en curso conserva su dia de inicio aunque ya haya pasado.
+            boolean inicioSinCambio = inicioOriginal != null
+                    && diaInicio.atStartOfDay(ZONA_GT).toOffsetDateTime().isEqual(inicioOriginal);
             boolean pasado = false;
-            if (diaInicio.isBefore(hoy)) {
+            if (diaInicio.isBefore(hoy) && !inicioSinCambio) {
                 errores.put("fechaInicio", "La fecha de inicio no puede ser anterior a hoy.");
                 pasado = true;
             }
@@ -359,14 +373,17 @@ public class AgendaService {
             if (fin == null) errores.put("fechaFin", "La fecha de fin es obligatoria.");
             if (inicio == null || fin == null) return null;
 
-            // Decision del equipo: ni inicio ni fin antes de hoy (hoy si, a cualquier hora)
+            // Decision del equipo: inicio y fin desde la hora actual (por minuto).
+            // Un evento en curso conserva su inicio aunque ya haya pasado.
+            OffsetDateTime ahora = ahora();
+            boolean inicioSinCambio = inicioOriginal != null && inicio.isEqual(inicioOriginal);
             boolean pasado = false;
-            if (antesDeHoy(inicio)) {
-                errores.put("fechaInicio", "La fecha de inicio no puede ser anterior a hoy.");
+            if (inicio.isBefore(ahora) && !inicioSinCambio) {
+                errores.put("fechaInicio", "La fecha de inicio no puede ser anterior a la fecha y hora actual.");
                 pasado = true;
             }
-            if (antesDeHoy(fin)) {
-                errores.put("fechaFin", "La fecha de fin no puede ser anterior a hoy.");
+            if (fin.isBefore(ahora)) {
+                errores.put("fechaFin", "La fecha de fin no puede ser anterior a la fecha y hora actual.");
                 pasado = true;
             }
             if (pasado) return null;
@@ -453,9 +470,9 @@ public class AgendaService {
         return !e.getFechaFin().isAfter(OffsetDateTime.now());
     }
 
-    /** true si la fecha (en hora de Guatemala) es de un dia anterior a hoy. */
-    private boolean antesDeHoy(OffsetDateTime fecha) {
-        return fecha.atZoneSameInstant(ZONA_GT).toLocalDate().isBefore(LocalDate.now(ZONA_GT));
+    /** Fecha y hora actual de Guatemala, al minuto (10:15:42 -> 10:15), para aceptar "la actual". */
+    private OffsetDateTime ahora() {
+        return OffsetDateTime.now(ZONA_GT).truncatedTo(java.time.temporal.ChronoUnit.MINUTES);
     }
 
     /** Fin de una cita = inicio + duracion (30 min si no tiene). */
