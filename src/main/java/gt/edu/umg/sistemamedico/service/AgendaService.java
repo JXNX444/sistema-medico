@@ -24,6 +24,11 @@ import java.util.*;
  *   [paso 2], coloreadas con estado_cita.color_hex.
  * - Tareas (his.tarea): crear, completar/descompletar, eliminar (borrado logico) [FA06].
  *
+ * Restricciones de fecha (decision del equipo):
+ * - Inicio y fin de un evento, y fecha limite de una tarea: no antes de HOY
+ *   (hoy si se permite, a cualquier hora).
+ * - Un evento que ya termino (fin <= ahora) no se puede editar; si se puede eliminar.
+ *
  * Todas las fechas se interpretan en hora de Guatemala (ZONA_GT).
  *
  * "Todo el dia": se guarda desde las 00:00 del dia de inicio hasta las 00:00 del dia
@@ -175,6 +180,11 @@ public class AgendaService {
             return Resultado.error("general", "El evento no existe o ya fue eliminado.");
         }
 
+        // Decision del equipo: un evento que ya termino no se edita (si se puede eliminar)
+        if (yaPaso(e)) {
+            return Resultado.error("general", "No se puede editar un evento que ya pasó.");
+        }
+
         Map<String, String> errores = new LinkedHashMap<>();
         Rango rango = validarEvento(datos, errores);
         if (!errores.isEmpty()) {
@@ -243,10 +253,12 @@ public class AgendaService {
             errores.put("prioridad", "Debe seleccionar la prioridad.");
         }
 
-        // RN-CU14-02: fecha limite obligatoria
+        // RN-CU14-02: fecha limite obligatoria; decision del equipo: no antes de hoy
         OffsetDateTime fechaLimite = leerFechaHora(datos.fechaLimite());
         if (fechaLimite == null) {
             errores.put("fechaLimite", "La fecha límite es obligatoria.");
+        } else if (antesDeHoy(fechaLimite)) {
+            errores.put("fechaLimite", "La fecha límite no puede ser anterior a hoy.");
         }
 
         if (!errores.isEmpty()) {
@@ -312,6 +324,7 @@ public class AgendaService {
 
         OffsetDateTime inicio;
         OffsetDateTime fin;
+        LocalDate hoy = LocalDate.now(ZONA_GT);
 
         if (d.todoElDia()) {
             // Solo fecha: de las 00:00 del inicio a las 00:00 del dia siguiente al fin
@@ -320,6 +333,18 @@ public class AgendaService {
             if (diaInicio == null) errores.put("fechaInicio", "La fecha de inicio es obligatoria.");
             if (diaFin == null) errores.put("fechaFin", "La fecha de fin es obligatoria.");
             if (diaInicio == null || diaFin == null) return null;
+
+            // Decision del equipo: ni inicio ni fin antes de hoy (hoy si)
+            boolean pasado = false;
+            if (diaInicio.isBefore(hoy)) {
+                errores.put("fechaInicio", "La fecha de inicio no puede ser anterior a hoy.");
+                pasado = true;
+            }
+            if (diaFin.isBefore(hoy)) {
+                errores.put("fechaFin", "La fecha de fin no puede ser anterior a hoy.");
+                pasado = true;
+            }
+            if (pasado) return null;
 
             if (diaFin.isBefore(diaInicio)) {
                 errores.put("fechaFin", "La fecha de fin no puede ser anterior a la fecha de inicio.");
@@ -333,6 +358,18 @@ public class AgendaService {
             if (inicio == null) errores.put("fechaInicio", "La fecha de inicio es obligatoria.");
             if (fin == null) errores.put("fechaFin", "La fecha de fin es obligatoria.");
             if (inicio == null || fin == null) return null;
+
+            // Decision del equipo: ni inicio ni fin antes de hoy (hoy si, a cualquier hora)
+            boolean pasado = false;
+            if (antesDeHoy(inicio)) {
+                errores.put("fechaInicio", "La fecha de inicio no puede ser anterior a hoy.");
+                pasado = true;
+            }
+            if (antesDeHoy(fin)) {
+                errores.put("fechaFin", "La fecha de fin no puede ser anterior a hoy.");
+                pasado = true;
+            }
+            if (pasado) return null;
 
             // RN-CU14-01
             if (!fin.isAfter(inicio)) {
@@ -409,6 +446,16 @@ public class AgendaService {
     private EventoVista aVista(EventoAgenda e) {
         return new EventoVista(e.getId(), e.getTitulo(), e.getDescripcion(), e.getFechaInicio(),
                 e.getFechaFin(), e.isTodoElDia(), e.getTipoEvento(), e.getNombreTipo());
+    }
+
+    /** Un evento ya paso cuando su fin quedo atras. */
+    private boolean yaPaso(EventoAgenda e) {
+        return !e.getFechaFin().isAfter(OffsetDateTime.now());
+    }
+
+    /** true si la fecha (en hora de Guatemala) es de un dia anterior a hoy. */
+    private boolean antesDeHoy(OffsetDateTime fecha) {
+        return fecha.atZoneSameInstant(ZONA_GT).toLocalDate().isBefore(LocalDate.now(ZONA_GT));
     }
 
     /** Fin de una cita = inicio + duracion (30 min si no tiene). */
