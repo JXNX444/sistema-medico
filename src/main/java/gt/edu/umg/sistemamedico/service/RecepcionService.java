@@ -485,7 +485,6 @@ public class RecepcionService {
     }
 
     private String generarNumeroCita() {
-        long total = citaRepository.count() + 1;
-        return "CITA-" + LocalDate.now(ZONA_GT).getYear() + "-" + String.format("%05d", total);
+        return citaRepository.siguienteNumeroCita();
     }
 }

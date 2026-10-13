@@ -615,8 +615,7 @@ public class ConsultaService {
     }
 
     private String generarNumeroCita() {
-        long total = citaRepository.count() + 1;
-        return "CITA-" + LocalDate.now().getYear() + "-" + String.format("%05d", total);
+        return citaRepository.siguienteNumeroCita();
     }
 
     // =====================================================================

@@ -257,8 +257,7 @@ public class CitaController {
     }
 
     private String generarNumeroCita(Integer pacienteId) {
-        long total = citaRepository.count() + 1;
-        return "CITA-" + LocalDate.now(ZONA_GT).getYear() + "-" + String.format("%05d", total);
+        return citaRepository.siguienteNumeroCita();
     }
 
     /** Validacion manual [RN-CU03-01 a 05], usando el CONTENIDO de cada regla, no su numero. */

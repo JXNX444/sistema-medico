@@ -2,8 +2,11 @@ package gt.edu.umg.sistemamedico.repository;
 
 import gt.edu.umg.sistemamedico.domain.Cita;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -75,4 +78,25 @@ public interface CitaRepository extends JpaRepository<Cita, Integer> {
      */
     long countByPacienteIdAndEstadoCita_CodigoAndFechaHoraAfter(Integer pacienteId, String codigo,
                                                                  OffsetDateTime instante);
+
+    /**
+     * Correlativo mas alto ya usado en numero_cita para un anio ("CITA-<anio>-<00000>").
+     * Devuelve 0 si aun no hay citas ese anio.
+     */
+    @Query(value = """
+            SELECT COALESCE(MAX(CAST(RIGHT(numero_cita, 5) AS INTEGER)), 0)
+              FROM his.cita
+             WHERE numero_cita LIKE CONCAT('CITA-', :anio, '-%')
+            """, nativeQuery = true)
+    int maxCorrelativoDelAnio(int anio);
+
+    /**
+     * Siguiente numero de cita. Antes se usaba count() + 1 en tres lugares distintos,
+     * que podia repetir un numero (y chocar con ux_cita_numero) si dos citas se creaban
+     * a la vez o si alguna se borraba; ahora todos usan el mismo metodo que los pagos.
+     */
+    default String siguienteNumeroCita() {
+        int anio = LocalDate.now(ZoneId.of("America/Guatemala")).getYear();
+        return "CITA-" + anio + "-" + String.format("%05d", maxCorrelativoDelAnio(anio) + 1);
+    }
 }
