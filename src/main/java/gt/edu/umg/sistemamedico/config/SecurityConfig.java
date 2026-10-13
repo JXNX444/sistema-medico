@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
@@ -134,6 +135,12 @@ public class SecurityConfig {
         // FA07: cuenta bloqueada
         if (ex instanceof LockedException) {
             res.sendRedirect(base + "?bloqueado");
+            return;
+        }
+
+        // Cuenta inactiva: no es un intento fallido, no se cuenta para el bloqueo
+        if (ex instanceof DisabledException) {
+            res.sendRedirect(base + "?inactivo");
             return;
         }
 

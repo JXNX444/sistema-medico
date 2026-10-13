@@ -28,6 +28,10 @@
             <div th:if="${param.bloqueado}" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;">
                 Cuenta bloqueada temporalmente. Intente de nuevo en 15 minutos.
             </div>
+            <!-- Cuenta inactiva o eliminada por el administrador -->
+            <div class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;" th:if="${param.inactivo}">
+                Su cuenta esta inactiva. Contacte al administrador del sistema.
+            </div>
             <div th:if="${param.rolNoAutorizado}" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;">
                 Estas credenciales no corresponden al acceso seleccionado.
             </div>

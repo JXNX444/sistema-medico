@@ -30,6 +30,10 @@
             <div class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;" th:if="${param.bloqueado}">
                 Cuenta bloqueada temporalmente. Intente de nuevo en 15 minutos.
             </div>
+            <!-- Cuenta inactiva o eliminada por el administrador -->
+            <div class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;" th:if="${param.inactivo}">
+                Su cuenta esta inactiva. Contacte al administrador del sistema.
+            </div>
             <!-- FA09: rol no autorizado -->
             <div class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;" th:if="${param.rolNoAutorizado}">
                 Este acceso es exclusivo para pacientes. Si es personal del hospital, use el panel administrativo.
