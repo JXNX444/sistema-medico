@@ -9,6 +9,7 @@ import gt.edu.umg.sistemamedico.service.EspecialidadService;
 import gt.edu.umg.sistemamedico.service.RolService;
 import gt.edu.umg.sistemamedico.service.SucursalService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -141,7 +142,16 @@ public class UsuarioController {
 
         Usuario usuario = new Usuario();
         aplicarFormAUsuario(form, usuario, true);
-        usuarioRepository.save(usuario);
+        try {
+            usuarioRepository.save(usuario);
+        } catch (DataIntegrityViolationException e) {
+            // Respaldo: si la BD rechaza algo que la validacion no atrapo, se muestra en el formulario
+            errores.put("general", mensajeDeBd(e));
+            cargarCatalogos(model);
+            model.addAttribute("errores", errores);
+            model.addAttribute("editando", false);
+            return "usuarios/formulario";
+        }
 
         auditoriaService.registrarUsuario("CREAR", usuario.getId(),
                 null, auditoriaService.snapshot(usuario), request);
@@ -197,7 +207,15 @@ public class UsuarioController {
         }
 
         aplicarFormAUsuario(form, usuario, false);
-        usuarioRepository.save(usuario);
+        try {
+            usuarioRepository.save(usuario);
+        } catch (DataIntegrityViolationException e) {
+            errores.put("general", mensajeDeBd(e));
+            cargarCatalogos(model);
+            model.addAttribute("errores", errores);
+            model.addAttribute("editando", true);
+            return "usuarios/formulario";
+        }
 
         auditoriaService.registrarUsuario("EDITAR", usuario.getId(),
                 antes, auditoriaService.snapshot(usuario), request);
@@ -252,12 +270,26 @@ public class UsuarioController {
         usuario.setRol(rolService.buscarPorId(form.getRolId()));
         usuario.setSucursal(form.getSucursalId() != null
                 ? sucursalService.buscarPorId(form.getSucursalId()) : null);
-        usuario.setEspecialidad(form.getEspecialidadId() != null
+        // [RN-CU01-14] La especialidad solo aplica al rol Medico; si se cambia el rol,
+        // se limpia para que el trigger tr_usuario_especialidad no rechace el guardado.
+        boolean esMedico = usuario.getRol() != null && "Medico".equalsIgnoreCase(usuario.getRol().getNombre());
+        usuario.setEspecialidad(esMedico && form.getEspecialidadId() != null
                 ? especialidadService.buscarPorId(form.getEspecialidadId()) : null);
 
         if (esNuevo || (form.getPassword() != null && !form.getPassword().isBlank())) {
             usuario.setPasswordHash(passwordEncoder.encode(form.getPassword()));
         }
+    }
+
+    /** Traduce el error de la BD a un mensaje entendible para el formulario. */
+    private String mensajeDeBd(DataIntegrityViolationException e) {
+        String msg = e.getMostSpecificCause().getMessage();
+        if (msg == null) msg = "";
+        if (msg.contains("correo")) return "Ya existe un usuario registrado con este correo electronico.";
+        if (msg.contains("dpi")) return "Ya existe un usuario registrado con este numero de DPI.";
+        if (msg.contains("username")) return "El nombre de usuario ya se encuentra registrado.";
+        if (msg.contains("nit")) return "El NIT no tiene un formato valido para la base de datos.";
+        return "No se pudo guardar el usuario. Verifique los datos ingresados.";
     }
 
     private String vacioANulo(String valor) {
@@ -299,6 +331,9 @@ public class UsuarioController {
         String password = form.getPassword();
         if (esNuevo && (password == null || password.isBlank())) {
             errores.put("password", "El campo Contrasena es obligatorio.");
+        } else if (password != null && !password.isBlank() && password.length() < 12) {
+            // RNF-015: minimo 12 caracteres (al crear, o al editar si se escribe una nueva)
+            errores.put("password", "La contrasena debe contener al menos 12 caracteres.");
         }
 
         String correo = form.getCorreo() == null ? "" : form.getCorreo().trim();
@@ -306,11 +341,17 @@ public class UsuarioController {
             errores.put("correo", "El campo Correo Electronico es obligatorio.");
         } else if (!correo.matches("^[\\w.+-]+@[\\w-]+\\.[a-zA-Z]{2,}$")) {
             errores.put("correo", "El correo electronico no tiene un formato valido.");
+        } else if (esNuevo ? usuarioRepository.existsByCorreo(correo)
+                           : usuarioRepository.existsByCorreoAndIdNot(correo, form.getId())) {
+            errores.put("correo", "Ya existe un usuario registrado con este correo electronico.");
         }
 
         String dpi = form.getDpi() == null ? "" : form.getDpi().trim();
         if (!dpi.isEmpty() && !dpi.matches("\\d{13}")) {
             errores.put("dpi", "El DPI debe contener exactamente 13 digitos numericos.");
+        } else if (!dpi.isEmpty() && (esNuevo ? usuarioRepository.existsByDpi(dpi)
+                                              : usuarioRepository.existsByDpiAndIdNot(dpi, form.getId()))) {
+            errores.put("dpi", "Ya existe un usuario registrado con este numero de DPI.");
         }
 
         String telefono = form.getTelefono() == null ? "" : form.getTelefono().trim();

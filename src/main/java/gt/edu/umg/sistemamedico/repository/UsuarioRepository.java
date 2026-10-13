@@ -21,4 +21,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer>,
 
     /** [RN-CU01-05] validar username unico, excluyendo al propio usuario en edicion. */
     boolean existsByUsernameAndIdNot(String username, Integer id);
+
+    boolean existsByCorreoAndIdNot(String correo, Integer id);
+
+    boolean existsByDpiAndIdNot(String dpi, Integer id);
 }

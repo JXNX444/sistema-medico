@@ -100,6 +100,8 @@
             <p class="sm-error" th:if="${errores.get('state')} != null" th:text="${errores.get('state')}"></p>
         </div>
 
+        <p class="sm-error" style="grid-column:1/-1;" th:if="${errores.get('general')} != null" th:text="${errores.get('general')}"></p>
+
         <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:12px;margin-top:8px;">
             <a th:href="@{/usuarios/listado}" class="sm-btn sm-btn--ghost">Cancelar</a>
             <button type="submit" class="sm-btn sm-btn--primary" th:text="${editando} ? 'Actualizar' : 'Crear'"></button>
