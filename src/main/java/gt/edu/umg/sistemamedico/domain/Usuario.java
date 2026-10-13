@@ -71,8 +71,15 @@ public class Usuario extends BaseEntity {
     @JoinColumn(name = "sucursal_id")
     private Sucursal sucursal;
 
-    /** [RN-CU01-14] solo aplica cuando el rol es Medico. */
-    @ManyToOne(fetch = FetchType.LAZY)
+    /**
+     * [RN-CU01-14] solo aplica cuando el rol es Medico.
+     *
+     * EAGER (no LAZY), igual que la sucursal: CU-03 lee el NOMBRE de la
+     * especialidad del medico fuera de una transaccion (TarifaService para
+     * el precio y el correo de confirmacion). Con LAZY tronaba con
+     * LazyInitializationException al confirmar la cita.
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "especialidad_id")
     private Especialidad especialidad;
 
