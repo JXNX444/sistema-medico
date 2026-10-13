@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Agenda Médica', null)}"></head>
+<body>
+
+<!-- Iconos Tabler (mismo set que el panel del medico) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <div style="display:flex;align-items:center;gap:16px;font-size:14px;color:var(--sm-slate-600);">
+        <span style="font-weight:700;color:var(--sm-ink);" th:text="${nombre}">Médico</span>
+        <a th:href="@{/panel/inicio}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver al panel</a>
+    </div>
+</nav>
+
+<main style="max-width:1280px;margin:0 auto;padding:32px 24px;">
+
+    <!-- Cabecera de la pagina -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+        <div>
+            <div style="font-size:24px;font-weight:800;">Agenda Médica</div>
+            <div style="font-size:14px;color:var(--sm-slate-500);">
+                Sus citas y eventos personales. Haga clic en un día para ver sus tareas.
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;">
+            <!-- Paso 3 -->
+            <button type="button" class="sm-btn sm-btn--sm ag-btn-evento" onclick="abrirNuevoEvento()">
+                <i class="ti ti-plus" aria-hidden="true"></i> Nuevo Evento
+            </button>
+            <!-- Paso 10 / FA06: muestra u oculta el panel de tareas -->
+            <button type="button" id="btnTareas" class="sm-btn sm-btn--ghost sm-btn--sm" onclick="alternarTareas()">
+                <i class="ti ti-checklist" aria-hidden="true"></i> Tareas
+            </button>
+        </div>
+    </div>
+
+    <!-- Mensajes de exito / error -->
+    <div id="mensajeGlobal" class="oculto"></div>
+
+    <!-- Paso 2: calendario + panel lateral de tareas -->
+    <div id="agendaCuerpo" class="ag-cuerpo">
+        <div class="sm-panel ag-calendario">
+            <div id="calendario"></div>
+        </div>
+
+        <!-- ===================== FA06: panel de tareas (TaskPanel) ===================== -->
+        <aside id="panelTareas" class="sm-panel ag-tareas oculto">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <div style="font-size:15px;font-weight:800;">Tareas — <span id="tareasFecha">—</span></div>
+                <span id="tareasConteo" class="ag-conteo">0</span>
+            </div>
+
+            <div class="ag-filtros">
+                <button type="button" class="ag-filtro activo" data-filtro="pendientes" onclick="filtrarTareas('pendientes')">Pendientes</button>
+                <button type="button" class="ag-filtro" data-filtro="completadas" onclick="filtrarTareas('completadas')">Completadas</button>
+                <button type="button" class="ag-filtro" data-filtro="todas" onclick="filtrarTareas('todas')">Todas</button>
+            </div>
+
+            <div id="listaTareas"></div>
+
+            <button type="button" id="btnNuevaTarea" class="sm-btn sm-btn--ghost sm-btn--sm"
+                    style="width:100%;margin-top:8px;" onclick="abrirNuevaTarea()">+ Nueva Tarea</button>
+
+            <!-- Formulario de tarea (dentro del panel) [RN-CU14-02] -->
+            <div id="formTarea" class="ag-form-tarea oculto">
+                <div class="sm-field">
+                    <label>Título *</label>
+                    <input id="inpTareaTitulo" class="sm-input" maxlength="200">
+                    <p class="sm-error" data-error="titulo"></p>
+                </div>
+                <div class="sm-field">
+                    <label>Descripción</label>
+                    <textarea id="inpTareaDescripcion" class="sm-textarea" rows="2" maxlength="1000"></textarea>
+                    <p class="sm-error" data-error="descripcion"></p>
+                </div>
+                <div class="sm-field">
+                    <label>Prioridad *</label>
+                    <select id="selTareaPrioridad" class="sm-select">
+                        <option value="0">Baja</option>
+                        <option value="1" selected>Normal</option>
+                        <option value="2">Alta</option>
+                    </select>
+                    <p class="sm-error" data-error="prioridad"></p>
+                </div>
+                <div class="sm-field">
+                    <label>Fecha límite *</label>
+                    <input id="inpTareaFecha" class="sm-input" type="datetime-local">
+                    <p class="sm-error" data-error="fechaLimite"></p>
+                </div>
+                <p class="sm-error" data-error="general"></p>
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                    <button type="button" class="sm-btn sm-btn--ghost sm-btn--sm" onclick="cerrarFormTarea()">Cancelar</button>
+                    <button type="button" class="sm-btn sm-btn--primary sm-btn--sm" onclick="guardarTarea()">Guardar</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+</main>
+
+<!-- ===================== FA01: popover de detalle ===================== -->
+<div id="popover" class="ag-popover oculto">
+    <div id="popoverContenido"></div>
+    <div id="popoverAcciones" style="display:flex;gap:8px;margin-top:10px;">
+        <button type="button" class="sm-btn sm-btn--ghost sm-btn--sm" onclick="editarDesdePopover()">Editar</button>
+        <button type="button" class="sm-btn sm-btn--ghost sm-btn--sm" style="color:var(--sm-danger);"
+                onclick="eliminarDesdePopover()">Eliminar</button>
+    </div>
+</div>
+
+<!-- ===================== Pasos 4-7 / FA07: formulario de evento ===================== -->
+<div id="modalEvento" class="ag-modal oculto">
+    <div class="ag-modal__caja">
+        <div id="modalTitulo" style="font-size:18px;font-weight:800;margin-bottom:14px;">Nuevo Evento</div>
+
+        <div class="sm-field">
+            <label>Título *</label>
+            <input id="inpTitulo" class="sm-input" maxlength="200" placeholder="Ej. Capacitación en congreso médico">
+            <p class="sm-error" data-error="titulo"></p>
+        </div>
+
+        <!-- Con hora (datetime-local) -->
+        <div id="fechasConHora" class="ag-dos">
+            <div class="sm-field">
+                <label>Fecha de inicio *</label>
+                <input id="inpInicioHora" class="sm-input" type="datetime-local">
+            </div>
+            <div class="sm-field">
+                <label>Fecha de fin *</label>
+                <input id="inpFinHora" class="sm-input" type="datetime-local">
+            </div>
+        </div>
+
+        <!-- Solo fecha, cuando "Todo el dia" esta marcado [RN-CU14-01] -->
+        <div id="fechasSoloDia" class="ag-dos oculto">
+            <div class="sm-field">
+                <label>Fecha de inicio *</label>
+                <input id="inpInicioDia" class="sm-input" type="date">
+            </div>
+            <div class="sm-field">
+                <label>Fecha de fin *</label>
+                <input id="inpFinDia" class="sm-input" type="date">
+            </div>
+        </div>
+        <div class="ag-dos" style="margin-top:-6px;">
+            <p class="sm-error" data-error="fechaInicio"></p>
+            <p class="sm-error" data-error="fechaFin"></p>
+        </div>
+
+        <div class="ag-dos" style="align-items:end;">
+            <div class="sm-field">
+                <label>Tipo de evento *</label>
+                <select id="selTipo" class="sm-select">
+                    <option value="">Seleccione...</option>
+                    <option value="0">Reunión</option>
+                    <option value="1">Descanso</option>
+                    <option value="2">Capacitación</option>
+                    <option value="3">Personal</option>
+                    <option value="4">Otro</option>
+                </select>
+                <p class="sm-error" data-error="tipo"></p>
+            </div>
+            <label class="ag-check">
+                <input type="checkbox" id="chkTodoElDia" onchange="cambiarTodoElDia()">
+                <span>Todo el día</span>
+            </label>
+        </div>
+
+        <div class="sm-field">
+            <label>Descripción <span style="color:var(--sm-slate-400);font-weight:400;">(opcional, máximo 500)</span></label>
+            <textarea id="inpDescripcion" class="sm-textarea" rows="3" maxlength="500"></textarea>
+            <p class="sm-error" data-error="descripcion"></p>
+        </div>
+
+        <!-- Choque con una cita: recuadro rojo (se oculta solo si esta vacio) -->
+        <p class="ag-conflicto" data-error="conflicto"></p>
+        <p class="sm-error" data-error="general"></p>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+            <button type="button" class="sm-btn sm-btn--ghost" onclick="cerrarModalEvento()">Cancelar</button>
+            <button type="button" class="sm-btn ag-btn-evento" onclick="guardarEvento()">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .oculto { display:none !important; }
+    .mensaje-caja { padding:14px 16px; border-radius:10px; font-size:14px; margin-bottom:16px; }
+    .mensaje-exito { background:var(--sm-success-bg); color:var(--sm-success-ink); }
+    .mensaje-error { background:var(--sm-danger-bg); color:var(--sm-danger); }
+
+    /* Boton violeta de eventos (#8b5cf6, RN-CU14-01) */
+    .ag-btn-evento { background:#8b5cf6; color:#fff; border-color:#8b5cf6; }
+    .ag-btn-evento:hover { background:#7c3aed; border-color:#7c3aed; color:#fff; }
+
+    /* Calendario + panel de tareas */
+    .ag-cuerpo { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
+    .ag-cuerpo.con-tareas { grid-template-columns:minmax(0,1fr) 300px; }
+    .ag-calendario { padding:16px; }
+
+    /* FullCalendar con los colores del sistema */
+    #calendario {
+        --fc-button-bg-color: #fff;
+        --fc-button-text-color: var(--sm-ink);
+        --fc-button-border-color: var(--sm-border);
+        --fc-button-hover-bg-color: var(--sm-cyan-25);
+        --fc-button-hover-border-color: var(--sm-cyan);
+        --fc-button-active-bg-color: var(--sm-cyan);
+        --fc-button-active-border-color: var(--sm-cyan);
+        --fc-today-bg-color: var(--sm-cyan-25);
+        --fc-border-color: var(--sm-line);
+        font-size:13px;
+    }
+    #calendario .fc-button { font-weight:600; text-transform:capitalize; box-shadow:none !important; }
+    #calendario .fc-button-active { color:#fff !important; }
+    #calendario .fc-toolbar-title { font-size:18px; font-weight:800; text-transform:capitalize; }
+    #calendario .fc-event { cursor:pointer; }
+    /* Dia elegido para el panel de tareas */
+    #calendario .ag-dia-elegido { box-shadow: inset 0 0 0 2px var(--sm-cyan); }
+
+    /* Panel de tareas */
+    .ag-tareas { padding:16px; }
+    .ag-conteo { font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px;
+        background:var(--sm-ink); color:#fff; }
+    .ag-filtros { display:flex; gap:6px; margin-bottom:12px; }
+    .ag-filtro { flex:1; border:1px solid var(--sm-border); background:#fff; border-radius:8px; padding:5px 6px;
+        font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--sm-slate-600); }
+    .ag-filtro.activo { background:var(--sm-cyan); border-color:var(--sm-cyan); color:#fff; }
+    .ag-tarea { border:1px solid var(--sm-border); border-radius:10px; padding:10px; margin-bottom:8px; font-size:13px; }
+    .ag-tarea.completada .ag-tarea__titulo { text-decoration:line-through; color:var(--sm-slate-400); }
+    .ag-tarea__cab { display:flex; gap:8px; align-items:flex-start; }
+    .ag-tarea__cab input { accent-color:var(--sm-cyan); width:16px; height:16px; margin-top:2px; }
+    .ag-tarea__titulo { flex:1; font-weight:700; }
+    .ag-tarea__borrar { background:none; border:none; cursor:pointer; color:var(--sm-slate-400); font-size:16px; padding:0; }
+    .ag-tarea__borrar:hover { color:var(--sm-danger); }
+    .ag-tarea__meta { color:var(--sm-slate-500); font-size:12px; margin:4px 0 0 24px; }
+    .ag-tarea__desc { color:var(--sm-slate-600); font-size:12px; margin:4px 0 0 24px; }
+    .ag-prio-0 { color:var(--sm-slate-400); }
+    .ag-prio-1 { color:#d97706; }
+    .ag-prio-2 { color:var(--sm-danger); }
+    .ag-form-tarea { border-top:1px solid var(--sm-line); margin-top:12px; padding-top:12px;
+        display:flex; flex-direction:column; gap:10px; }
+
+    /* FA01: popover */
+    .ag-popover { position:fixed; z-index:50; width:300px; background:#fff; border:1px solid var(--sm-border);
+        border-left:4px solid #8b5cf6; border-radius:12px; box-shadow:var(--sm-shadow); padding:14px; font-size:13px; }
+
+    /* Formulario de evento como ventana sobre la pagina */
+    .ag-modal { position:fixed; inset:0; z-index:60; background:rgba(15,23,42,.45);
+        display:flex; align-items:center; justify-content:center; padding:20px; }
+    .ag-modal__caja { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:560px;
+        max-height:90vh; overflow:auto; display:flex; flex-direction:column; gap:10px; }
+    .ag-dos { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .ag-check { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; padding-bottom:10px; cursor:pointer; }
+    .ag-check input { accent-color:#8b5cf6; width:16px; height:16px; }
+
+    /* Choque con cita: recuadro rojo; vacio no se ve */
+    .ag-conflicto { margin:0; padding:12px 14px; border-radius:10px; font-size:14px;
+        background:var(--sm-danger-bg); color:var(--sm-danger); }
+    .ag-conflicto:empty { display:none; }
+</style>
+
+<script th:inline="javascript">
+    const CTX = /*[[@{/}]]*/ '/';
+</script>
+<!-- FullCalendar 6.1.15 (version fijada) y su idioma espaniol -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales/es.global.min.js"></script>
+<script th:src="@{/js/agenda.js}"></script>
+
+</body>
+</html>
