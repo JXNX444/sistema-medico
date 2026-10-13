@@ -5,6 +5,13 @@
    - Popover de detalle [FA01], crear / editar / eliminar evento
      [pasos 3-9] [FA07] [FA04]
    - Panel lateral de tareas del dia elegido [paso 10] [FA06]
+
+   Restricciones de fecha (decision del equipo; el servidor las
+   vuelve a validar):
+   - Evento con hora y tarea: desde la fecha y hora actual.
+   - Evento de todo el dia: desde hoy.
+   - Evento que ya termino: sin "Editar" (solo "Eliminar").
+   - Evento en curso: se puede editar conservando su inicio.
    ============================================================ */
 
 let calendario = null;
@@ -13,6 +20,7 @@ let tareas = [];                               // tareas del dia (pendientes y c
 let filtroTareas = 'pendientes';
 let eventoPopover = null;                      // evento de FullCalendar abierto en el popover
 let eventoEditandoId = null;                   // null = nuevo, numero = editando [FA07]
+let inicioOriginal = null;                     // inicio del evento en edicion (para eventos en curso)
 
 document.addEventListener('DOMContentLoaded', () => {
     iniciarCalendario();
@@ -41,10 +49,31 @@ function esc(texto) {
     return div.innerHTML;
 }
 
+function dos(n) {
+    return String(n).padStart(2, '0');
+}
+
 /** Fecha local del navegador como "yyyy-MM-dd". */
 function fechaISO(d) {
-    const p = n => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    return `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`;
+}
+
+/** Fecha y hora local como "yyyy-MM-ddTHH:mm" (formato de datetime-local). */
+function fechaHoraISO(d) {
+    return `${fechaISO(d)}T${dos(d.getHours())}:${dos(d.getMinutes())}`;
+}
+
+/** La hora actual al minuto, como texto de datetime-local. */
+function ahoraISO() {
+    return fechaHoraISO(new Date());
+}
+
+/** La proxima media hora (10:07 -> 10:30), para sugerir horas que no hayan pasado. */
+function proximaMediaHora() {
+    const d = new Date();
+    d.setSeconds(0, 0);
+    d.setMinutes(d.getMinutes() <= 30 ? 30 : 60);
+    return d;
 }
 
 /** dd/mm/yyyy, como pide el CU: toLocaleDateString("es-GT"). */
@@ -212,8 +241,13 @@ function mostrarPopover(evento, clic) {
 
     const pop = document.getElementById('popover');
     document.getElementById('popoverContenido').innerHTML = html;
-    // Las citas no se editan ni eliminan desde la agenda
+
+    // Las citas no se editan ni eliminan desde la agenda.
+    // Un evento que ya termino no se edita, pero si se elimina.
+    const yaPaso = esEvento && evento.end && evento.end.getTime() <= Date.now();
     document.getElementById('popoverAcciones').classList.toggle('oculto', !esEvento);
+    document.getElementById('btnPopoverEditar').classList.toggle('oculto', yaPaso);
+
     pop.style.borderLeftColor = evento.backgroundColor || '#8b5cf6';
     pop.classList.remove('oculto');
 
@@ -234,10 +268,18 @@ function cerrarPopover() {
 function abrirNuevoEvento() {
     cerrarPopover();
     eventoEditandoId = null;
+    inicioOriginal = null;
     document.getElementById('modalTitulo').textContent = 'Nuevo Evento';
+
+    // Sugerencia: el dia seleccionado de 08:00 a 09:00; si eso ya paso,
+    // la proxima media hora de hoy y una hora de duracion.
+    let inicio = new Date(`${diaSeleccionado}T08:00`);
+    if (inicio.getTime() < Date.now()) inicio = proximaMediaHora();
+    const fin = new Date(inicio.getTime() + 60 * 60 * 1000);
+
     llenarFormularioEvento({
         titulo: '', descripcion: '', tipo: '', todoElDia: false,
-        inicio: `${diaSeleccionado}T08:00`, fin: `${diaSeleccionado}T09:00`
+        inicio: fechaHoraISO(inicio), fin: fechaHoraISO(fin)
     });
 }
 
@@ -246,6 +288,7 @@ function editarDesdePopover() {
     if (!eventoPopover) return;
     const p = eventoPopover.extendedProps;
     eventoEditandoId = p.eventoId;
+    inicioOriginal = { todoElDia: p.todoElDia, valor: p.inicioForm };   // evento en curso
     cerrarPopover();
     document.getElementById('modalTitulo').textContent = 'Editar Evento';
     llenarFormularioEvento({
@@ -260,6 +303,7 @@ function editarDesdePopover() {
 
 function llenarFormularioEvento(d) {
     limpiarErrores('modalEvento');
+    aplicarMinimos();
     document.getElementById('inpTitulo').value = d.titulo;
     document.getElementById('inpDescripcion').value = d.descripcion;
     document.getElementById('selTipo').value = d.tipo;
@@ -268,8 +312,8 @@ function llenarFormularioEvento(d) {
     if (d.todoElDia) {
         document.getElementById('inpInicioDia').value = d.inicio.substring(0, 10);
         document.getElementById('inpFinDia').value = d.fin.substring(0, 10);
-        document.getElementById('inpInicioHora').value = `${d.inicio.substring(0, 10)}T08:00`;
-        document.getElementById('inpFinHora').value = `${d.fin.substring(0, 10)}T09:00`;
+        document.getElementById('inpInicioHora').value = horaSugerida(d.inicio.substring(0, 10), '08:00');
+        document.getElementById('inpFinHora').value = horaSugerida(d.fin.substring(0, 10), '09:00');
     } else {
         document.getElementById('inpInicioHora').value = d.inicio;
         document.getElementById('inpFinHora').value = d.fin;
@@ -279,6 +323,35 @@ function llenarFormularioEvento(d) {
     aplicarTodoElDia();
     document.getElementById('modalEvento').classList.remove('oculto');
     document.getElementById('inpTitulo').focus();
+}
+
+/**
+ * Minimos de los campos de fecha (decision del equipo):
+ * - con hora: desde la hora actual;
+ * - solo fecha (todo el dia): desde hoy.
+ * Si se edita un evento en curso, su inicio original sigue permitido.
+ */
+function aplicarMinimos() {
+    const ahora = ahoraISO();
+    const hoy = fechaISO(new Date());
+
+    let minInicioHora = ahora;
+    let minInicioDia = hoy;
+    if (inicioOriginal) {
+        if (!inicioOriginal.todoElDia && inicioOriginal.valor < ahora) minInicioHora = inicioOriginal.valor;
+        if (inicioOriginal.todoElDia && inicioOriginal.valor < hoy) minInicioDia = inicioOriginal.valor;
+    }
+
+    document.getElementById('inpInicioHora').min = minInicioHora;
+    document.getElementById('inpFinHora').min = ahora;
+    document.getElementById('inpInicioDia').min = minInicioDia;
+    document.getElementById('inpFinDia').min = hoy;
+}
+
+/** "yyyy-MM-ddTHH:mm" con la hora sugerida, o la proxima media hora si esa ya paso. */
+function horaSugerida(dia, hora) {
+    const sugerida = new Date(`${dia}T${hora}`);
+    return sugerida.getTime() < Date.now() ? fechaHoraISO(proximaMediaHora()) : `${dia}T${hora}`;
 }
 
 /** RN-CU14-01: "Todo el dia" cambia los campos de fecha-hora a solo fecha. */
@@ -293,8 +366,8 @@ function cambiarTodoElDia() {
     } else {
         const ini = document.getElementById('inpInicioDia').value;
         const fin = document.getElementById('inpFinDia').value;
-        if (ini) document.getElementById('inpInicioHora').value = `${ini}T08:00`;
-        if (fin) document.getElementById('inpFinHora').value = `${fin}T09:00`;
+        if (ini) document.getElementById('inpInicioHora').value = horaSugerida(ini, '08:00');
+        if (fin) document.getElementById('inpFinHora').value = horaSugerida(fin, '09:00');
     }
     limpiarErrores('modalEvento');
     aplicarTodoElDia();
@@ -450,7 +523,10 @@ function abrirNuevaTarea() {
     document.getElementById('inpTareaTitulo').value = '';
     document.getElementById('inpTareaDescripcion').value = '';
     document.getElementById('selTareaPrioridad').value = '1';            // Normal
-    document.getElementById('inpTareaFecha').value = `${diaSeleccionado}T09:00`;
+    // Decision del equipo: la fecha limite no puede ser anterior a la hora actual
+    const fecha = document.getElementById('inpTareaFecha');
+    fecha.min = ahoraISO();
+    fecha.value = horaSugerida(diaSeleccionado, '09:00');
     document.getElementById('formTarea').classList.remove('oculto');
     document.getElementById('btnNuevaTarea').classList.add('oculto');
     document.getElementById('inpTareaTitulo').focus();
