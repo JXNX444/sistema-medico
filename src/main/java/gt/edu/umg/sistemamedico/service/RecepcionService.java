@@ -2,10 +2,13 @@ package gt.edu.umg.sistemamedico.service;
 
 import gt.edu.umg.sistemamedico.domain.Cita;
 import gt.edu.umg.sistemamedico.domain.CitaHistorialEstado;
+import gt.edu.umg.sistemamedico.domain.CitaReasignacion;
 import gt.edu.umg.sistemamedico.domain.EstadoCita;
 import gt.edu.umg.sistemamedico.domain.Usuario;
 import gt.edu.umg.sistemamedico.repository.CitaHistorialEstadoRepository;
+import gt.edu.umg.sistemamedico.repository.CitaReasignacionRepository;
 import gt.edu.umg.sistemamedico.repository.CitaRepository;
+import gt.edu.umg.sistemamedico.repository.EventoAgendaRepository;
 import gt.edu.umg.sistemamedico.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * CU-05 Recepcion y Verificacion de Cita.
@@ -47,19 +51,25 @@ public class RecepcionService {
     private final CitaHistorialEstadoRepository citaHistorialEstadoRepository;
     private final TarifaService tarifaService;
     private final DisponibilidadService disponibilidadService;
+    private final CitaReasignacionRepository reasignacionRepository;
+    private final EventoAgendaRepository eventoAgendaRepository;
 
     public RecepcionService(CitaRepository citaRepository,
                             UsuarioRepository usuarioRepository,
                             EstadoCitaService estadoCitaService,
                             CitaHistorialEstadoRepository citaHistorialEstadoRepository,
                             TarifaService tarifaService,
-                            DisponibilidadService disponibilidadService) {
+                            DisponibilidadService disponibilidadService,
+                            CitaReasignacionRepository reasignacionRepository,
+                            EventoAgendaRepository eventoAgendaRepository) {
         this.citaRepository = citaRepository;
         this.usuarioRepository = usuarioRepository;
         this.estadoCitaService = estadoCitaService;
         this.citaHistorialEstadoRepository = citaHistorialEstadoRepository;
         this.tarifaService = tarifaService;
         this.disponibilidadService = disponibilidadService;
+        this.reasignacionRepository = reasignacionRepository;
+        this.eventoAgendaRepository = eventoAgendaRepository;
     }
 
     // ---------- Resultado de busqueda ----------
@@ -227,6 +237,99 @@ public class RecepcionService {
         return new ResultadoLlegada(true,
                 "La cita fue reprogramada para hoy. Ya puede registrar la llegada del paciente.",
                 cita, false);
+    }
+
+    // ---------- FA07: reasignacion de medico ----------
+
+    private static final Set<String> ESTADOS_REASIGNABLES = Set.of("CONFIRMADA", "PACIENTE_PRESENTE");
+    private static final Set<String> ESTADOS_QUE_NO_OCUPAN = Set.of("CANCELADA", "NO_ASISTIO");
+
+    /** Un medico que se puede elegir en la reasignacion. */
+    public record MedicoOpcion(Integer id, String nombre) {}
+
+    /**
+     * Medicos activos de la misma sede y especialidad de la cita, sin el medico actual
+     * y libres a la hora de la cita (sin otra cita ni evento de agenda [CU-16]).
+     */
+    @Transactional(readOnly = true)
+    public List<MedicoOpcion> medicosParaReasignar(Integer citaId) {
+        Cita cita = citaRepository.findById(citaId).orElse(null);
+        if (cita == null || !ESTADOS_REASIGNABLES.contains(cita.getEstadoCita().getCodigo())) {
+            return List.of();
+        }
+        return usuarioRepository.findAll().stream()
+                .filter(u -> u.getState() == 1)
+                .filter(u -> "Medico".equalsIgnoreCase(u.getNombreRol()))
+                .filter(u -> !u.getId().equals(cita.getMedico().getId()))
+                .filter(u -> u.getSucursal() != null && u.getSucursal().getId().equals(cita.getSucursal().getId()))
+                .filter(u -> u.getEspecialidad() != null
+                        && u.getEspecialidad().getId().equals(cita.getEspecialidad().getId()))
+                .filter(u -> estaLibre(u.getId(), cita))
+                .map(u -> new MedicoOpcion(u.getId(), u.getNombreCompleto()))
+                .toList();
+    }
+
+    @Transactional
+    public ResultadoLlegada reasignarMedico(Integer citaId, Integer nuevoMedicoId, String motivo,
+                                            Usuario recepcionista) {
+        Cita cita = citaRepository.findById(citaId).orElse(null);
+        if (cita == null || !ESTADOS_REASIGNABLES.contains(cita.getEstadoCita().getCodigo())) {
+            return new ResultadoLlegada(false,
+                    "Solo se puede reasignar el medico de una cita Confirmada o con Paciente Presente.",
+                    cita, false);
+        }
+        String nota = motivo == null || motivo.isBlank() ? null : motivo.trim();
+        if (nota != null && nota.length() > 500) {
+            return new ResultadoLlegada(false, "El motivo no puede exceder 500 caracteres.", cita, false);
+        }
+        boolean disponible = nuevoMedicoId != null && medicosParaReasignar(citaId).stream()
+                .anyMatch(m -> m.id().equals(nuevoMedicoId));
+        if (!disponible) {
+            return new ResultadoLlegada(false,
+                    "El medico seleccionado no esta disponible a la hora de la cita. Elija otro.", cita, false);
+        }
+
+        Usuario anterior = cita.getMedico();
+        Usuario nuevo = usuarioRepository.findById(nuevoMedicoId).orElseThrow();
+
+        CitaReasignacion r = new CitaReasignacion();
+        r.setCitaId(cita.getId());
+        r.setMedicoAnteriorId(anterior.getId());
+        r.setMedicoNuevoId(nuevo.getId());
+        r.setMotivo(nota);
+        r.setReasignadoPor(recepcionista.getId());
+        reasignacionRepository.save(r);
+
+        cita.setMedico(nuevo);
+        cita.setUpdatedBy(recepcionista.getId());
+        citaRepository.save(cita);
+
+        return new ResultadoLlegada(true,
+                "Medico reasignado correctamente. Nuevo medico: " + nuevo.getNombreCompleto() + ".",
+                cita, false);
+    }
+
+    /** true si el medico no tiene otra cita ni un evento de agenda que se cruce con la cita. */
+    private boolean estaLibre(Integer medicoId, Cita cita) {
+        int duracion = cita.getDuracionMin() == null ? 30 : cita.getDuracionMin();
+        OffsetDateTime inicio = cita.getFechaHora();
+        OffsetDateTime fin = inicio.plusMinutes(duracion);
+
+        boolean tieneCita = citaRepository
+                .findByMedicoIdAndFechaHoraBetweenAndStateNot(medicoId, inicio.minusHours(12), fin, (short) 2)
+                .stream()
+                .filter(c -> !ESTADOS_QUE_NO_OCUPAN.contains(c.getEstadoCita().getCodigo()))
+                .anyMatch(c -> {
+                    int d = c.getDuracionMin() == null ? 30 : c.getDuracionMin();
+                    return c.getFechaHora().isBefore(fin) && c.getFechaHora().plusMinutes(d).isAfter(inicio);
+                });
+        if (tieneCita) {
+            return false;
+        }
+        return eventoAgendaRepository
+                .findByMedicoIdAndStateAndFechaInicioLessThanAndFechaFinGreaterThanOrderByFechaInicioAsc(
+                        medicoId, (short) 1, fin, inicio)
+                .isEmpty();
     }
 
     // ---------- FA04: crear cita walk-in para un paciente sin citas activas ----------

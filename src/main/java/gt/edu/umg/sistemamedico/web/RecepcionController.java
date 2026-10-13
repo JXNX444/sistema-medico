@@ -124,6 +124,25 @@ public class RecepcionController {
         return mapearResultadoLlegada(resultado);
     }
 
+    // ---------- FA07: reasignacion de medico ----------
+
+    @GetMapping("/api/medicos-reasignacion")
+    @ResponseBody
+    public List<RecepcionService.MedicoOpcion> medicosReasignacion(@RequestParam Integer citaId) {
+        return recepcionService.medicosParaReasignar(citaId);
+    }
+
+    public record ReasignarRequest(Integer citaId, Integer medicoId, String motivo) {}
+
+    @PostMapping("/api/reasignar")
+    @ResponseBody
+    public Map<String, Object> reasignar(@RequestBody ReasignarRequest req,
+                                         @AuthenticationPrincipal UsuarioDetails ud) {
+        RecepcionService.ResultadoLlegada resultado = recepcionService
+                .reasignarMedico(req.citaId(), req.medicoId(), req.motivo(), ud.getUsuario());
+        return mapearResultadoLlegada(resultado);
+    }
+
     // ---------- FA04: datos para el mini formulario walk-in ----------
 
     @GetMapping("/api/sucursales")

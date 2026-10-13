@@ -138,6 +138,15 @@ function tarjetaCita(c) {
 </button>`;
     }
 
+    // FA07: reasignar medico en citas Confirmadas o con Paciente Presente
+    if (c.estadoCodigo === 'CONFIRMADA' || c.estadoCodigo === 'PACIENTE_PRESENTE') {
+        accion += `
+<button class="boton-secundario" style="margin-top:10px;" onclick="mostrarReasignacion(${c.citaId})">
+<i class="ti ti-switch-horizontal"></i> Reasignar Medico
+</button>
+<div id="reasignar-${c.citaId}"></div>`;
+    }
+
     const emergencia = c.esEmergencia
         ? `<span class="badge-emergencia"><i class="ti ti-alert-triangle"></i> EMERGENCIA</span>`
         : '';
@@ -212,6 +221,67 @@ async function reprogramarHoy(citaId, emergencia) {
         }
     } catch (e) {
         Aviso.mostrar('Error al reprogramar la cita.', { tipo: 'error' });
+    }
+}
+
+/* ---------- FA07: reasignacion de medico ---------- */
+
+async function mostrarReasignacion(citaId) {
+    const zona = document.getElementById(`reasignar-${citaId}`);
+    if (zona.innerHTML.trim() !== '') {   // segundo clic: cerrar
+        zona.innerHTML = '';
+        return;
+    }
+    let medicos = [];
+    try {
+        medicos = await (await fetch(`${CTX}recepcion/api/medicos-reasignacion?citaId=${citaId}`)).json();
+    } catch (e) {
+        Aviso.mostrar('No se pudieron cargar los medicos disponibles.', { tipo: 'error' });
+        return;
+    }
+    if (medicos.length === 0) {
+        zona.innerHTML = `<div class="resultado-mensaje tono-ambar" style="margin-top:10px;">
+            No hay otros medicos de la misma sede y especialidad libres a la hora de esta cita.
+</div>`;
+        return;
+    }
+    zona.innerHTML = `
+<div style="margin-top:12px;">
+<label class="etiqueta-campo">Nuevo medico</label>
+<select id="reaMedico-${citaId}" class="campo-formulario">
+<option value="">Seleccione...</option>
+            ${medicos.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('')}
+</select>
+<label class="etiqueta-campo">Motivo de la reasignacion (opcional)</label>
+<textarea id="reaMotivo-${citaId}" class="campo-formulario" maxlength="500"
+          placeholder="Ej: el medico asignado no se presento hoy"></textarea>
+<div style="display:flex;gap:10px;">
+<button class="boton-secundario" style="flex:1;" onclick="mostrarReasignacion(${citaId})">Cancelar</button>
+<button class="boton-principal" style="flex:1;" onclick="confirmarReasignacion(${citaId})">
+<i class="ti ti-check"></i> Confirmar Reasignacion
+</button>
+</div>
+</div>`;
+}
+
+async function confirmarReasignacion(citaId) {
+    const medicoId = document.getElementById(`reaMedico-${citaId}`).value;
+    const motivo = document.getElementById(`reaMotivo-${citaId}`).value;
+    if (!medicoId) {
+        Aviso.mostrar('Seleccione el nuevo medico.', { tipo: 'error' });
+        return;
+    }
+    try {
+        const resp = await fetch(`${CTX}recepcion/api/reasignar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ citaId, medicoId: Number(medicoId), motivo })
+        });
+        const data = await resp.json();
+        Aviso.mostrar(data.mensaje, { tipo: data.ok ? 'exito' : 'error' });
+        if (data.cita) reemplazarTarjeta(data.cita);
+    } catch (e) {
+        Aviso.mostrar('Error al reasignar el medico.', { tipo: 'error' });
     }
 }
 
