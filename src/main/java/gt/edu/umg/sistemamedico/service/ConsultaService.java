@@ -281,6 +281,17 @@ public class ConsultaService {
             errores.put("diagnostico", "El diagnostico debe tener entre 10 y 5000 caracteres.");
         }
 
+        // RN-CU08-02: para cerrar la consulta tambien son obligatorios los hallazgos
+        // clinicos y el plan de tratamiento (mientras esta "En curso" pueden ir vacios).
+        if (datos.finalizar()) {
+            if (limpiar(datos.hallazgos()) == null) {
+                errores.put("hallazgos", "Los hallazgos clinicos son obligatorios para finalizar la consulta.");
+            }
+            if (limpiar(datos.planTratamiento()) == null) {
+                errores.put("planTratamiento", "El plan de tratamiento es obligatorio para finalizar la consulta.");
+            }
+        }
+
         if (!errores.isEmpty()) {
             return Resultado.errores(errores);
         }
