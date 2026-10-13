@@ -1,9 +1,7 @@
 package gt.edu.umg.sistemamedico.service;
 
 import gt.edu.umg.sistemamedico.domain.Cita;
-import gt.edu.umg.sistemamedico.domain.CitaHistorialEstado;
 import gt.edu.umg.sistemamedico.domain.EstadoCita;
-import gt.edu.umg.sistemamedico.repository.CitaHistorialEstadoRepository;
 import gt.edu.umg.sistemamedico.repository.CitaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,14 +40,14 @@ public class ReservaExpiradaScheduler {
     private int minutosTolerancia;
 
     private final CitaRepository citaRepository;
-    private final CitaHistorialEstadoRepository citaHistorialEstadoRepository;
+    private final CitaHistorialService citaHistorialService;
     private final EstadoCitaService estadoCitaService;
 
     public ReservaExpiradaScheduler(CitaRepository citaRepository,
-                                    CitaHistorialEstadoRepository citaHistorialEstadoRepository,
+                                    CitaHistorialService citaHistorialService,
                                     EstadoCitaService estadoCitaService) {
         this.citaRepository = citaRepository;
-        this.citaHistorialEstadoRepository = citaHistorialEstadoRepository;
+        this.citaHistorialService = citaHistorialService;
         this.estadoCitaService = estadoCitaService;
     }
 
@@ -71,15 +69,11 @@ public class ReservaExpiradaScheduler {
             Integer estadoAnteriorId = cita.getEstadoCita().getId();
 
             cita.setEstadoCita(cancelada);
-            citaRepository.save(cita);
+            citaRepository.saveAndFlush(cita); // el trigger tr_cita_historial crea la fila del historial
 
-            CitaHistorialEstado historial = new CitaHistorialEstado();
-            historial.setCitaId(cita.getId());
-            historial.setEstadoAnteriorId(estadoAnteriorId);
-            historial.setEstadoNuevoId(cancelada.getId());
-            historial.setUsuarioId(null); // accion automatica, sin usuario
-            historial.setObservacion(MOTIVO_NO_PAGO);
-            citaHistorialEstadoRepository.save(historial);
+            // Solo se le agrega el motivo a esa fila (antes quedaban dos filas por cambio).
+            citaHistorialService.registrarMotivo(cita.getId(), estadoAnteriorId, cancelada.getId(),
+                    MOTIVO_NO_PAGO);
 
             log.info("Cita {} cancelada automaticamente: reserva de pago expirada.", cita.getNumeroCita());
         }
@@ -108,15 +102,11 @@ public class ReservaExpiradaScheduler {
             Integer estadoAnteriorId = cita.getEstadoCita().getId();
 
             cita.setEstadoCita(cancelada);
-            citaRepository.save(cita);
+            citaRepository.saveAndFlush(cita); // el trigger tr_cita_historial crea la fila del historial
 
-            CitaHistorialEstado historial = new CitaHistorialEstado();
-            historial.setCitaId(cita.getId());
-            historial.setEstadoAnteriorId(estadoAnteriorId);
-            historial.setEstadoNuevoId(cancelada.getId());
-            historial.setUsuarioId(null); // accion automatica, sin usuario
-            historial.setObservacion("Cancelada automaticamente: llego la hora de la cita y no se registro el pago.");
-            citaHistorialEstadoRepository.save(historial);
+            // Solo se le agrega el motivo a esa fila (antes quedaban dos filas por cambio).
+            citaHistorialService.registrarMotivo(cita.getId(), estadoAnteriorId, cancelada.getId(),
+                    "Cancelada automaticamente: llego la hora de la cita y no se registro el pago.");
 
             log.info("Cita {} cancelada automaticamente: no se pago antes de la hora de la cita.", cita.getNumeroCita());
         }

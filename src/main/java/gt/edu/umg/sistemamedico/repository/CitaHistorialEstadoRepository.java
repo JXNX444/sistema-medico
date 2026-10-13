@@ -13,4 +13,7 @@ public interface CitaHistorialEstadoRepository extends JpaRepository<CitaHistori
      * estado actual, tanto en Recepcion como en "Mis Citas".
      */
     Optional<CitaHistorialEstado> findFirstByCitaIdOrderByCreatedAtDesc(Integer citaId);
+
+    /** La fila mas reciente por id (la que acaba de insertar el trigger tr_cita_historial). */
+    Optional<CitaHistorialEstado> findFirstByCitaIdOrderByIdDesc(Integer citaId);
 }

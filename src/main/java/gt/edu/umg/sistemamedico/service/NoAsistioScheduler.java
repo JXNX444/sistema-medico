@@ -1,9 +1,7 @@
 package gt.edu.umg.sistemamedico.service;
 
 import gt.edu.umg.sistemamedico.domain.Cita;
-import gt.edu.umg.sistemamedico.domain.CitaHistorialEstado;
 import gt.edu.umg.sistemamedico.domain.EstadoCita;
-import gt.edu.umg.sistemamedico.repository.CitaHistorialEstadoRepository;
 import gt.edu.umg.sistemamedico.repository.CitaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,14 +48,14 @@ public class NoAsistioScheduler {
     private int minutosTolerancia;
 
     private final CitaRepository citaRepository;
-    private final CitaHistorialEstadoRepository citaHistorialEstadoRepository;
+    private final CitaHistorialService citaHistorialService;
     private final EstadoCitaService estadoCitaService;
 
     public NoAsistioScheduler(CitaRepository citaRepository,
-                              CitaHistorialEstadoRepository citaHistorialEstadoRepository,
+                              CitaHistorialService citaHistorialService,
                               EstadoCitaService estadoCitaService) {
         this.citaRepository = citaRepository;
-        this.citaHistorialEstadoRepository = citaHistorialEstadoRepository;
+        this.citaHistorialService = citaHistorialService;
         this.estadoCitaService = estadoCitaService;
     }
 
@@ -85,18 +83,13 @@ public class NoAsistioScheduler {
             String horaCita = cita.getFechaLocal().format(FMT_HORA);
 
             cita.setEstadoCita(noAsistio);
-            citaRepository.save(cita);
+            citaRepository.saveAndFlush(cita); // el trigger tr_cita_historial crea la fila del historial
 
-            CitaHistorialEstado historial = new CitaHistorialEstado();
-            historial.setCitaId(cita.getId());
-            historial.setEstadoAnteriorId(estadoAnteriorId);
-            historial.setEstadoNuevoId(noAsistio.getId());
-            historial.setUsuarioId(null); // accion automatica, sin usuario
-            historial.setObservacion(
+            // Solo se le agrega el motivo a esa fila (antes quedaban dos filas por cambio).
+            citaHistorialService.registrarMotivo(cita.getId(), estadoAnteriorId, noAsistio.getId(),
                     "Marcada como No Asistio automaticamente: la cita estaba pagada y confirmada para el " +
                             horaCita + ", pero el paciente no registro su llegada en recepcion dentro de los " +
                             minutosTolerancia + " minutos de tolerancia.");
-            citaHistorialEstadoRepository.save(historial);
 
             log.info("Cita {} marcada como No Asistio: fecha vencida sin llegada registrada.", cita.getNumeroCita());
         }
