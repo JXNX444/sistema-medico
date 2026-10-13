@@ -38,7 +38,16 @@ public class IntentoLoginService {
         }
 
         Usuario u = opt.get();
-        short nuevos = (short) (u.getIntentosFallidos() + 1);
+
+        // Si ya habia un bloqueo y ese tiempo ya paso, se empieza a contar de cero.
+        // Sin esto el contador seguia en 5, el siguiente fallo lo subia a 6 y la BD
+        // lo rechazaba (ck_usuario_intentos <= 5), dando error 500.
+        if (u.getBloqueadoHasta() != null && !u.estaBloqueado()) {
+            u.setIntentosFallidos((short) 0);
+            u.setBloqueadoHasta(null);
+        }
+
+        short nuevos = (short) Math.min(u.getIntentosFallidos() + 1, maxIntentos);
         u.setIntentosFallidos(nuevos);
 
         if (nuevos >= maxIntentos) {
