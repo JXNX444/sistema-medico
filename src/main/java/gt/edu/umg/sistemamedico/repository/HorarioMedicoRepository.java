@@ -1,9 +1,12 @@
 package gt.edu.umg.sistemamedico.repository;
 
 import gt.edu.umg.sistemamedico.domain.HorarioMedico;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 public interface HorarioMedicoRepository extends JpaRepository<HorarioMedico, Integer> {
@@ -19,4 +22,8 @@ public interface HorarioMedicoRepository extends JpaRepository<HorarioMedico, In
 
     /** Todos los horarios activos de un medico en una sucursal (sin filtrar por dia). */
     List<HorarioMedico> findByMedicoIdAndSucursalIdAndState(Integer medicoId, Integer sucursalId, Short state);
+
+    /** Listado del catalogo de horarios: filtra por nombre del medico y estado. */
+    Page<HorarioMedico> findByMedicoNombreCompletoContainingIgnoreCaseAndStateIn(
+            String nombre, Collection<Short> estados, Pageable pageable);
 }
