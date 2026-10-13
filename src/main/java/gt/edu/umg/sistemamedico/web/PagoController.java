@@ -122,10 +122,10 @@ public class PagoController {
             e.put("numeroTarjeta", "El numero de tarjeta no es valido.");
         }
 
-        // [RN-CU04-02] titular: 5 a 100 caracteres.
+        // [RN-CU04-02] titular: 5 a 100 caracteres, solo letras y espacios (sin especiales).
         String titular = f.titular() == null ? "" : f.titular().trim();
-        if (titular.length() < 5 || titular.length() > 100) {
-            e.put("titular", "El nombre del titular debe tener entre 5 y 100 caracteres.");
+        if (titular.length() < 5 || titular.length() > 100 || !titular.matches("[\\p{L} ]+")) {
+            e.put("titular", "El nombre del titular debe contener entre 5 y 100 caracteres alfabeticos sin especiales.");
         }
 
         // [RN-CU04-03] vencimiento MM/AA y no vencida.

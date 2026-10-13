@@ -98,6 +98,14 @@ public class PagoService {
                     "Esta cita ya se encuentra pagada.", yaPagada.get().getNumeroTransaccion(), null);
         }
 
+        // 2b) Solo se paga una cita que siga pendiente de pago (pudo cancelarse
+        //     mientras el paciente tenia abierta la pantalla de pago).
+        if (!"PENDIENTE_PAGO".equals(cita.getEstadoCita().getCodigo())) {
+            return new ResultadoPago(false, "ERROR",
+                    "Esta cita ya no esta pendiente de pago (estado actual: " +
+                            cita.getEstadoCita().getNombre() + ").", null, null);
+        }
+
         // 3) FA02: la reserva de 5 minutos expiro.
         if (cita.getReservaExpiraEn() != null
                 && cita.getReservaExpiraEn().isBefore(OffsetDateTime.now())) {
