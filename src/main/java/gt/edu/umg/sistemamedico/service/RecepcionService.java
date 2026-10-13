@@ -46,17 +46,20 @@ public class RecepcionService {
     private final EstadoCitaService estadoCitaService;
     private final CitaHistorialEstadoRepository citaHistorialEstadoRepository;
     private final TarifaService tarifaService;
+    private final DisponibilidadService disponibilidadService;
 
     public RecepcionService(CitaRepository citaRepository,
                             UsuarioRepository usuarioRepository,
                             EstadoCitaService estadoCitaService,
                             CitaHistorialEstadoRepository citaHistorialEstadoRepository,
-                            TarifaService tarifaService) {
+                            TarifaService tarifaService,
+                            DisponibilidadService disponibilidadService) {
         this.citaRepository = citaRepository;
         this.usuarioRepository = usuarioRepository;
         this.estadoCitaService = estadoCitaService;
         this.citaHistorialEstadoRepository = citaHistorialEstadoRepository;
         this.tarifaService = tarifaService;
+        this.disponibilidadService = disponibilidadService;
     }
 
     // ---------- Resultado de busqueda ----------
@@ -240,6 +243,10 @@ public class RecepcionService {
             return new ResultadoWalkIn(false, errores, null);
         }
         Usuario paciente = pacienteOpt.get();
+        if (!"Paciente".equalsIgnoreCase(paciente.getNombreRol())) {
+            errores.put("dpi", "Ese DPI pertenece a un usuario interno, no a un paciente.");
+            return new ResultadoWalkIn(false, errores, null);
+        }
 
         if (medicoId == null) {
             errores.put("medicoId", "Debe seleccionar un medico para continuar.");
@@ -274,8 +281,19 @@ public class RecepcionService {
         }
 
         Usuario medico = usuarioRepository.findById(medicoId).orElse(null);
-        if (medico == null) {
+        if (medico == null || medico.getState() != 1 || medico.getSucursal() == null
+                || !"Medico".equalsIgnoreCase(medico.getNombreRol())) {
             errores.put("medicoId", "El medico seleccionado ya no esta disponible.");
+            return new ResultadoWalkIn(false, errores, null);
+        }
+
+        // Igual que en CU-03: el horario debe seguir libre al momento de guardar.
+        LocalTime horaElegida = fechaHora.atZoneSameInstant(ZONA_GT).toLocalTime();
+        LocalDate fechaElegida = fechaHora.atZoneSameInstant(ZONA_GT).toLocalDate();
+        if (!disponibilidadService
+                .obtenerHorariosDisponibles(medico.getId(), medico.getSucursal().getId(), fechaElegida)
+                .contains(horaElegida)) {
+            errores.put("fechaHora", "El horario seleccionado ya no esta disponible. Por favor, elija otro horario.");
             return new ResultadoWalkIn(false, errores, null);
         }
 

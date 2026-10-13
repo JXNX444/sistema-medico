@@ -5,9 +5,9 @@ import gt.edu.umg.sistemamedico.repository.SucursalEspecialidadRepository;
 import gt.edu.umg.sistemamedico.repository.UsuarioRepository;
 import gt.edu.umg.sistemamedico.security.UsuarioDetails;
 import gt.edu.umg.sistemamedico.service.*;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -125,9 +125,11 @@ public class CitaController {
 
     // ---------- PASO 6: elegir metodo de pago y guardar la cita ----------
 
+    // Sin @Transactional a proposito: el save() ya abre su propia transaccion, y asi se
+    // puede atrapar aqui el choque de horario (indice ux_cita_medico_slot) sin que la
+    // transaccion quede marcada para rollback y termine en error 500.
     @PostMapping("/api/agendar")
     @ResponseBody
-    @Transactional
     public Map<String, Object> agendar(@RequestBody AgendarCitaRequest req,
                                        @AuthenticationPrincipal UsuarioDetails ud) {
 
@@ -140,7 +142,25 @@ public class CitaController {
         }
 
         Usuario paciente = ud.getUsuario();
-        Usuario medico = usuarioRepository.findById(req.medicoId()).orElseThrow();
+        Usuario medico = usuarioRepository.findById(req.medicoId()).orElse(null);
+
+        // El navegador manda el medicoId: se verifica que de verdad sea un medico activo
+        // de la sucursal y especialidad elegidas.
+        if (medico == null || medico.getState() != 1
+                || !"Medico".equalsIgnoreCase(medico.getNombreRol())
+                || medico.getSucursal() == null || !medico.getSucursal().getId().equals(req.sucursalId())
+                || medico.getEspecialidad() == null || !medico.getEspecialidad().getId().equals(req.especialidadId())) {
+            return error("medicoId", "El medico seleccionado no esta disponible para esa sucursal y especialidad.");
+        }
+
+        // [CU-12 FA01] Se vuelve a calcular la disponibilidad: el horario pudo ocuparse
+        // (u otro evento de la agenda [CU-16] pudo bloquearlo) desde que se mostro.
+        if (!disponibilidadService
+                .obtenerHorariosDisponibles(medico.getId(), req.sucursalId(), LocalDate.parse(req.fecha()))
+                .contains(LocalTime.parse(req.hora()))) {
+            return error("fechaHora", MSG_HORARIO_OCUPADO);
+        }
+
         Sucursal sucursal = medico.getSucursal();
         Especialidad especialidad = medico.getEspecialidad();
         EstadoCita pendientePago = estadoCitaService.buscarPorCodigo("PENDIENTE_PAGO");
@@ -172,7 +192,13 @@ public class CitaController {
         boolean pagoEnCaja = "CAJA".equals(req.metodoPago());
         cita.setReservaExpiraEn(pagoEnCaja ? null : OffsetDateTime.now().plusMinutes(MINUTOS_RESERVA));
 
-        Cita guardada = citaRepository.save(cita);
+        Cita guardada;
+        try {
+            guardada = citaRepository.save(cita);
+        } catch (DataIntegrityViolationException e) {
+            // Dos pacientes confirmaron el mismo horario al mismo tiempo: gana el primero.
+            return error("fechaHora", MSG_HORARIO_OCUPADO);
+        }
 
         Map<String, Object> resultado = new LinkedHashMap<>();
         resultado.put("ok", true);
@@ -185,6 +211,18 @@ public class CitaController {
     }
 
     // ---------- Helpers ----------
+
+    private static final String MSG_HORARIO_OCUPADO =
+            "El horario seleccionado ya no esta disponible. Por favor, elija otro horario.";
+
+    private Map<String, Object> error(String campo, String mensaje) {
+        Map<String, Object> errores = new LinkedHashMap<>();
+        errores.put(campo, mensaje);
+        Map<String, Object> resultado = new LinkedHashMap<>();
+        resultado.put("ok", false);
+        resultado.put("errores", errores);
+        return resultado;
+    }
 
     private String generarNumeroCita(Integer pacienteId) {
         long total = citaRepository.count() + 1;

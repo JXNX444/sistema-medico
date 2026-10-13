@@ -9,6 +9,7 @@ import gt.edu.umg.sistemamedico.service.DisponibilidadService;
 import gt.edu.umg.sistemamedico.service.RecepcionService;
 import gt.edu.umg.sistemamedico.service.SucursalService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -189,8 +190,16 @@ public class RecepcionController {
     @ResponseBody
     public Map<String, Object> crearWalkIn(@RequestBody WalkInRequest req) {
 
-        RecepcionService.ResultadoWalkIn resultado = recepcionService
-                .crearCitaWalkIn(req.dpi(), req.medicoId(), req.fecha(), req.hora(), req.motivo());
+        RecepcionService.ResultadoWalkIn resultado;
+        try {
+            resultado = recepcionService
+                    .crearCitaWalkIn(req.dpi(), req.medicoId(), req.fecha(), req.hora(), req.motivo());
+        } catch (DataIntegrityViolationException e) {
+            // Otra persona tomo el mismo horario en el mismo instante (ux_cita_medico_slot).
+            resultado = new RecepcionService.ResultadoWalkIn(false,
+                    Map.of("fechaHora", "El horario seleccionado ya no esta disponible. Por favor, elija otro horario."),
+                    null);
+        }
 
         Map<String, Object> respuesta = new LinkedHashMap<>();
         respuesta.put("ok", resultado.ok());
