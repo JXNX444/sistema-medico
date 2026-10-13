@@ -48,7 +48,7 @@
 
                 <div class="sm-field">
                     <label for="nit">NIT</label>
-                    <input class="sm-input" type="text" id="nit" th:field="*{nit}" maxlength="9" inputmode="numeric" placeholder="8 a 9 dígitos">
+                    <input class="sm-input" type="text" id="nit" th:field="*{nit}" maxlength="9" placeholder="8 a 9 caracteres (ej: 1234567K)">
                     <p class="sm-error" th:if="${errores.get('nit')}" th:text="${errores.get('nit')}"></p>
                 </div>
 
@@ -98,7 +98,7 @@
     function soloAlfanumerico(input){ input.addEventListener('input', function(){ this.value = this.value.replace(/[^A-Za-z0-9]/g,''); }); }
     soloDigitos(document.getElementById('dpi'));
     soloDigitos(document.getElementById('telefono'));
-    soloDigitos(document.getElementById('nit'));
+    soloAlfanumerico(document.getElementById('nit'));
     soloAlfanumerico(document.getElementById('username'));
 </script>
 

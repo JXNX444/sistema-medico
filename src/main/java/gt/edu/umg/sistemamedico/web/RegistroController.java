@@ -132,12 +132,15 @@ public class RegistroController {
                     + "Si ya tiene cuenta, inicie sesion.");
         }
 
-        // RN-GLOBAL-002 NIT (solo numeros, 8 a 9 digitos)
+        // RN-GLOBAL-002 NIT: 8 a 9 caracteres alfanumericos (hay NIT que terminan en K)
         String nit = limpiar(form.getNit());
         if (nit.isEmpty()) {
             errores.put("nit", "El campo NIT es obligatorio.");
-        } else if (!nit.matches("\\d{8,9}")) {
-            errores.put("nit", "El NIT debe contener entre 8 y 9 digitos numericos.");
+        } else if (nit.length() < 8 || nit.length() > 9) {
+            errores.put("nit", "El NIT debe contener entre 8 y 9 caracteres. Usted ingreso "
+                    + nit.length() + " caracteres.");
+        } else if (!nit.matches("[A-Za-z0-9]+")) {
+            errores.put("nit", "El NIT debe contener unicamente caracteres alfanumericos.");
         }
 
         // RN-CU02-02 Telefono
