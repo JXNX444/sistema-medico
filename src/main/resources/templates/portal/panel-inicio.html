@@ -29,7 +29,7 @@
   Accesos: cada tarjeta solo la ve el actor de su CU.
     Administrador -> CU-01, CU-13, CU-14, CU-15 (ajustes)
     Recepcionista -> CU-05 | Cajero -> CU-06, CU-10 | Enfermero -> CU-07
-    Medico -> CU-08 (+ resultados de CU-09 en solo lectura)
+    Medico -> CU-08, CU-16 (+ resultados de CU-09 en solo lectura)
     Laboratorista -> CU-09 | Farmaceutico -> CU-11, CU-15
 -->
 <section style="background:var(--sm-panel);padding:36px 48px;min-height:40vh;">
@@ -122,6 +122,17 @@
             </div>
             <div class="sm-feature__title">Resultados de Laboratorio</div>
             <div class="sm-feature__desc">Consultar las órdenes de sus pacientes y sus resultados publicados.</div>
+        </a>
+
+        <!-- CU-16 Gestion de Agenda Medica -->
+        <a th:if="${rol == 'Medico'}" th:href="@{/medico/agenda}"
+           class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h2M14 14h2M8 18h2"/></svg>
+            </div>
+            <div class="sm-feature__title">Agenda Médica</div>
+            <div class="sm-feature__desc">Ver sus citas en el calendario, registrar eventos personales y gestionar sus tareas.</div>
         </a>
 
         <!-- CU-11 Despacho de Medicamentos -->
