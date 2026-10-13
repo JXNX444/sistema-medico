@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
@@ -41,6 +42,9 @@ import java.util.Set;
 @Controller
 @RequestMapping("/recepcion")
 public class RecepcionController {
+
+    /** Todo el sistema trabaja en hora de Guatemala. */
+    private static final ZoneId ZONA_GT = ZoneId.of("America/Guatemala");
 
     private static final DateTimeFormatter FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", new Locale("es", "GT"));
@@ -222,7 +226,7 @@ public class RecepcionController {
     public List<String> horarios(@RequestParam Integer medicoId, @RequestParam Integer sucursalId,
                                  @RequestParam String fecha) {
         LocalDate fechaConsulta = LocalDate.parse(fecha);
-        if (fechaConsulta.isBefore(LocalDate.now())) {
+        if (fechaConsulta.isBefore(LocalDate.now(ZONA_GT))) {
             return List.of();
         }
         List<LocalTime> horas = disponibilidadService.obtenerHorariosDisponibles(medicoId, sucursalId, fechaConsulta);

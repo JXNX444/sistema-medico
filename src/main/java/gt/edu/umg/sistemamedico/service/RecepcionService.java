@@ -422,7 +422,7 @@ public class RecepcionService {
             try {
                 LocalDate fechaCita = LocalDate.parse(fecha);
                 LocalTime horaCita = LocalTime.parse(hora);
-                fechaHora = fechaCita.atTime(horaCita).atZone(ZoneId.systemDefault()).toOffsetDateTime();
+                fechaHora = fechaCita.atTime(horaCita).atZone(ZONA_GT).toOffsetDateTime();
                 if (!fechaHora.isAfter(OffsetDateTime.now())) {
                     errores.put("fechaHora", "Debe seleccionar una fecha y hora futuras.");
                 }
@@ -486,6 +486,6 @@ public class RecepcionService {
 
     private String generarNumeroCita() {
         long total = citaRepository.count() + 1;
-        return "CITA-" + LocalDate.now().getYear() + "-" + String.format("%05d", total);
+        return "CITA-" + LocalDate.now(ZONA_GT).getYear() + "-" + String.format("%05d", total);
     }
 }

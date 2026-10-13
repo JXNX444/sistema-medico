@@ -32,6 +32,9 @@ import java.util.Map;
 @RequestMapping("/citas")
 public class CitaController {
 
+    /** Todo el sistema trabaja en hora de Guatemala. */
+    private static final ZoneId ZONA_GT = ZoneId.of("America/Guatemala");
+
     private static final int MINUTOS_RESERVA = 5; // FA03
 
     /** [RN-CU03-06] Maximo de citas sin pagar que un paciente puede tener a la vez. */
@@ -121,7 +124,7 @@ public class CitaController {
         LocalDate fechaConsulta = LocalDate.parse(fecha); // yyyy-MM-dd
 
         // [RN-CU03-05] nunca calcular ni devolver horarios de fechas pasadas.
-        if (fechaConsulta.isBefore(LocalDate.now())) {
+        if (fechaConsulta.isBefore(LocalDate.now(ZONA_GT))) {
             return List.of();
         }
 
@@ -184,7 +187,7 @@ public class CitaController {
 
         LocalDate fecha = LocalDate.parse(req.fecha());
         LocalTime hora = LocalTime.parse(req.hora());
-        OffsetDateTime fechaHora = fecha.atTime(hora).atZone(ZoneId.systemDefault()).toOffsetDateTime();
+        OffsetDateTime fechaHora = fecha.atTime(hora).atZone(ZONA_GT).toOffsetDateTime();
 
         Cita cita = new Cita();
         cita.setNumeroCita(generarNumeroCita(paciente.getId()));
@@ -224,7 +227,7 @@ public class CitaController {
             correoService.enviarConfirmacionCita(
                     paciente.getCorreo(), paciente.getNombreCompleto(), guardada.getNumeroCita(),
                     medico.getNombreCompleto(), especialidad.getNombre(), sucursal.getNombre(),
-                    guardada.getFechaHora().atZoneSameInstant(ZoneId.of("America/Guatemala"))
+                    guardada.getFechaHora().atZoneSameInstant(ZONA_GT)
                             .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
                     guardada.getMonto().setScale(2, java.math.RoundingMode.HALF_UP).toPlainString());
         }
@@ -255,7 +258,7 @@ public class CitaController {
 
     private String generarNumeroCita(Integer pacienteId) {
         long total = citaRepository.count() + 1;
-        return "CITA-" + LocalDate.now().getYear() + "-" + String.format("%05d", total);
+        return "CITA-" + LocalDate.now(ZONA_GT).getYear() + "-" + String.format("%05d", total);
     }
 
     /** Validacion manual [RN-CU03-01 a 05], usando el CONTENIDO de cada regla, no su numero. */
@@ -278,7 +281,7 @@ public class CitaController {
             try {
                 LocalDate fecha = LocalDate.parse(req.fecha());
                 LocalTime hora = LocalTime.parse(req.hora());
-                OffsetDateTime fechaHora = fecha.atTime(hora).atZone(ZoneId.systemDefault()).toOffsetDateTime();
+                OffsetDateTime fechaHora = fecha.atTime(hora).atZone(ZONA_GT).toOffsetDateTime();
                 if (!fechaHora.isAfter(OffsetDateTime.now())) {
                     errores.put("fechaHora", "Debe seleccionar una fecha y hora futuras. Las citas no pueden agendarse en fechas pasadas o presentes.");
                 }
