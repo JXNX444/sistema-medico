@@ -117,7 +117,13 @@ function tarjetaCita(c) {
         mensaje = `<div class="resultado-mensaje tono-rojo">${motivo}</div>`;
         accion = `<button class="boton-secundario" onclick="mostrarFormularioWalkIn()">Nueva Cita</button>`;
     } else if (c.estadoCodigo === 'PACIENTE_PRESENTE') {
-        mensaje = `<div class="resultado-mensaje tono-teal">
+        // FA08: si es emergencia ya esta de primero en la fila de enfermeria (prioridad 2)
+        mensaje = c.esEmergencia
+            ? `<div class="resultado-mensaje tono-rojo">
+            Paciente con prioridad de <strong>EMERGENCIA</strong>: debe pasar directamente a toma de signos vitales.
+            Ya esta de primero en la fila de enfermeria.
+</div>`
+            : `<div class="resultado-mensaje tono-teal">
             La llegada de este paciente ya fue registrada. El paciente debe pasar a la sala de espera.
 </div>`;
     } else if (c.estadoCodigo === 'CONFIRMADA' && !c.esFechaHoy) {
@@ -130,7 +136,7 @@ function tarjetaCita(c) {
 <button class="boton-secundario" style="flex:1;" onclick="reprogramarHoy(${c.citaId}, false)">
 <i class="ti ti-calendar-repeat"></i> Reprogramar para hoy
 </button>
-<button class="boton-principal" style="flex:1;background:var(--rojo);" onclick="reprogramarHoy(${c.citaId}, true)">
+<button class="boton-principal" style="flex:1;background:var(--sm-danger);" onclick="reprogramarHoy(${c.citaId}, true)">
 <i class="ti ti-alert-triangle"></i> Reprogramar como emergencia
 </button>
 </div>`;
@@ -138,6 +144,19 @@ function tarjetaCita(c) {
         accion = `<button class="boton-principal" onclick="registrarLlegada(${c.citaId})">
 <i class="ti ti-check"></i> Registrar llegada
 </button>`;
+        // FA08: boton adicional para pasar directo a signos vitales [CU-07].
+        // Registra la llegada y, como la cita tiene prioridad 2, enfermeria la ve de primero.
+        if (c.esEmergencia) {
+            accion = `
+<div style="display:flex;gap:10px;flex-wrap:wrap;">
+<button class="boton-principal" style="flex:1;" onclick="registrarLlegada(${c.citaId})">
+<i class="ti ti-check"></i> Registrar llegada
+</button>
+<button class="boton-principal" style="flex:1;background:var(--sm-danger);" onclick="registrarLlegada(${c.citaId})">
+<i class="ti ti-heartbeat"></i> Signos Vitales (Urgente)
+</button>
+</div>`;
+        }
     }
 
     // FA07: reasignar medico en citas Confirmadas o con Paciente Presente
@@ -314,7 +333,7 @@ function botonEmergencia() {
     // Solo tiene sentido cuando se busco por DPI (se sabe quien es el paciente).
     if (modoActual !== 'dpi' || !ultimoDpiBuscado) return '';
     return `
-<button class="boton-principal" style="background:var(--rojo);margin:10px 0;" onclick="mostrarFormularioEmergencia()">
+<button class="boton-principal" style="background:var(--sm-danger);margin:10px 0;" onclick="mostrarFormularioEmergencia()">
 <i class="ti ti-alert-triangle"></i> Emergencia (sin cita)
 </button>`;
 }
@@ -349,7 +368,7 @@ function mostrarFormularioEmergencia() {
 
 <div style="display:flex;gap:10px;">
 <button class="boton-secundario" style="flex:1;" onclick="buscar()">Cancelar</button>
-<button class="boton-principal" style="flex:1;background:var(--rojo);" onclick="enviarEmergencia()">
+<button class="boton-principal" style="flex:1;background:var(--sm-danger);" onclick="enviarEmergencia()">
 <i class="ti ti-alert-triangle"></i> Registrar emergencia
 </button>
 </div>
