@@ -5,6 +5,12 @@
 let modoActual = 'dpi'; // 'dpi' | 'numero'
 let ultimoDpiBuscado = '';
 
+/* Listado de citas del paciente (busqueda por DPI): filtro por estado + paginacion */
+const CITAS_POR_PAGINA = 5;
+let citasActuales = [];   // todas las citas que devolvio la busqueda
+let filtroEstado = '';    // '' = todos los estados
+let paginaActual = 1;
+
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnModoDpi').addEventListener('click', () => cambiarModo('dpi'));
     document.getElementById('btnModoNumero').addEventListener('click', () => cambiarModo('numero'));
@@ -90,12 +96,102 @@ function renderResultado(data) {
             break;
 
         case 'CITAS_ENCONTRADAS':
+            citasActuales = data.citas;
+            filtroEstado = '';
+            paginaActual = 1;
             zona.innerHTML =
-                `<p class="resultado-subtitulo" style="margin-bottom:12px;">${data.citas.length} cita(s) encontrada(s)</p>` +
                 botonEmergencia() +
-                data.citas.map(tarjetaCita).join('');
+                barraFiltroEstado() +
+                `<div id="listaCitas"></div>`;
+            renderListaCitas();
             break;
     }
+}
+
+/* ---------- Filtro por estado y paginacion (5 citas por pagina) ---------- */
+
+/** Lista desplegable con los estados que traen las citas encontradas (sin repetir). */
+function barraFiltroEstado() {
+    const estados = [];
+    citasActuales.forEach(c => {
+        if (!estados.some(e => e.codigo === c.estadoCodigo)) {
+            estados.push({ codigo: c.estadoCodigo, nombre: c.estadoNombre });
+        }
+    });
+    const opciones = estados
+        .map(e => `<option value="${e.codigo}">${e.nombre}</option>`)
+        .join('');
+    return `
+<div class="filtro-citas">
+<p class="resultado-subtitulo" id="conteoCitas"></p>
+<div class="filtro-citas__control">
+<label class="etiqueta-campo" for="filtroEstadoCita">Estado</label>
+<select id="filtroEstadoCita" onchange="cambiarFiltroEstado(this.value)">
+<option value="">Todos</option>
+            ${opciones}
+</select>
+</div>
+</div>`;
+}
+
+function cambiarFiltroEstado(codigo) {
+    filtroEstado = codigo;
+    paginaActual = 1;
+    renderListaCitas();
+}
+
+function irAPagina(pagina) {
+    paginaActual = pagina;
+    renderListaCitas();
+    document.getElementById('zonaResultado').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/** Dibuja solo las tarjetas de la pagina actual y los botones de pagina. */
+function renderListaCitas() {
+    const lista = document.getElementById('listaCitas');
+    if (!lista) return;
+
+    const filtradas = filtroEstado
+        ? citasActuales.filter(c => c.estadoCodigo === filtroEstado)
+        : citasActuales;
+
+    const totalPaginas = Math.max(1, Math.ceil(filtradas.length / CITAS_POR_PAGINA));
+    if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+
+    const inicio = (paginaActual - 1) * CITAS_POR_PAGINA;
+    const pagina = filtradas.slice(inicio, inicio + CITAS_POR_PAGINA);
+
+    const conteo = document.getElementById('conteoCitas');
+    if (conteo) {
+        conteo.textContent = filtroEstado
+            ? `${filtradas.length} de ${citasActuales.length} cita(s) con este estado`
+            : `${citasActuales.length} cita(s) encontrada(s)`;
+    }
+
+    if (pagina.length === 0) {
+        lista.innerHTML = `<div class="resultado-mensaje tono-ambar">No hay citas con ese estado.</div>`;
+        return;
+    }
+
+    lista.innerHTML = pagina.map(tarjetaCita).join('') + paginador(totalPaginas);
+}
+
+function paginador(totalPaginas) {
+    if (totalPaginas <= 1) return '';
+    let botones = '';
+    for (let p = 1; p <= totalPaginas; p++) {
+        botones += `<button type="button" class="paginador__num${p === paginaActual ? ' is-active' : ''}"
+            onclick="irAPagina(${p})">${p}</button>`;
+    }
+    return `
+<div class="paginador">
+<button type="button" class="paginador__num" ${paginaActual === 1 ? 'disabled' : ''}
+            onclick="irAPagina(${paginaActual - 1})">&lsaquo;</button>
+        ${botones}
+<button type="button" class="paginador__num" ${paginaActual === totalPaginas ? 'disabled' : ''}
+            onclick="irAPagina(${paginaActual + 1})">&rsaquo;</button>
+<span class="paginador__texto">Pagina ${paginaActual} de ${totalPaginas}</span>
+</div>`;
 }
 
 /* ---------- Arma el HTML de una tarjeta de cita, segun su estado y su fecha ---------- */
@@ -307,6 +403,10 @@ async function confirmarReasignacion(citaId) {
 }
 
 function reemplazarTarjeta(cita) {
+    // Mantener al dia la lista guardada para que el filtro y las paginas usen el estado nuevo
+    const i = citasActuales.findIndex(c => c.citaId === cita.citaId);
+    if (i >= 0) citasActuales[i] = cita;
+
     const actual = document.getElementById(`tarjeta-cita-${cita.citaId}`);
     if (actual) {
         actual.outerHTML = tarjetaCita(cita);
