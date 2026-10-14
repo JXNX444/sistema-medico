@@ -236,8 +236,14 @@ async function confirmar() {
             $('errorDespacho').textContent = `La cantidad de ${it.nombre} debe estar entre 0 y ${it.cantidad}.`;
             return;
         }
-        if (cant > 0 && sustituir && (!alt || !razon)) {
+        // FA02: si se marco Sustituir, el alternativo y la razon son obligatorios
+        // aunque la cantidad este en 0 (antes con 0 se saltaba esta validacion)
+        if (sustituir && (!alt || !razon)) {
             $('errorDespacho').textContent = `Complete el medicamento alternativo y la razón de sustitución de ${it.nombre}.`;
+            return;
+        }
+        if (sustituir && cant === 0) {
+            $('errorDespacho').textContent = `Ingrese la cantidad a despachar del medicamento alternativo de ${it.nombre}.`;
             return;
         }
         items.push({

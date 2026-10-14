@@ -281,6 +281,29 @@ public class DespachoService {
                 .filter(d -> d.getState() == null || d.getState() == ACTIVO)
                 .collect(Collectors.toMap(d -> d.getMedicamento().getId(), RecetaDetalle::getCantidad, Integer::sum));
 
+        // FA02: si se marco Sustituir, el alternativo y la razon son obligatorios
+        // aunque la cantidad venga en 0. Se valida ANTES de descartar las
+        // cantidades en 0; si no, la sustitucion incompleta se ignoraba.
+        if (solicitud != null) {
+            for (ItemSolicitud item : solicitud) {
+                if (!item.sustituir()) {
+                    continue;
+                }
+                String nombre = medicamentoRepository.findById(item.medicamentoId())
+                        .map(Medicamento::getNombre)
+                        .orElse("el medicamento");
+                boolean sinRazon = item.razon() == null || item.razon().isBlank();
+                if (item.alternativoId() == null || sinRazon) {
+                    return ResultadoDespacho.error("Complete el medicamento alternativo y la razón de sustitución de "
+                            + nombre + ".");
+                }
+                if (item.cantidad() == null || item.cantidad() <= 0) {
+                    return ResultadoDespacho.error("Ingrese la cantidad a despachar del medicamento alternativo de "
+                            + nombre + ".");
+                }
+            }
+        }
+
         List<ItemSolicitud> aDespachar = solicitud == null ? List.of()
                 : solicitud.stream().filter(i -> i.cantidad() != null && i.cantidad() > 0).toList();
         if (aDespachar.isEmpty()) {
