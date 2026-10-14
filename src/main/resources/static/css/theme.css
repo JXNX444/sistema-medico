@@ -283,11 +283,18 @@ a:hover { color: var(--sm-cyan-dark); }
 /* Recepción: formulario walk-in que inyecta el JS */
 .campo-formulario { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
 .etiqueta-campo { font-size:12px; font-weight:600; color: var(--sm-ink); }
-.campo-formulario input, .campo-formulario select, .campo-formulario textarea {
-    width:100%; font-family: var(--sm-font); font-size:14px; color: var(--sm-ink);
-    border:1px solid var(--sm-border); border-radius: var(--sm-r-input); padding:12px 14px; outline:none;
+/* Aplica tanto a los controles DENTRO de .campo-formulario como a los que llevan
+   la clase directamente (recepcion.js: motivo de reasignacion, emergencia, walk-in). */
+.campo-formulario input, .campo-formulario select, .campo-formulario textarea,
+input.campo-formulario, select.campo-formulario, textarea.campo-formulario {
+    display:block; width:100%; font-family: var(--sm-font); font-size:14px; color: var(--sm-ink);
+    border:1px solid var(--sm-border); border-radius: var(--sm-r-input); padding:12px 14px;
+    background:#fff; outline:none; transition:.15s ease;
 }
-.campo-formulario input:focus, .campo-formulario select:focus, .campo-formulario textarea:focus {
+textarea.campo-formulario, .campo-formulario textarea { min-height:90px; resize:vertical; }
+input.campo-formulario::placeholder, textarea.campo-formulario::placeholder { color: var(--sm-slate-400); }
+.campo-formulario input:focus, .campo-formulario select:focus, .campo-formulario textarea:focus,
+input.campo-formulario:focus, select.campo-formulario:focus, textarea.campo-formulario:focus {
     border-color: var(--sm-cyan); box-shadow:0 0 0 3px rgba(6,182,212,.15);
 }
 .error-campo { color: var(--sm-danger); font-size:12px; }
