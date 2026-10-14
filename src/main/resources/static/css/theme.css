@@ -332,3 +332,17 @@ input.campo-formulario:focus, select.campo-formulario:focus, textarea.campo-form
 .hora-slot.seleccionada { border-color: var(--sm-cyan); background: var(--sm-cyan-50); color: var(--sm-cyan-dark); }
 .pasos li.paso-completo { color: var(--sm-cyan-dark); border-color: var(--sm-cyan-50); background:#fff; }
 .pasos li.paso-completo::before { background: var(--sm-cyan-dark); color:#fff; }
+
+/* ---- Recepcion: filtro por estado y paginacion de las citas encontradas ---- */
+.filtro-citas { display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+    flex-wrap:wrap; margin-bottom:12px; }
+.filtro-citas .resultado-subtitulo { margin:0; }
+.filtro-citas__control { display:flex; flex-direction:column; gap:6px; min-width:200px; }
+.paginador { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:16px; }
+.paginador__num { min-width:36px; padding:6px 12px; border:1px solid var(--sm-border); border-radius:8px;
+    background:#fff; font-family: var(--sm-font); font-size:13px; font-weight:600;
+    color: var(--sm-slate-600); cursor:pointer; transition:.15s ease; }
+.paginador__num:hover:not(:disabled) { border-color: var(--sm-cyan); color: var(--sm-cyan-dark); }
+.paginador__num.is-active { background: var(--sm-cyan); border-color: var(--sm-cyan); color:#fff; }
+.paginador__num:disabled { opacity:.4; cursor:default; }
+.paginador__texto { margin-left:auto; font-size:12px; color: var(--sm-slate-500); }
