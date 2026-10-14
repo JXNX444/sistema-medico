@@ -25,12 +25,7 @@
             <p>Verifique su registro con el número de DPI para agendar su cita médica en el hospital o sede más cercana.</p>
 
             <div class="buscador">
-                <div class="campo-dpi">
-                    <input type="text" id="dpiRapido" placeholder="Ingrese su DPI"
-                           maxlength="13" inputmode="numeric" autocomplete="off">
-                    <span class="contador" id="contadorRapido">0/13</span>
-                </div>
-                <button class="btn-agendar" onclick="abrirModal()">Agendar cita →</button>
+                <button class="btn-agendar" onclick="abrirModal()">Agendar cita</button>
             </div>
 
             <div class="hero-stats">
@@ -181,9 +176,6 @@
     .hero h1 { font-size:44px; font-weight:800; line-height:1.15; margin:0; }
     .hero p { font-size:16px; color:var(--sm-slate-500); margin:0; max-width:460px; }
     .buscador { display:flex; gap:12px; margin-top:6px; flex-wrap:wrap; }
-    .campo-dpi { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--sm-border);
-        border-radius:var(--sm-r-input); padding:0 14px; min-width:240px; flex:1; }
-    .campo-dpi input { border:none; outline:none; font-family:var(--sm-font); font-size:15px; padding:14px 0; flex:1; color:var(--sm-ink); background:transparent; }
     .contador { font-size:12px; color:var(--sm-slate-400); font-weight:600; }
     .contador.completo { color:var(--sm-cyan-dark); }
     .btn-agendar { background:var(--sm-cyan); color:#fff; border:none; cursor:pointer; font-family:var(--sm-font);
@@ -275,19 +267,16 @@
     /* ===================== MODAL DE DPI ===================== */
     const velo          = document.getElementById('velo');
     const dpiModal      = document.getElementById('dpiModal');
-    const dpiRapido     = document.getElementById('dpiRapido');
     const contadorModal = document.getElementById('contadorModal');
-    const contadorRap   = document.getElementById('contadorRapido');
     const cajaError     = document.getElementById('errorDpi');
     const textoError    = document.getElementById('textoError');
 
     function soloDigitos(v){ return v.replace(/\D/g,''); }
     function pintarContador(el, n){ el.textContent = n + '/13'; el.classList.toggle('completo', n === 13); }
 
-    dpiRapido.addEventListener('input', e => { e.target.value = soloDigitos(e.target.value); pintarContador(contadorRap, e.target.value.length); });
     dpiModal.addEventListener('input', e => { e.target.value = soloDigitos(e.target.value); pintarContador(contadorModal, e.target.value.length); ocultarError(); });
 
-    function abrirModal(){ dpiModal.value = soloDigitos(dpiRapido.value); pintarContador(contadorModal, dpiModal.value.length); ocultarError(); velo.classList.add('visible'); dpiModal.focus(); }
+    function abrirModal(){ dpiModal.value = ''; pintarContador(contadorModal, 0); ocultarError(); velo.classList.add('visible'); dpiModal.focus(); }
     function cerrarModal(){ velo.classList.remove('visible'); }
     function mostrarError(m){ textoError.textContent = m; cajaError.classList.add('visible'); dpiModal.classList.add('error'); }
     function ocultarError(){ cajaError.classList.remove('visible'); dpiModal.classList.remove('error'); }
