@@ -47,6 +47,11 @@
                 ¡Registro exitoso! Ahora puede iniciar sesión.
             </div>
 
+            <!-- FA08: sin conexion con el servidor (lo muestra el JS de abajo) -->
+            <div id="errorConexion" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;display:none;">
+                No se pudo conectar con el servidor. Intente de nuevo más tarde.
+            </div>
+
             <!-- Formulario Paciente -->
             <form id="form-pac" th:action="@{/login}" method="post"
                   style="display:flex;flex-direction:column;gap:16px;">
@@ -105,7 +110,31 @@
         document.getElementById('tab-per').classList.toggle('is-active', !esPac);
         document.getElementById('form-pac').style.display = esPac ? 'flex' : 'none';
         document.getElementById('form-per').style.display = esPac ? 'none' : 'flex';
+        document.getElementById('errorConexion').style.display = 'none';
     }
+
+    /* FA08: antes de enviar, se comprueba que el servidor responda.
+       Si la app esta apagada, el navegador ya no muestra su pagina de error:
+       se queda en el login con el mensaje del CU y se puede reintentar.
+       Aplica a los dos formularios (Paciente y Personal). */
+    document.querySelectorAll('#form-pac, #form-per').forEach(function (form) {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            var errorConexion = document.getElementById('errorConexion');
+            var boton = form.querySelector('button[type="submit"]');
+            errorConexion.style.display = 'none';
+            boton.disabled = true;
+            boton.textContent = 'Verificando...';
+            try {
+                await fetch(form.action, { method: 'HEAD', cache: 'no-store' });
+                form.submit();   // el servidor responde: se envia el formulario normal
+            } catch (err) {
+                errorConexion.style.display = 'block';
+                boton.disabled = false;
+                boton.textContent = 'Iniciar sesión';
+            }
+        });
+    });
 </script>
 
 </body>
