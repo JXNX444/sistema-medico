@@ -47,7 +47,13 @@
                 ¡Registro exitoso! Su cuenta ha sido creada. Ahora puede iniciar sesión con sus credenciales.
             </div>
 
-            <form th:action="@{/login}" method="post" style="display:flex;flex-direction:column;gap:16px;">
+            <!-- FA08: sin conexion con el servidor (lo muestra el JS de abajo) -->
+            <div class="sm-badge sm-badge--danger" id="errorConexion"
+                 style="padding:10px 14px;font-size:13px;display:none;">
+                No se pudo conectar con el servidor. Intente de nuevo más tarde.
+            </div>
+
+            <form id="formLogin" th:action="@{/login}" method="post" style="display:flex;flex-direction:column;gap:16px;">
                 <div class="sm-field">
                     <label for="username">Usuario</label>
                     <input class="sm-input" type="text" id="username" name="username"
@@ -58,7 +64,7 @@
                     <input class="sm-input" type="password" id="password" name="password"
                            placeholder="Su contraseña" required>
                 </div>
-                <button type="submit" class="sm-btn sm-btn--primary sm-btn--block">Iniciar sesión</button>
+                <button type="submit" id="btnLogin" class="sm-btn sm-btn--primary sm-btn--block">Iniciar sesión</button>
             </form>
 
             <div style="text-align:center;font-size:13px;color:var(--sm-slate-500);">
@@ -71,6 +77,30 @@
         </div>
     </div>
 </div>
+
+<script>
+    /* FA08: antes de enviar, se comprueba que el servidor responda.
+       Si la app esta apagada, el navegador ya no muestra su pagina de error:
+       se queda en el login con el mensaje del CU y el usuario puede reintentar. */
+    const formLogin     = document.getElementById('formLogin');
+    const btnLogin      = document.getElementById('btnLogin');
+    const errorConexion = document.getElementById('errorConexion');
+
+    formLogin.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorConexion.style.display = 'none';
+        btnLogin.disabled = true;
+        btnLogin.textContent = 'Verificando...';
+        try {
+            await fetch(formLogin.action, { method: 'HEAD', cache: 'no-store' });
+            formLogin.submit();   // el servidor responde: se envia el formulario normal
+        } catch (err) {
+            errorConexion.style.display = 'block';
+            btnLogin.disabled = false;
+            btnLogin.textContent = 'Iniciar sesión';
+        }
+    });
+</script>
 
 </body>
 </html>
