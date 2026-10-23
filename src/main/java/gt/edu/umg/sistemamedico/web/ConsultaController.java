@@ -60,7 +60,6 @@ public class ConsultaController {
 
     // ---------- Paso 1: panel en tres secciones ----------
 
-    // CU-08 FB1
     @GetMapping("/api/citas")
     @ResponseBody
     public Map<String, Object> listarCitas(@AuthenticationPrincipal UsuarioDetails ud) {
@@ -77,7 +76,6 @@ public class ConsultaController {
 
     public record CitaRequest(Integer citaId) {}
 
-    // CU-08 FB2
     @PostMapping("/api/iniciar")
     @ResponseBody
     public Map<String, Object> iniciar(@RequestBody CitaRequest req,
@@ -96,7 +94,6 @@ public class ConsultaController {
 
     // ---------- Paso 3: datos para abrir el formulario ----------
 
-    // CU-08 FB3
     @GetMapping("/api/consulta/{citaId}")
     @ResponseBody
     public Map<String, Object> obtenerConsulta(@PathVariable Integer citaId,
@@ -118,7 +115,6 @@ public class ConsultaController {
 
     // ---------- Paso 7: autocompletado CIE-10 ----------
 
-    // CU-08 FB4-7
     @GetMapping("/api/cie10")
     @ResponseBody
     public List<Map<String, Object>> buscarCie10(@RequestParam(name = "q", required = false) String q) {
@@ -131,7 +127,6 @@ public class ConsultaController {
             Integer citaId, String motivoVisita, String hallazgos, Integer cie10Id,
             String diagnostico, String planTratamiento, String notas, boolean finalizar) {}
 
-    // CU-08 FB8-10
     @PostMapping("/api/consulta")
     @ResponseBody
     public Map<String, Object> guardarConsulta(@RequestBody GuardarConsultaRequest req,
@@ -193,7 +188,6 @@ public class ConsultaController {
 
     // ---------- FA02 / CU-12: cita de seguimiento ----------
 
-    // CU-12 FB5
     @GetMapping("/api/horarios")
     @ResponseBody
     public List<String> horarios(@RequestParam Integer citaId, @RequestParam String fecha,
@@ -215,7 +209,6 @@ public class ConsultaController {
     public record SeguimientoRequest(Integer citaId, String fecha, String hora, Short tipo,
                                      String observaciones, Short prioridad) {}
 
-    // CU-12 FB7-8
     @PostMapping("/api/seguimiento")
     @ResponseBody
     public Map<String, Object> agendarSeguimiento(@RequestBody SeguimientoRequest req,
@@ -237,7 +230,6 @@ public class ConsultaController {
 
     // ---------- Pasos 11-12: Finalizar Atencion ----------
 
-    // CU-08 FB11-12
     @PostMapping("/api/finalizar-atencion")
     @ResponseBody
     public Map<String, Object> finalizarAtencion(@RequestBody CitaRequest req,
@@ -260,7 +252,6 @@ public class ConsultaController {
     }
 
     private Map<String, Object> mapearCita(Cita c) {
-        // CU-12 FB1-3
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("citaId", c.getId());
         m.put("numeroCita", c.getNumeroCita());

@@ -44,7 +44,6 @@ public class BitacoraInventarioController {
 
     // ---------- Paso 2: listado [FA01] ----------
 
-    // FB1
     @GetMapping
     public String listado(@RequestParam(required = false) String tipo,
                           @RequestParam(required = false) String medicamentoId,
@@ -80,7 +79,6 @@ public class BitacoraInventarioController {
 
     // ---------- Pasos 3-4: formulario ----------
 
-    // FB2-3
     @GetMapping("/nuevo")
     public String nuevo(@AuthenticationPrincipal UsuarioDetails ud, Model model) {
         Usuario usuario = ud.getUsuario();
@@ -92,7 +90,6 @@ public class BitacoraInventarioController {
 
     // ---------- Pasos 6-9 + FA02 + FA03: registrar ----------
 
-    // FB5-8
     @PostMapping("/nuevo")
     public String registrar(@ModelAttribute MovimientoForm form,
                             @AuthenticationPrincipal UsuarioDetails ud,
@@ -118,7 +115,6 @@ public class BitacoraInventarioController {
 
     // ---------- Accion "Ver" ----------
 
-    // FB1
     @GetMapping("/{id}")
     public String detalle(@PathVariable Long id, Model model, RedirectAttributes redirect) {
         MovimientoInventario m = service.buscar(id);
@@ -132,7 +128,6 @@ public class BitacoraInventarioController {
 
     // ---------- Accion "Desactivar/Activar" ----------
 
-    // FB1
     @PostMapping("/{id}/estado")
     public String alternarEstado(@PathVariable Long id, RedirectAttributes redirect) {
         Resultado r = service.alternarEstado(id);
@@ -146,7 +141,6 @@ public class BitacoraInventarioController {
 
     // ---------- Panel de inventario en tiempo real (JSON) ----------
 
-    // FB2-3
     @GetMapping("/stock")
     @ResponseBody
     public InfoStock stock(@RequestParam(required = false) Integer medicamentoId,

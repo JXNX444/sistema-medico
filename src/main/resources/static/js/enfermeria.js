@@ -6,7 +6,6 @@ let citaSeleccionada = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarPanel();
-    // FB1
     setInterval(cargarPanel, 15000); // refresca la fila cada 15s
 });
 
@@ -25,7 +24,6 @@ function mostrarMensaje(texto, tipo) {
 
 /* ---------- Paso 1 flujo normal: lista de pacientes ---------- */
 
-// FB1
 async function cargarPanel() {
     try {
         const resp = await fetch(`${CTX}enfermeria/api/pacientes`);
@@ -37,7 +35,6 @@ async function cargarPanel() {
     }
 }
 
-// FB1
 function renderListaPresentes(citas) {
     const cont = document.getElementById('listaPresentes');
     const contador = document.getElementById('countPresentes');
@@ -57,7 +54,6 @@ function renderListaPresentes(citas) {
         </div>`).join('');
 }
 
-// FB1
 function renderListaEnSignos(citas) {
     const cont = document.getElementById('listaEnSignos');
     const contador = document.getElementById('countEnSignos');
@@ -80,7 +76,6 @@ function renderListaEnSignos(citas) {
 
 /* ---------- Paso 2 flujo normal: llamar paciente (con TTS) ---------- */
 
-// FB1
 async function llamarPaciente(citaId) {
     try {
         const resp = await fetch(`${CTX}enfermeria/api/llamar`, {
@@ -101,7 +96,6 @@ async function llamarPaciente(citaId) {
     }
 }
 
-// FB1
 function anunciarPorVoz(texto) {
     if (!('speechSynthesis' in window)) return;
     const utterance = new SpeechSynthesisUtterance(texto);
@@ -111,7 +105,6 @@ function anunciarPorVoz(texto) {
 
 /* ---------- Pasos 3-11: formulario de registro ---------- */
 
-// FB2-3
 function abrirFormulario(citaId, nombre, numeroCita) {
     citaSeleccionada = citaId;
     document.getElementById('formContexto').textContent = `${nombre} — ${numeroCita}`;
@@ -135,7 +128,6 @@ function limpiarErrores() {
 
 /* ---------- FA03: alertas clinicas en tiempo real ---------- */
 
-// FB9
 async function chequearAlertas() {
     const body = {
         presionSistolica: numOrNull('inpSistolica'),
@@ -162,7 +154,6 @@ function numOrNull(id) {
 
 /* ---------- Guardar el registro ---------- */
 
-// FB10-12
 async function registrarSignos() {
     limpiarErrores();
 
@@ -174,7 +165,6 @@ async function registrarSignos() {
         pesoKg: numOrNull('inpPeso'),
         tallaCm: numOrNull('inpTalla'),
         frecuenciaCardiaca: numOrNull('inpFrecuencia'),
-        // FA01
         esEmergencia: document.getElementById('inpEmergencia').checked
     };
 

@@ -15,7 +15,6 @@
     </div>
 
     <!-- Pasos 5-7: formulario de asignacion [RN-CU12-01] -->
-    <!-- FB4-5 -->
     <form th:action="@{/sedes-especialidades/nuevo}" method="post" class="sm-panel"
           style="display:flex;flex-direction:column;gap:14px;">
 
@@ -54,7 +53,6 @@
         <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px;">
             <!-- FA04: Cancelar descarta los datos y vuelve al listado -->
             <a th:href="@{/sedes-especialidades}" class="sm-btn sm-btn--ghost">Cancelar</a>
-            <!-- FB6-9 -->
             <button type="submit" class="sm-btn sm-btn--primary">Asignar</button>
         </div>
     </form>

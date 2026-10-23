@@ -17,13 +17,11 @@
     </div>
 
     <!-- Paso 4 (crear) / FA02 paso 2 (editar): campos segun la tabla 2.3 -->
-    <!-- FB3-5 -->
     <form method="post" class="sm-panel" style="display:flex;flex-direction:column;gap:14px;"
           th:action="${id == null}
                 ? @{/catalogos/{clave}/nuevo(clave=${catalogo.clave()})}
                 : @{/catalogos/{clave}/{id}/editar(clave=${catalogo.clave()}, id=${id})}">
 
-        <!-- FA05 -->
         <div th:each="c : ${campos}" class="sm-field"
              th:classappend="${errores.containsKey(c.nombre())} ? 'cat-campo--error'">
 

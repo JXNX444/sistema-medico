@@ -14,7 +14,6 @@ let catalogoMedicamentos = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarPanel();
-    // CU-08 FB1
     setInterval(cargarPanel, 30000); // [paso 1] se actualiza cada 30 segundos
 });
 
@@ -32,7 +31,6 @@ function mostrarMensaje(texto, tipo) {
 }
 
 /** Pinta cada error en su <p data-error="campo"> del formulario; si no existe, lo muestra arriba. */
-// CU-08 FA05
 function mostrarErrores(formId, errores) {
     const form = document.getElementById(formId);
     for (const campo in (errores || {})) {
@@ -68,7 +66,6 @@ async function postJson(url, body) {
 
 /* ---------- Paso 1: panel en tres secciones ---------- */
 
-// CU-08 FB1
 async function cargarPanel() {
     try {
         const resp = await fetch(`${CTX}medico/api/citas`);
@@ -88,7 +85,6 @@ async function cargarPanel() {
     }
 }
 
-// CU-08 FB1
 function renderLista(idLista, idContador, citas, textoVacio, botonesFn) {
     const cont = document.getElementById(idLista);
     const contador = document.getElementById(idContador);
@@ -145,7 +141,6 @@ function contextoDe(citaId) {
 
 /* ---------- Paso 2: Iniciar Consulta (con TTS) ---------- */
 
-// CU-08 FB2
 async function iniciarConsulta(citaId) {
     try {
         const data = await postJson('medico/api/iniciar', { citaId });
@@ -161,7 +156,6 @@ async function iniciarConsulta(citaId) {
     }
 }
 
-// CU-08 FB2
 function anunciarPorVoz(texto) {
     if (!texto || !('speechSynthesis' in window)) return;
     const utterance = new SpeechSynthesisUtterance(texto);
@@ -187,7 +181,6 @@ async function marcarNoAsistio(citaId) {
 
 /* ---------- Paso 3: abrir formulario de consulta ---------- */
 
-// CU-08 FB3
 async function abrirConsulta(citaId) {
     try {
         const resp = await fetch(`${CTX}medico/api/consulta/${citaId}`);
@@ -224,7 +217,6 @@ async function abrirConsulta(citaId) {
 }
 
 /** Signos vitales de enfermeria (CU-07), solo lectura. */
-// CU-08 FB3
 function renderSignos(s) {
     const cont = document.getElementById('signosConsulta');
     if (!s) {
@@ -253,7 +245,6 @@ function renderSignos(s) {
 
 /* ---------- Paso 7: autocompletado CIE-10 ---------- */
 
-// CU-08 FB4-7
 function buscarCie10() {
     cie10Seleccionado = null; // si vuelve a escribir, se pierde la seleccion anterior
     clearTimeout(timerCie10);
@@ -284,7 +275,6 @@ function seleccionarCie10(indice) {
 
 /* ---------- Pasos 4-10 + FA05: guardar consulta ---------- */
 
-// CU-08 FB8-10
 async function guardarConsulta() {
     limpiarErrores('formConsulta');
 
@@ -439,8 +429,6 @@ function hoyLocal() {
     return d.toISOString().slice(0, 10);
 }
 
-// CU-08 FA02
-// CU-12 FB1-3
 function abrirSeguimiento(citaId) {
     cerrarFormularios();
     citaEvaluada = citaId;
@@ -462,7 +450,6 @@ function abrirSeguimiento(citaId) {
 }
 
 /** [RN-CU11-03] Contador de caracteres de las observaciones (10 a 2000). */
-// CU-12 FB6
 function contarObservaciones() {
     const texto = document.getElementById('inpObsSeg').value.trim();
     const contador = document.getElementById('contadorObsSeg');
@@ -473,7 +460,6 @@ function contarObservaciones() {
         : 'var(--sm-slate-400)';
 }
 
-// CU-12 FB5
 async function cargarHorarios() {
     const fecha = document.getElementById('inpFechaSeg').value;
     const sel = document.getElementById('selHoraSeg');
@@ -489,10 +475,8 @@ async function cargarHorarios() {
     }
 }
 
-// CU-12 FB7-8
 async function guardarSeguimiento() {
     limpiarErrores('formSeguimiento');
-    // CU-12 FB6
     const tipo = document.getElementById('selTipoSeg').value;
     const prioridad = document.getElementById('selPrioridadSeg').value;
     const body = {
@@ -524,7 +508,6 @@ async function guardarSeguimiento() {
 
 /* ---------- Pasos 11-12: Finalizar Atencion ---------- */
 
-// CU-08 FB11-12
 async function finalizarAtencion(citaId) {
     try {
         const data = await postJson('medico/api/finalizar-atencion', { citaId });

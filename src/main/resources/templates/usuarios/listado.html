@@ -12,16 +12,12 @@
 
         <div class="sm-content">
 
-            <!-- FA01 -->
             <div th:if="${param.creado}"       class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;">Usuario creado correctamente.</div>
-            <!-- FA04 -->
             <div th:if="${param.actualizado}"  class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;">Usuario actualizado correctamente.</div>
-            <!-- FA05 -->
             <div th:if="${param.eliminado}"    class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;">El usuario ha sido eliminado correctamente.</div>
             <div th:if="${param.errorAutoeliminar}" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;">No puede eliminar su propia cuenta mientras tiene la sesión iniciada.</div>
 
             <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
-                <!-- FB5 FB6-7 FA02 -->
                 <form th:action="@{/usuarios/listado/buscar}" method="get" style="display:flex;gap:10px;">
                     <select class="sm-select" name="campo" style="width:auto;">
                         <option value="usuario"  th:selected="${campo == 'usuario'}">Nombre de Usuario</option>
@@ -36,7 +32,6 @@
                 <a th:href="@{/usuarios/nuevo}" class="sm-btn sm-btn--dark sm-btn--sm">+ Crear usuario</a>
             </div>
 
-            <!-- FA03 -->
             <div th:if="${usuarios.totalElements == 0}" class="sm-empty">
                 <div class="sm-empty__icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -45,7 +40,6 @@
                 <div class="sm-empty__desc">Modifique los filtros e intente nuevamente.</div>
             </div>
 
-            <!-- FB3-4 -->
             <div th:if="${usuarios.totalElements > 0}" class="sm-panel">
                 <table class="sm-table">
                     <thead>
@@ -64,7 +58,6 @@
                         </td>
                         <td th:text="${u.sucursal != null ? u.sucursal.nombre : '-'}"></td>
                         <td>
-                            <!-- FA05 -->
                             <a th:href="@{'/usuarios/' + ${u.id} + '/editar'}" style="font-weight:600;">Editar</a>
                             <button type="button"
                                     th:unless="${u.username == #authentication.name}"
@@ -79,7 +72,6 @@
                 </table>
 
                 <div class="sm-pag" th:if="${usuarios.totalPages > 1}">
-                    <!-- FB3-4 -->
                     <a th:each="p : ${#numbers.sequence(0, usuarios.totalPages - 1)}"
                        th:href="@{${endpoint}(campo=${campo}, valor=${valor}, page=${p})}"
                        th:text="${p + 1}"
@@ -91,13 +83,11 @@
     </div>
 </div>
 
-<!-- FA05 -->
 <div class="sm-veil" id="veloEliminar">
     <div class="sm-modal">
         <div style="font-size:17px;font-weight:800;">Confirmar eliminación</div>
         <p id="textoConfirmacion" style="font-size:14px;color:var(--sm-slate-500);"></p>
         <form id="formEliminar" method="post" style="display:flex;justify-content:flex-end;gap:12px;">
-            <!-- FA07 -->
             <button type="button" onclick="cerrarModalEliminar()" class="sm-btn sm-btn--ghost">Cancelar</button>
             <button type="submit" class="sm-btn" style="background:var(--sm-danger);color:#fff;">Eliminar</button>
         </form>
@@ -117,7 +107,6 @@
 </style>
 
 <script>
-    // FA05
     function confirmarEliminar(boton) {
         const id = boton.dataset.id, nombre = boton.dataset.nombre;
         document.getElementById('textoConfirmacion').textContent =

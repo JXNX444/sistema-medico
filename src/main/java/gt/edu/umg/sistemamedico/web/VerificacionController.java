@@ -31,12 +31,10 @@ public class VerificacionController {
         this.usuarioRepository = usuarioRepository;
     }
 
-    // FB7
     @PostMapping("/portal/verificar-dpi")
     public ResponseEntity<Map<String, String>> verificarDpi(@RequestParam String dpi) {
 
         // Validacion de respaldo del formato  [RN-GLOBAL-001] [FA01]
-        // FB6
         if (dpi == null || !dpi.matches("\\d{13}")) {
             return ResponseEntity.ok(Map.of(
                     "accion",  "ERROR",
@@ -67,7 +65,6 @@ public class VerificacionController {
             ));
         }
 
-        // FB8
         // Paso 8: es Paciente -> login del portal
         return ResponseEntity.ok(Map.of(
                 "accion",  "LOGIN",

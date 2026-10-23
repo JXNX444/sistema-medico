@@ -51,7 +51,6 @@ public class AgendaService {
     private static final short CITA_ELIMINADA = 2;
 
     /** [Paso 2] Estados de cita que NO se muestran en el calendario. */
-    // FB1-2
     private static final Set<String> NO_SE_MUESTRAN = Set.of("PENDIENTE_PAGO", "NO_ASISTIO", "CANCELADA");
 
     /** Estados de cita que NO ocupan el horario (igual que DisponibilidadService). */
@@ -116,7 +115,6 @@ public class AgendaService {
 
     /** Eventos activos del medico que se cruzan con el rango visible [desde, hasta). */
     @Transactional(readOnly = true)
-    // FB1-2
     public List<EventoVista> listarEventos(Integer medicoId, OffsetDateTime desde, OffsetDateTime hasta) {
         return eventoRepository
                 .findByMedicoIdAndStateAndFechaInicioLessThanAndFechaFinGreaterThanOrderByFechaInicioAsc(
@@ -152,7 +150,6 @@ public class AgendaService {
     // =====================================================================
 
     @Transactional
-    // FB5-9
     public Resultado crearEvento(Integer medicoId, DatosEvento datos) {
         Map<String, String> errores = new LinkedHashMap<>();
         Rango rango = validarEvento(datos, errores, null);
@@ -231,7 +228,6 @@ public class AgendaService {
 
     /** Tareas cuya fecha limite cae en el dia elegido (pendientes y completadas). */
     @Transactional(readOnly = true)
-    // FB10
     public List<TareaVista> listarTareas(Integer medicoId, LocalDate dia) {
         OffsetDateTime desde = dia.atStartOfDay(ZONA_GT).toOffsetDateTime();
         OffsetDateTime hasta = dia.plusDays(1).atStartOfDay(ZONA_GT).toOffsetDateTime();
@@ -312,7 +308,6 @@ public class AgendaService {
     }
 
     // =====================================================================
-    // FB5-9
     // Validacion del evento [RN-CU14-01] [FA03]
     // =====================================================================
 

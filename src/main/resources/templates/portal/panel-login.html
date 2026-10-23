@@ -21,12 +21,10 @@
             </div>
 
             <!-- Mensajes -->
-            <!-- CU-00 FA06 -->
             <div th:if="${param.error}" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;">
                 Usuario o contraseña incorrectos.
                 <span th:if="${param.restantes}" th:text="'Intentos restantes: ' + ${param.restantes[0]} + '.'"></span>
             </div>
-            <!-- CU-00 FA07 -->
             <div th:if="${param.bloqueado}" class="sm-badge sm-badge--danger" style="padding:10px 14px;font-size:13px;">
                 Cuenta bloqueada temporalmente. Intente de nuevo en 15 minutos.
             </div>
@@ -45,7 +43,6 @@
             <div th:if="${param.logout}" class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;">
                 Sesión cerrada correctamente.
             </div>
-            <!-- CU-02 FB13-15 -->
             <div th:if="${param.registrado}" class="sm-badge sm-badge--success" style="padding:10px 14px;font-size:13px;">
                 ¡Registro exitoso! Ahora puede iniciar sesión.
             </div>
@@ -56,7 +53,6 @@
             </div>
 
             <!-- Formulario Paciente -->
-            <!-- CU-00 FB9 -->
             <form id="form-pac" th:action="@{/login}" method="post"
                   style="display:flex;flex-direction:column;gap:16px;">
                 <div style="display:flex;flex-direction:column;gap:4px;">

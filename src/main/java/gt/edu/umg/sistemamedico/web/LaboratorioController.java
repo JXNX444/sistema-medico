@@ -63,7 +63,6 @@ public class LaboratorioController {
      * Todos los parametros son opcionales. Un estado que no sea 0, 1 o 2
      * se toma como "todos". Si el usuario es medico, solo ve sus ordenes.
      */
-    // FB1
     @GetMapping("/api/ordenes")
     @ResponseBody
     public List<Map<String, Object>> listarOrdenes(@RequestParam(required = false) Short estado,
@@ -83,7 +82,6 @@ public class LaboratorioController {
 
     // ---------- Pasos 2-3: detalle de una orden ----------
 
-    // FB2-3
     @GetMapping("/api/orden/{ordenId}")
     @ResponseBody
     public Map<String, Object> detalleOrden(@PathVariable Integer ordenId,
@@ -119,7 +117,6 @@ public class LaboratorioController {
     public record GuardarResultadoRequest(Integer detalleId, String valor, String unidad,
                                           LocalDate fecha, boolean fueraRango, String notas) {}
 
-    // FB9-10
     @PostMapping("/api/resultado")
     @ResponseBody
     public Map<String, Object> guardarResultado(@RequestBody GuardarResultadoRequest req,
@@ -134,7 +131,6 @@ public class LaboratorioController {
 
     public record PublicarRequest(Integer detalleId) {}
 
-    // FB11-12
     @PostMapping("/api/publicar")
     @ResponseBody
     public Map<String, Object> publicar(@RequestBody PublicarRequest req,
@@ -191,7 +187,6 @@ public class LaboratorioController {
         m.put("unidad", ocultar ? null : d.getUnidad());
         m.put("fecha", ocultar || d.getFechaResultado() == null
                 ? null : d.getFechaResultado().toString()); // yyyy-MM-dd para <input type="date">
-        // FA02
         m.put("fueraRango", !ocultar && d.isFueraRango());
         m.put("notas", ocultar ? null : d.getNotasResultado());
         m.put("guardado", !ocultar && d.getValorResultado() != null);

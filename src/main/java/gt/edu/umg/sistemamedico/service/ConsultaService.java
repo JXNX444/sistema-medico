@@ -33,7 +33,6 @@ public class ConsultaService {
     private static final Short ACTIVO = 1;
     private static final ZoneId ZONA_GT = ZoneId.of("America/Guatemala");
 
-    // CU-08 FA05
     private static final String MSG_FA05 =
             "No es posible finalizar la consulta sin registrar un diagnostico. El campo Diagnostico es obligatorio.";
 
@@ -113,7 +112,6 @@ public class ConsultaService {
     public record PanelMedico(List<Tarjeta> enEspera, List<Tarjeta> enConsulta, List<Tarjeta> evaluados) {}
 
     @Transactional(readOnly = true)
-    // CU-08 FB1
     public PanelMedico listarPanel(Integer medicoId) {
         List<Cita> citas = citaRepository
                 .findByMedicoIdAndEstadoCita_CodigoInOrderByPrioridadDescFechaHoraAsc(medicoId, ESTADOS_PANEL);
@@ -161,7 +159,6 @@ public class ConsultaService {
     // =====================================================================
 
     @Transactional
-    // CU-08 FB2
     public Resultado iniciarConsulta(Integer citaId, Usuario medico) {
         Cita cita = citaDelMedico(citaId, medico);
         if (cita == null) {
@@ -210,7 +207,6 @@ public class ConsultaService {
 
     /** Devuelve null si la cita no es del medico o no esta en "Consulta Medica". */
     @Transactional(readOnly = true)
-    // CU-08 FB3
     public DetalleConsulta obtenerConsulta(Integer citaId, Usuario medico) {
         Cita cita = citaDelMedico(citaId, medico);
         if (cita == null || !"CONSULTA_MEDICA".equals(codigoDe(cita))) {
@@ -229,7 +225,6 @@ public class ConsultaService {
      * Filtra en memoria la lista cacheada por Cie10Service. Coincide por
      * inicio de codigo o por texto dentro de la descripcion. Maximo 10.
      */
-    // CU-08 FB4-7
     public List<Cie10> buscarCie10(String texto) {
         String q = texto == null ? "" : texto.trim().toLowerCase();
         if (q.isEmpty()) {
@@ -251,7 +246,6 @@ public class ConsultaService {
                                 boolean finalizar) {}
 
     @Transactional
-    // CU-08 FB8-10
     public Resultado guardarConsulta(Integer citaId, Usuario medico, DatosConsulta datos) {
         Cita cita = citaDelMedico(citaId, medico);
         if (cita == null) {
@@ -428,7 +422,6 @@ public class ConsultaService {
                              String duracion, Integer cantidad, String indicaciones) {}
 
     @Transactional
-    // CU-08 FA04
     public Resultado generarReceta(Integer citaId, Usuario medico, List<ItemReceta> items, String notasReceta) {
         Cita cita = citaDelMedico(citaId, medico);
         Resultado invalida = validarEvaluada(cita);
@@ -508,7 +501,6 @@ public class ConsultaService {
 
     /** Horarios libres del medico en la sede de la cita para una fecha. Reusa DisponibilidadService (CU-03). */
     @Transactional(readOnly = true)
-    // CU-12 FB5
     public List<LocalTime> horariosSeguimiento(Integer citaId, Usuario medico, LocalDate fecha) {
         Cita cita = citaDelMedico(citaId, medico);
         if (cita == null || !"EVALUADO".equals(codigoDe(cita))
@@ -547,7 +539,6 @@ public class ConsultaService {
      * (NotificacionService) la notificacion para ya y el recordatorio para 24 h antes.
      */
     @Transactional
-    // CU-12 FB7-8
     public Resultado agendarSeguimiento(Integer citaId, Usuario medico, LocalDate fecha, LocalTime hora,
                                         Short tipo, String observaciones, Short prioridad) {
         Cita cita = citaDelMedico(citaId, medico);
@@ -559,7 +550,6 @@ public class ConsultaService {
 
         Map<String, String> errores = new LinkedHashMap<>();
 
-        // CU-12 FB3-4
         // RN-CU11-01
         if (tipo == null || (tipo != 0 && tipo != 1)) {
             errores.put("tipoSeguimiento", "Debe seleccionar el tipo de seguimiento.");
@@ -575,7 +565,6 @@ public class ConsultaService {
                     "El horario seleccionado ya no está disponible. Por favor, elija otro horario.");
         }
 
-        // CU-12 FB6
         // RN-CU11-03
         String obs = limpiar(observaciones);
         if (obs == null || obs.length() < 10 || obs.length() > 2000) {
@@ -618,7 +607,6 @@ public class ConsultaService {
         // con el id generado; el objeto original se queda con id = null.
         nueva = citaRepository.save(nueva);
 
-        // CU-12 FB9-10
         // RN-CU11-04 y RN-CU11-05: a la cola de correos (los envia NotificacionScheduler)
         notificacionService.programarSeguimiento(nueva, tipoTexto, obs);
 
@@ -635,7 +623,6 @@ public class ConsultaService {
     // =====================================================================
 
     @Transactional
-    // CU-08 FB11-12
     public Resultado finalizarAtencion(Integer citaId, Usuario medico) {
         Cita cita = citaDelMedico(citaId, medico);
         Resultado invalida = validarEvaluada(cita);
@@ -662,7 +649,6 @@ public class ConsultaService {
         return cita;
     }
 
-    // CU-08 FB11-12
     /** Las acciones de la seccion "Evaluados" exigen cita EVALUADO con consulta finalizada. */
     private Resultado validarEvaluada(Cita cita) {
         if (cita == null) {

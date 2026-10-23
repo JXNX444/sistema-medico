@@ -76,7 +76,6 @@ public class LaboratorioService {
      * @param medico   texto a buscar en el nombre del medico (puede venir vacio)
      */
     @Transactional(readOnly = true)
-    // FB1
     public List<OrdenLaboratorio> listarOrdenes(Short estado, String paciente, String medico) {
         boolean todos = (estado == null);
         return ordenRepository.buscarConFiltros(
@@ -103,7 +102,6 @@ public class LaboratorioService {
     public record DetalleOrden(OrdenLaboratorio orden, List<OrdenLaboratorioDetalle> examenes) {}
 
     @Transactional(readOnly = true)
-    // FB2-3
     public DetalleOrden obtenerDetalle(Integer ordenId) {
         OrdenLaboratorio orden = ordenRepository.buscarConDetalles(ordenId).orElse(null);
         if (orden == null) {
@@ -135,7 +133,6 @@ public class LaboratorioService {
                                      String mensaje, OrdenLaboratorioDetalle detalle) {}
 
     @Transactional
-    // FB9-10
     public ResultadoOperacion guardarResultado(Integer detalleId, Usuario laboratorista,
                                                String valor, String unidad, LocalDate fecha,
                                                boolean fueraRango, String notas) {
@@ -203,7 +200,6 @@ public class LaboratorioService {
     // ---------- Pasos 11-14: publicar resultado de un examen ----------
 
     @Transactional
-    // FB11-12
     public ResultadoOperacion publicarResultado(Integer detalleId, Usuario laboratorista) {
 
         // El medico solo consulta; publicar resultados es del laboratorio
@@ -228,7 +224,6 @@ public class LaboratorioService {
         detalle.setPublicadoPor(laboratorista.getId());
         detalleRepository.saveAndFlush(detalle);
 
-        // FB14
         // ---- Paso 14: si ya no queda ninguno sin publicar, la orden se completa ----
         OrdenLaboratorio orden = detalle.getOrden();
         long pendientes = detalleRepository.countByOrdenIdAndStateAndPublicadoFalse(orden.getId(), ACTIVO);
@@ -260,7 +255,6 @@ public class LaboratorioService {
         if (orden.isEsExterna()) {
             return "Esta orden es externa: los exámenes se realizan en un laboratorio externo.";
         }
-        // FB4-7
         // Paso 7 + RN-CU09-01: el cobro va antes de la toma de muestras
         if (orden.getEstadoOrden() == PENDIENTE) {
             return "La orden aún no ha sido pagada en caja. El pago es requerido antes de la toma de muestras.";

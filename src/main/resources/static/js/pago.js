@@ -6,7 +6,6 @@
 // Se regenera despues de un rechazo, para que el reintento sea un intento nuevo.
 let idempotencyKey = crearUUID();
 
-// FB9
 function crearUUID() {
     if (window.crypto && crypto.randomUUID) {
         return crypto.randomUUID();
@@ -23,7 +22,6 @@ function crearUUID() {
 
 let intervaloReserva = null;
 
-// FB1
 function iniciarTemporizador() {
     if (!EXPIRA_EN) return;
 
@@ -45,7 +43,6 @@ function iniciarTemporizador() {
     }, 1000);
 }
 
-// FA02
 function expirarReserva() {
     bloquearFormulario();
     mostrarBanner('El tiempo para confirmar su cita ha expirado. El horario seleccionado ha sido ' +
@@ -65,7 +62,6 @@ inTarjeta.addEventListener('input', () => {
     inTarjeta.value = v.replace(/(.{4})/g, '$1 ').trim();
 });
 
-// FB2-6
 // [RN-CU04-01] Al perder el foco, enmascarar dejando solo los ultimos 4.
 inTarjeta.addEventListener('blur', () => {
     const soloDig = inTarjeta.value.replace(/\D/g, '');
@@ -85,7 +81,6 @@ inTarjeta.addEventListener('focus', () => {
 
 // [RN-CU04-02] Titular en mayusculas.
 inTitular.addEventListener('input', () => {
-    // FB2-6
     inTitular.value = inTitular.value.toUpperCase();
 });
 
@@ -100,13 +95,11 @@ inVenc.addEventListener('input', () => {
 
 document.getElementById('btnPagar').addEventListener('click', pagar);
 
-// FB7-8
 function pagar() {
     limpiarErrores();
 
     const numeroReal = inTarjeta.dataset.real || inTarjeta.value.replace(/\D/g, '');
 
-    // FB9
     const btn = document.getElementById('btnPagar');
     btn.disabled = true;
     btn.innerHTML = '<i class="ti ti-loader-2"></i> Procesando pago...';
@@ -159,7 +152,6 @@ function manejarRespuesta(resp) {
 
 /* ---------- Pantalla de exito (ConfirmationPage) ---------- */
 
-// FB13-14
 function mostrarExito(numeroTransaccion) {
     clearInterval(intervaloReserva);
     document.querySelector('.grid-pago').classList.add('oculto');
@@ -192,7 +184,6 @@ function mostrarBanner(texto) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// FA01
 function pintarErrores(errores) {
     const mapa = {
         numeroTarjeta: 'errNumeroTarjeta',

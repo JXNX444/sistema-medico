@@ -25,7 +25,6 @@ function mostrar(vista) {
     window.scrollTo(0, 0);
 }
 
-// FB1
 function nuevoDespacho() {
     $('filtroReceta').value = '';
     $('filtroConsulta').value = '';
@@ -35,7 +34,6 @@ function nuevoDespacho() {
     $('filtroReceta').focus();
 }
 
-// FB2
 async function buscar() {
     const receta = $('filtroReceta').value.trim();
     const consulta = $('filtroConsulta').value.trim();
@@ -68,7 +66,6 @@ async function buscar() {
     }
 }
 
-// FB2
 function pintarRecetas(recetas) {
     $('cuerpoTabla').innerHTML = recetas.map(r => {
         let vigencia;
@@ -77,10 +74,8 @@ function pintarRecetas(recetas) {
         } else if (r.vigente) {
             vigencia = `<span class="etiqueta verde">Vigente · ${r.diasTranscurridos} día(s)</span>`;
         } else {
-            // FB3-4
             vigencia = `<span class="etiqueta roja">Vencida · ${r.diasTranscurridos} días</span>`;
         }
-        // FB3-4
         const deshabilitado = (!r.vigente || r.despachada) ? 'disabled' : '';
         return `<tr>
             <td><strong>#${r.recetaId}</strong></td>
@@ -101,7 +96,6 @@ function pintarRecetas(recetas) {
 // =====================================================================
 // Pasos 4-7 + FA01 + FA02: detalle de la receta
 // =====================================================================
-// FB4-5
 async function abrirReceta(recetaId) {
     $('errorBusqueda').textContent = '';
     try {
@@ -118,7 +112,6 @@ async function abrirReceta(recetaId) {
     }
 }
 
-// FB4-5 FA01
 function pintarDetalle(d) {
     $('dtTitulo').textContent = 'Receta #' + d.recetaId;
     $('dtSubtitulo').textContent = d.paciente + ' · Dr(a). ' + d.medico + ' · Emitida ' + d.fechaEmision;
@@ -148,7 +141,6 @@ function pintarDetalle(d) {
                 ${esc(m.nombre)} — ${q(m.precio)} — ${m.stock === null ? 'sin inventario' : 'stock ' + m.stock}</option>`)
             .join('');
 
-        // FA02
         return `<tr>
             <td><strong>${esc(it.nombre)}</strong><br><span class="ayuda">${esc(it.unidad)}</span></td>
             <td>${esc(it.dosis)}<br><span class="ayuda">${esc(it.frecuencia)} · ${esc(it.duracion)}</span></td>
@@ -209,7 +201,6 @@ function actualizarMensajeSustitucion(i) {
 }
 
 // Paso 7: total del despacho
-// FB6-7
 function recalcular() {
     let total = 0;
     detalleActual.items.forEach((it, i) => {
@@ -228,7 +219,6 @@ function recalcular() {
 // =====================================================================
 // Pasos 8-12 + FA04: confirmar despacho
 // =====================================================================
-// FB9-12
 $('btnConfirmar').addEventListener('click', confirmar);
 
 async function confirmar() {
@@ -296,7 +286,6 @@ async function confirmar() {
     }
 }
 
-// FB9-12 FA04
 function pintarResumen(r) {
     $('rsMensaje').textContent = r.mensaje;
     $('rsSustituciones').innerHTML = r.sustituciones.map(s => `<div class="alerta azul">${esc(s)}</div>`).join('');

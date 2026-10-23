@@ -51,7 +51,6 @@ public class CorreoService {
     // CU-02: bienvenida
     // =====================================================================
 
-    // FB13-15
     public void enviarBienvenida(String correoDestino, String nombrePaciente, String username) {
         enviar(correoDestino,
                 "Bienvenido al Sistema de Citas - " + nombreHospital,

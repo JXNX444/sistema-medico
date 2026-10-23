@@ -24,7 +24,6 @@ public class UsuarioDetailsService implements UserDetailsService {
     }
 
     @Override
-    // FB9
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 

@@ -25,7 +25,6 @@
             <p>Verifique su registro con el número de DPI para agendar su cita médica en el hospital o sede más cercana.</p>
 
             <div class="buscador">
-                <!-- FB3-4 -->
                 <button class="btn-agendar" onclick="abrirModal()">Agendar cita</button>
             </div>
 
@@ -88,7 +87,6 @@
         </div>
         <div class="esp-viewport" id="espViewport">
             <div class="esp-track" id="espTrack">
-                <!-- FB1-2 -->
                 <div class="esp-card" th:each="esp : ${especialidades}" th:attr="data-nombre=${esp.nombre}">
                     <div class="esp-card__icon"></div>
                     <h3 th:text="${esp.nombre}">Especialidad</h3>
@@ -134,7 +132,6 @@
     <div class="seccion-inner">
         <p class="rotulo">NUESTRAS SEDES</p>
         <div class="rejilla-sedes">
-            <!-- FB1-2 -->
             <article class="tarjeta-sede" th:each="suc : ${sucursales}">
                 <div class="sede-icono"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 21V7l8-4 8 4v14M9 9h.01M15 9h.01M9 13h.01M15 13h.01M10 21v-4h4v4"/></svg></div>
                 <div>
@@ -156,12 +153,10 @@
 </footer>
 
 <!-- ============ MODAL VERIFICAR DPI ============ -->
-<!-- FB3-4 -->
 <div class="velo" id="velo">
     <div class="modal-dpi">
         <div class="modal-cabecera">
             <h2>Verificar registro</h2>
-            <!-- FA02 -->
             <button class="cerrar" onclick="cerrarModal()" aria-label="Cerrar">&times;</button>
         </div>
         <p class="modal-texto">Ingrese su número de DPI para verificar si está registrado en el sistema.</p>
@@ -277,44 +272,35 @@
     const textoError    = document.getElementById('textoError');
 
     function soloDigitos(v){ return v.replace(/\D/g,''); }
-    // FB3-4
     function pintarContador(el, n){ el.textContent = n + '/13'; el.classList.toggle('completo', n === 13); }
 
     dpiModal.addEventListener('input', e => { e.target.value = soloDigitos(e.target.value); pintarContador(contadorModal, e.target.value.length); ocultarError(); });
 
     function abrirModal(){ dpiModal.value = ''; pintarContador(contadorModal, 0); ocultarError(); velo.classList.add('visible'); dpiModal.focus(); }
-    // FA02
     function cerrarModal(){ velo.classList.remove('visible'); }
     function mostrarError(m){ textoError.textContent = m; cajaError.classList.add('visible'); dpiModal.classList.add('error'); }
     function ocultarError(){ cajaError.classList.remove('visible'); dpiModal.classList.remove('error'); }
 
     async function verificarDpi(){
         const dpi = dpiModal.value;
-        // FB6 FA01
         if (dpi.length === 0){ mostrarError('El campo DPI es obligatorio. Por favor, ingrese su número de DPI.'); return; }
         if (dpi.length !== 13){ mostrarError('El DPI debe contener exactamente 13 dígitos. Usted ingresó ' + dpi.length + ' dígitos.'); return; }
         const boton = document.querySelector('.btn-principal');
-        // FB7
         boton.disabled = true; boton.innerHTML = 'Verificando...';
         try{
             const respuesta = await fetch('/portal/verificar-dpi', { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body:'dpi=' + dpi });
             const datos = await respuesta.json();
-            // FB8
             if (datos.accion === 'LOGIN'){ window.location.href = '/login'; }
-            // FA03
             else if (datos.accion === 'REGISTRO'){
                 cerrarModal();
                 Aviso.mostrar(datos.mensaje, { titulo: 'DPI no registrado', boton: 'Ir al registro' })
                     .then(() => { window.location.href = '/registro'; });
             }
-            // FA04
             else { mostrarError(datos.mensaje); }
-        // FA05
         } catch(e){ mostrarError('No se pudo conectar con el servidor. Intente de nuevo más tarde.'); }
         finally { boton.disabled = false; boton.innerHTML = 'Verificar DPI'; }
     }
 
-    // FA02
     velo.addEventListener('click', e => { if (e.target === velo) cerrarModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
 

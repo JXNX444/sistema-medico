@@ -27,7 +27,6 @@ public class DespachoService {
     private static final ZoneId ZONA_GT = ZoneId.of("America/Guatemala");
     private static final DateTimeFormatter FMT_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    // FB3-4
     /** [RN-CU10-01] La receta vale 7 dias desde su emision. */
     private static final int DIAS_VIGENCIA = 7;
 
@@ -75,7 +74,6 @@ public class DespachoService {
     public record ResultadoBusqueda(boolean ok, String mensaje, List<RecetaFila> recetas) {}
 
     @Transactional(readOnly = true)
-    // FB2
     public ResultadoBusqueda buscar(String recetaIdTxt, String consultaIdTxt) {
         Integer recetaId = aEntero(recetaIdTxt);
         Integer consultaId = aEntero(consultaIdTxt);
@@ -150,14 +148,12 @@ public class DespachoService {
     }
 
     @Transactional(readOnly = true)
-    // FB4-5
     public DetalleReceta detalle(Integer recetaId, Integer farmaceuticoId) {
         Receta receta = recetaRepository.buscarConDetalles(recetaId).orElse(null);
         if (receta == null) {
             return DetalleReceta.error("La receta no existe o no esta activa.");
         }
 
-        // FB3-4
         // Paso 4 [RN-CU10-01]
         String vencida = mensajeSiVencida(receta);
         if (vencida != null) {
@@ -255,7 +251,6 @@ public class DespachoService {
     }
 
     @Transactional
-    // FB9-12
     public ResultadoDespacho confirmar(Integer recetaId, List<ItemSolicitud> solicitud,
                                        String notas, Integer farmaceuticoId) {
 
@@ -516,7 +511,6 @@ public class DespachoService {
     private String mensajeSiVencida(Receta r) {
         long dias = diasDesdeEmision(r);
         if (dias > DIAS_VIGENCIA) {
-            // FB3-4
             return "Receta Vencida. La receta #" + r.getId() + " fue emitida hace " + dias +
                     " días y ya no es válida para despacho.";
         }

@@ -91,7 +91,6 @@ async function postJson(url, body) {
 /* ---------- Paso 1: tabla de ordenes con filtros ---------- */
 
 /** Espera a que el usuario deje de escribir para no consultar en cada tecla. */
-// FB1
 function filtrarConPausa() {
     clearTimeout(timerFiltro);
     timerFiltro = setTimeout(cargarOrdenes, 300);
@@ -117,7 +116,6 @@ async function cargarOrdenes() {
     }
 }
 
-// FB1
 function renderTabla(ordenes) {
     document.getElementById('countOrdenes').textContent = ordenes.length;
     const cuerpo = document.getElementById('cuerpoOrdenes');
@@ -128,7 +126,6 @@ function renderTabla(ordenes) {
         return;
     }
 
-    // FA01
     cuerpo.innerHTML = ordenes.map(o => `
         <tr class="lab-fila" onclick="abrirOrden(${o.ordenId})">
             <td><b>${esc(o.numeroOrden)}</b>
@@ -143,7 +140,6 @@ function renderTabla(ordenes) {
 
 /* ---------- Pasos 2-3: detalle de la orden ---------- */
 
-// FB2-3
 async function abrirOrden(ordenId) {
     try {
         const resp = await fetch(`${CTX}laboratorio/api/orden/${ordenId}`);
@@ -167,7 +163,6 @@ async function abrirOrden(ordenId) {
     }
 }
 
-// FB14
 function volverALista() {
     ordenActual = null;
     editando = new Set();
@@ -177,10 +172,8 @@ function volverALista() {
     cargarOrdenes();
 }
 
-// FB2-3
 function renderDetalle(orden, examenes) {
     // Encabezado
-    // FA01
     document.getElementById('detalleTitulo').innerHTML =
         `${esc(orden.numeroOrden)} ${badgeEstado(orden.estado, orden.estadoNombre)}
          ${orden.esExterna ? '<span class="lab-tag">Externa</span>' : ''}`;
@@ -198,7 +191,6 @@ function renderDetalle(orden, examenes) {
 
     // Aviso segun el estado de la orden (el texto cambia si es el medico quien consulta)
     const aviso = document.getElementById('detalleAviso');
-    // FA01
     if (orden.esExterna) {
         // FA01
         aviso.className = 'lab-aviso lab-aviso--gris';
@@ -220,7 +212,6 @@ function renderDetalle(orden, examenes) {
     }
 
     // Solo se registran resultados si NO es el medico, la orden esta En proceso y no es externa
-    // FB4-7
     const sePuedeOperar = !SOLO_LECTURA && orden.estado === EN_PROCESO && !orden.esExterna;
 
     document.getElementById('listaExamenes').innerHTML =
@@ -240,7 +231,6 @@ function renderExamen(ex, sePuedeOperar) {
         : '';
 
     // Estado 3: publicado (solo lectura, RNF-024). Igual para laboratorio y medico.
-    // FB11-12
     if (ex.publicado) {
         return `
         <div class="sm-card lab-ex">
@@ -306,7 +296,6 @@ function renderExamen(ex, sePuedeOperar) {
 
     const id = ex.detalleId;
     const esEdicion = editando.has(id);
-    // FA02
     return `
     <div class="sm-card lab-ex" id="examen-${id}">
         <div class="lab-ex__fila">${encabezado}
@@ -365,7 +354,6 @@ function cancelarEdicion(detalleId) {
 
 /* ---------- Pasos 9-10 + FA02: guardar resultado ---------- */
 
-// FB9-10
 async function guardarResultado(detalleId) {
     // Limpiar errores anteriores de este examen
     document.querySelectorAll(`#examen-${detalleId} .sm-error`).forEach(p => p.textContent = '');
@@ -407,7 +395,6 @@ function mostrarErroresExamen(detalleId, errores) {
 
 /* ---------- Pasos 11-14: publicar resultado ---------- */
 
-// FB11-12
 async function publicarResultado(detalleId) {
     try {
         const data = await postJson('laboratorio/api/publicar', { detalleId: detalleId });

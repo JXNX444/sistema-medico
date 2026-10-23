@@ -7,7 +7,6 @@
     <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
     <div style="display:flex;align-items:center;gap:16px;font-size:14px;color:var(--sm-slate-600);">
         <span style="font-weight:700;color:var(--sm-ink);" th:text="${nombre}">Cajero</span>
-        <!-- CU-10 FB1 -->
         <a th:href="@{/caja/laboratorio}" class="sm-btn sm-btn--sm"
            style="background:var(--sm-cyan);color:#fff;">Cobro Lab</a>
         <a th:href="@{/panel/inicio}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver al panel</a>
@@ -68,7 +67,6 @@
                 <!-- Efectivo -->
                 <div id="bloqueEfectivo">
                     <div class="grupo">
-                        <!-- CU-06 FB5-7 -->
                         <label for="montoRecibido">Monto recibido (Q)</label>
                         <input type="number" id="montoRecibido" min="0" step="0.01" placeholder="0.00" autocomplete="off">
                     </div>
@@ -80,7 +78,6 @@
                 <!-- Tarjeta -->
                 <div id="bloqueTarjeta" class="oculto">
                     <div class="grupo">
-                        <!-- CU-06 FA01 -->
                         <label for="ultimos4">Últimos 4 dígitos de la tarjeta</label>
                         <input type="text" id="ultimos4" maxlength="4" inputmode="numeric" placeholder="1234" autocomplete="off">
                         <p class="ayuda">Solo como referencia en el comprobante. No se guarda la tarjeta completa.</p>
@@ -115,7 +112,6 @@
                 </div>
 
                 <div class="acciones-comprobante">
-                    <!-- CU-06 FB9-10 -->
                     <button type="button" id="btnImprimir" class="boton-secundario">Imprimir</button>
                     <button type="button" id="btnNuevoCobro" class="boton-principal">Nuevo cobro</button>
                 </div>

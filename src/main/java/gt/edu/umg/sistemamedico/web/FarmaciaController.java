@@ -27,14 +27,12 @@ public class FarmaciaController {
         this.despachoService = despachoService;
     }
 
-    // FB1
     @GetMapping("/despacho")
     public String vista(@AuthenticationPrincipal UsuarioDetails ud, Model model) {
         model.addAttribute("nombre", ud.getUsuario().getNombreCompleto());
         return "farmacia/despacho";
     }
 
-    // FB2
     @GetMapping("/api/recetas")
     @ResponseBody
     public DespachoService.ResultadoBusqueda buscar(@RequestParam(required = false) String recetaId,
@@ -42,7 +40,6 @@ public class FarmaciaController {
         return despachoService.buscar(recetaId, consultaId);
     }
 
-    // FB4-5
     @GetMapping("/api/receta/{recetaId}")
     @ResponseBody
     public DespachoService.DetalleReceta detalle(@PathVariable Integer recetaId,
@@ -50,7 +47,6 @@ public class FarmaciaController {
         return despachoService.detalle(recetaId, ud.getUsuario().getId());
     }
 
-    // FB9-12
     @PostMapping("/api/despachar")
     @ResponseBody
     public DespachoService.ResultadoDespacho despachar(@RequestBody DespachoForm form,
@@ -59,7 +55,6 @@ public class FarmaciaController {
                 ud.getUsuario().getId());
     }
 
-    // FA03
     @PostMapping("/api/no-adquirido/{recetaId}")
     @ResponseBody
     public DespachoService.ResultadoSimple noAdquirido(@PathVariable Integer recetaId,

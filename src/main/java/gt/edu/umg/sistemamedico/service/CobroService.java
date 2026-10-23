@@ -83,7 +83,6 @@ public class CobroService {
      *              cosa se interpreta como busqueda por DPI.
      */
     @Transactional(readOnly = true)
-    // FB1-2
     public ResultadoBusqueda buscar(String modo, String valor) {
         if (valor == null || valor.isBlank()) {
             return new ResultadoBusqueda(TipoResultado.SIN_PARAMETROS, null,
@@ -167,7 +166,6 @@ public class CobroService {
      * @param idempotencyKey llave para no cobrar dos veces el mismo intento.
      */
     @Transactional
-    // FB8
     public ResultadoCobro registrarCobro(Integer citaId, Short metodoPago,
                                          BigDecimal montoRecibido, String ultimos4,
                                          Integer cajeroId, UUID idempotencyKey) {
@@ -229,7 +227,6 @@ public class CobroService {
             }
             BigDecimal recibido = montoRecibido.setScale(2, RoundingMode.HALF_UP);
 
-            // FB5-7
             // Paso 6: el monto recibido no puede ser menor al monto a cobrar.
             if (recibido.compareTo(monto) < 0) {
                 return ResultadoCobro.error("VALIDACION",
@@ -279,7 +276,6 @@ public class CobroService {
         cita.setReservaExpiraEn(null); // ya no aplica el temporizador de la reserva
         citaRepository.save(cita);
 
-        // FB9-10
         // 6) Comprobante (paso 9). [RN-CU06-03]
         return new ResultadoCobro(true, "APROBADO",
                 "¡Pago registrado exitosamente! Paciente: " + cita.getPaciente().getNombreCompleto() +
@@ -291,7 +287,6 @@ public class CobroService {
     // Helpers
     // =====================================================================
 
-    // FB9-10
     private Comprobante armarComprobante(Cita cita, Pago pago) {
         boolean efectivo = pago.getMetodoPago() == Pago.METODO_EFECTIVO;
 

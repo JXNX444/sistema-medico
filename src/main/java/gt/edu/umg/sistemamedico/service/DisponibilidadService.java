@@ -67,7 +67,6 @@ public class DisponibilidadService {
      * canceladas/no-asistio), los eventos de la agenda del medico [CU-16]
      * y (si la fecha es hoy) las horas que ya pasaron.
      */
-    // FB5 FA02
     public List<LocalTime> obtenerHorariosDisponibles(Integer medicoId, Integer sucursalId, LocalDate fecha) {
 
         // 1. Horarios del medico en esa sucursal, activos y vigentes para esa fecha.

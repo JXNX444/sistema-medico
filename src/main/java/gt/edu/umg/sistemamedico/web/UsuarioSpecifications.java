@@ -9,7 +9,6 @@ public final class UsuarioSpecifications {
     private UsuarioSpecifications() {
     }
 
-    // FB5
     public static Specification<Usuario> porCampo(String campo, String valor) {
         if (valor == null || valor.isBlank()) {
             return null;

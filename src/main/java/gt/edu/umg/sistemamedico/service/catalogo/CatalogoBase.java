@@ -195,7 +195,6 @@ public abstract class CatalogoBase implements Catalogo {
     }
 
     /** Paso 8 (crear) o FA02 paso 5 (editar). */
-    // FB6-8
     protected Resultado guardado(Integer idOriginal, String nombre) {
         return idOriginal == null
                 ? Resultado.exito("El registro " + nombre + " ha sido creado exitosamente.")
