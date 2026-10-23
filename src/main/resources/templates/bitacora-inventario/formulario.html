@@ -17,11 +17,11 @@
 
     <div class="bi-columnas">
         <!-- Paso 4: formulario [RN-CU13-01] -->
-        <!-- FB5-8 -->
+        <!-- CU-15 FB5-8 -->
         <form th:action="@{/bitacora-inventario/nuevo}" method="post" class="sm-panel"
               style="display:flex;flex-direction:column;gap:14px;">
 
-            <!-- FA03 -->
+            <!-- CU-15 FA03 -->
             <div class="sm-field" th:classappend="${errores.containsKey('medicamentoId')} ? 'bi-error'">
                 <label>Medicamento *</label>
                 <select class="sm-select" name="medicamentoId" id="medicamentoId">

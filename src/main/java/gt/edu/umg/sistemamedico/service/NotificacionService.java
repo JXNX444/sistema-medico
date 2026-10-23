@@ -74,7 +74,7 @@ public class NotificacionService {
      * @param observaciones  lo que escribio el medico [RN-CU11-03]
      */
     @Transactional
-    // FB9-10
+    // CU-12 FB9-10
     public void programarSeguimiento(Cita cita, String tipoTexto, String observaciones) {
         ZonedDateTime fechaLocal = cita.getFechaLocal();   // hora de Guatemala
         String fecha = fechaLocal.format(FMT_FECHA);

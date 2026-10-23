@@ -439,8 +439,7 @@ function hoyLocal() {
     return d.toISOString().slice(0, 10);
 }
 
-// CU-08 FA02
-// CU-12 FB1-3
+// CU-08 FA02 / CU-12 FB1-3
 function abrirSeguimiento(citaId) {
     cerrarFormularios();
     citaEvaluada = citaId;

@@ -112,7 +112,7 @@ public class BitacoraInventarioService {
      * [RN-CU13-01] Tipos del formulario. El 6 (Despacho) nunca se ofrece.
      * El Administrador es actor "para ajustes de inventario": solo 4 y 5.
      */
-    // FB2-3
+    // CU-15 FB2-3
     public List<OpcionTipo> tiposPermitidos(Usuario u) {
         List<Short> tipos = esAdministrador(u)
                 ? List.of(AJUSTE_ENTRADA, AJUSTE_SALIDA)
@@ -135,7 +135,7 @@ public class BitacoraInventarioService {
     // =====================================================================
 
     @Transactional(readOnly = true)
-    // FB1
+    // CU-15 FB1
     public Page<MovimientoInventario> listar(Filtros f, int pagina) {
         Specification<MovimientoInventario> spec = Specification
                 .where(MovimientoInventarioSpecifications.tipo(f.tipo()))
@@ -191,7 +191,7 @@ public class BitacoraInventarioService {
 
     /** [RN-CU13-03] Stock actual y minimo de un medicamento en una sucursal. */
     @Transactional(readOnly = true)
-    // FB2-3
+    // CU-15 FB2-3
     public InfoStock infoStock(Integer medicamentoId, Integer sucursalId) {
         if (medicamentoId == null || sucursalId == null) {
             return new InfoStock(false, null, null, null, null);
@@ -207,7 +207,7 @@ public class BitacoraInventarioService {
     // =====================================================================
 
     @Transactional
-    // FB5-8
+    // CU-15 FB5-8
     public Resultado registrar(MovimientoForm form, Usuario usuario) {
         Map<String, String> errores = new LinkedHashMap<>();
 
@@ -292,7 +292,7 @@ public class BitacoraInventarioService {
                 + ". Tipo: " + nombreTipo(tipo) + ". Cantidad: " + cantidad
                 + ". Stock actualizado: " + stockNuevo + ".";
 
-        // FA05
+        // CU-15 FA05
         // Postcondicion: alerta de stock minimo [RN-CU10-03]
         String alerta = inv.esStockBajo()
                 ? medicamento.getNombre() + ": Stock bajo — disponible: " + stockNuevo
@@ -307,7 +307,7 @@ public class BitacoraInventarioService {
     // =====================================================================
 
     @Transactional
-    // FB1
+    // CU-15 FB1
     public Resultado alternarEstado(Long id) {
         MovimientoInventario mov = buscar(id);
         if (mov == null) return Resultado.error("general", "El movimiento no existe.");

@@ -42,7 +42,7 @@
     </div>
 
     <!-- Paso 2: filtros por columna -->
-    <!-- FB1 -->
+    <!-- CU-15 FB1 -->
     <form th:action="@{/bitacora-inventario}" method="get" class="sm-panel bi-filtros">
         <select class="sm-select" name="tipo">
             <option value="">Todos los tipos</option>
@@ -79,7 +79,7 @@
     </div>
 
     <!-- Paso 2: tabla -->
-    <!-- FB1 -->
+    <!-- CU-15 FB1 -->
     <div th:if="${pagina.totalElements > 0}" class="sm-panel" style="overflow-x:auto;">
         <table class="sm-table">
             <thead>
@@ -108,10 +108,9 @@
                 </td>
                 <td style="text-align:right;white-space:nowrap;">
                     <!-- Accion Ver -->
-                    <!-- FB1 -->
+                    <!-- CU-15 FB1 -->
                     <a th:href="@{/bitacora-inventario/{id}(id=${m.id})}" class="sm-btn sm-btn--ghost sm-btn--sm">Ver</a>
                     <!-- Accion Desactivar / Activar -->
-                    <!-- FB1 -->
                     <form th:action="@{/bitacora-inventario/{id}/estado(id=${m.id})}" method="post" style="display:inline;">
                         <button type="submit" class="sm-btn sm-btn--ghost sm-btn--sm"
                                 th:text="${m.state == 1} ? 'Desactivar' : 'Activar'">Desactivar</button>

@@ -142,17 +142,16 @@ function limpiarErrores(contenedorId) {
    Paso 2 + FA05: calendario
    ============================================================ */
 
-// FB1-2
+// CU-16 FB1-2
 function iniciarCalendario() {
     calendario = new FullCalendar.Calendar(document.getElementById('calendario'), {
         locale: 'es',
-        // FA05
+        // CU-16 FA05
         initialView: 'dayGridMonth',
         firstDay: 1,                                   // la semana empieza el lunes
         height: 'auto',
         nowIndicator: true,
         dayMaxEvents: 3,                               // "+N mas" si un dia tiene muchos
-        // FA05
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
@@ -268,7 +267,7 @@ function cerrarPopover() {
    Pasos 3-9 + FA07: formulario de evento
    ============================================================ */
 
-// FB3-4
+// CU-16 FB3-4
 function abrirNuevoEvento() {
     cerrarPopover();
     eventoEditandoId = null;
@@ -388,7 +387,7 @@ function cerrarModalEvento() {
     if (window.Controles) Controles.cerrar();
 }
 
-// FB5-9
+// CU-16 FB5-9
 async function guardarEvento() {
     limpiarErrores('modalEvento');
     const todoElDia = document.getElementById('chkTodoElDia').checked;
@@ -450,7 +449,7 @@ async function eliminarDesdePopover() {
    Paso 10 + FA06: panel de tareas
    ============================================================ */
 
-// FB10
+// CU-16 FB10
 function alternarTareas() {
     const panel = document.getElementById('panelTareas');
     const abrir = panel.classList.contains('oculto');
@@ -468,7 +467,7 @@ function actualizarTituloTareas() {
     document.getElementById('tareasFecha').textContent = `${d}/${m}/${a}`;
 }
 
-// FB10 FA06
+// CU-16 FB10 FA06
 async function cargarTareas() {
     try {
         const resp = await fetch(`${CTX}medico/agenda/api/tareas?dia=${diaSeleccionado}`);
@@ -480,7 +479,7 @@ async function cargarTareas() {
     renderTareas();
 }
 
-// FB10 FA06
+// CU-16 FB10 FA06
 function filtrarTareas(filtro) {
     filtroTareas = filtro;
     document.querySelectorAll('.ag-filtro')
@@ -526,7 +525,7 @@ function renderTareas() {
         </div>`).join('');
 }
 
-// FB10 FA06
+// CU-16 FB10 FA06
 function abrirNuevaTarea() {
     limpiarErrores('formTarea');
     document.getElementById('inpTareaTitulo').value = '';

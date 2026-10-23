@@ -12,7 +12,7 @@
         <div class="sm-content">
 
             <!-- Mensajes despues de asignar o eliminar (llegan con el redirect, se ven una sola vez) -->
-            <!-- FB6-9 -->
+            <!-- CU-13 FB6-9 -->
             <div th:if="${mensajeExito}" class="sm-badge sm-badge--success"
                  style="padding:10px 14px;font-size:13px;" th:text="${mensajeExito}"></div>
             <div th:if="${mensajeError}" class="sm-badge sm-badge--danger"
@@ -20,7 +20,7 @@
 
             <!-- Filtro por ID + boton Asignar (pasos 3 y 4) -->
             <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
-                <!-- FB2-3 -->
+                <!-- CU-13 FB2-3 -->
                 <form th:action="@{/sedes-especialidades}" method="get" style="display:flex;gap:10px;align-items:center;">
                     <input class="sm-input" type="text" name="id" th:value="${filtroId}"
                            placeholder="Filtrar por ID" maxlength="9" style="width:180px;">
@@ -31,7 +31,7 @@
                 <a th:href="@{/sedes-especialidades/nuevo}" class="sm-btn sm-btn--dark sm-btn--sm">+ Asignar Especialidad</a>
             </div>
 
-            <!-- FA01 -->
+            <!-- CU-13 FA01 -->
             <div th:if="${errorFiltro}" class="sm-badge sm-badge--danger"
                  style="padding:10px 14px;font-size:13px;" th:text="${errorFiltro}"></div>
 
@@ -45,7 +45,7 @@
             </div>
 
             <!-- Paso 3: tabla -->
-            <!-- FB2-3 -->
+            <!-- CU-13 FB2-3 -->
             <div th:if="${pagina.totalElements > 0}" class="sm-panel">
                 <table class="sm-table">
                     <thead>
@@ -83,7 +83,7 @@
                         Página 1 de 1
                     </span>
                     <div class="sm-pag" th:if="${pagina.totalPages > 1}" style="margin-top:0;">
-                        <!-- FB2-3 -->
+                        <!-- CU-13 FB2-3 -->
                         <a th:each="p : ${#numbers.sequence(0, pagina.totalPages - 1)}"
                            th:href="@{/sedes-especialidades(id=${filtroId}, page=${p})}"
                            th:text="${p + 1}"
@@ -96,7 +96,7 @@
     </div>
 </div>
 
-<!-- FA02 -->
+<!-- CU-13 FA02 -->
 <!-- Formulario oculto que hace el POST de eliminar despues de confirmar -->
 <form id="formEliminar" method="post" style="display:none;"></form>
 

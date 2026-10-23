@@ -70,21 +70,21 @@ public class CitaController {
 
     // ---------- VISTA DEL WIZARD ----------
 
-    // FB1
+    // CU-03 FB1
     @GetMapping("/nueva")
     public String nueva(Model model) {
-        // FB2
+        // CU-03 FB2
         model.addAttribute("sucursales", sucursalService.listarActivas());
         return "citas/agendar";
     }
 
     // ---------- PASO 2: especialidades de la sucursal elegida ----------
 
-    // FB3
+    // CU-03 FB3
     @GetMapping("/api/especialidades")
     @ResponseBody
     public List<Map<String, Object>> especialidadesPorSucursal(@RequestParam Integer sucursalId) {
-        // FA01
+        // CU-03 FA01
         return sucursalEspecialidadRepository.findBySucursalIdAndState(sucursalId, (short) 1)
                 .stream()
                 .map(se -> {
@@ -98,7 +98,7 @@ public class CitaController {
 
     // ---------- PASO 3: medicos de esa especialidad en esa sucursal ----------
 
-    // FB4
+    // CU-03 FB4
     @GetMapping("/api/medicos")
     @ResponseBody
     public List<Map<String, Object>> medicosPorEspecialidadYSucursal(
@@ -120,7 +120,7 @@ public class CitaController {
 
     // ---------- PASO 4: horarios disponibles de un medico en una fecha ----------
 
-    // FB5
+    // CU-03 FB5
     @GetMapping("/api/horarios")
     @ResponseBody
     public List<String> horariosDisponibles(
@@ -130,7 +130,7 @@ public class CitaController {
         LocalDate fechaConsulta = LocalDate.parse(fecha); // yyyy-MM-dd
 
         // [RN-CU03-05] nunca calcular ni devolver horarios de fechas pasadas.
-        // FA02
+        // CU-03 FA02
         if (fechaConsulta.isBefore(LocalDate.now(ZONA_GT))) {
             return List.of();
         }
@@ -146,7 +146,7 @@ public class CitaController {
     // Sin @Transactional a proposito: el save() ya abre su propia transaccion, y asi se
     // puede atrapar aqui el choque de horario (indice ux_cita_medico_slot) sin que la
     // transaccion quede marcada para rollback y termine en error 500.
-    // FB8-9
+    // CU-03 FB8-9
     @PostMapping("/api/agendar")
     @ResponseBody
     public Map<String, Object> agendar(@RequestBody AgendarCitaRequest req,
@@ -218,7 +218,7 @@ public class CitaController {
         // Si paga en caja no hay temporizador: queda PENDIENTE_PAGO hasta que el cajero
         // la cobre [CU-06]. Si llega la hora de la cita (mas la tolerancia) sin pagarse,
         // ReservaExpiradaScheduler la cancela y libera el horario [RN-CU03-06].
-        // FB10
+        // CU-03 FB10
         boolean pagoEnCaja = "CAJA".equals(req.metodoPago());
         cita.setReservaExpiraEn(pagoEnCaja ? null : OffsetDateTime.now().plusMinutes(MINUTOS_RESERVA));
 
@@ -298,7 +298,7 @@ public class CitaController {
             }
         }
 
-        // FB6-7
+        // CU-03 FB6-7
         String motivo = req.motivo() == null ? "" : req.motivo().trim();
         if (motivo.isEmpty()) {
             errores.put("motivo", "El motivo debe contener entre 10 y 2000 caracteres. Usted ingreso 0 caracteres.");

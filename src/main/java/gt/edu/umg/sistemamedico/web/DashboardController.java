@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class DashboardController {
 
-    // FB10
+    // CU-00 FB10
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal UsuarioDetails ud, Model model) {
         // ud es el usuario autenticado; Spring lo inyecta automaticamente

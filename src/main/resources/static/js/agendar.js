@@ -40,7 +40,7 @@ function mostrarError(paso, mensaje) {
 
 /** Valida el paso actual antes de dejar avanzar. Devuelve true si esta OK. */
 function validarPasoActual() {
-    // FB2
+    // CU-03 FB2
     if (pasoActual === 1) {
         if (!seleccion.sucursalId) {
             mostrarError(1, 'Debe seleccionar una sucursal para continuar.');
@@ -65,7 +65,7 @@ function validarPasoActual() {
             return false;
         }
     }
-    // FB6-7
+    // CU-03 FB6-7
     if (pasoActual === 5) {
         const motivo = document.getElementById('motivoCita').value.trim();
         if (motivo.length < 10 || motivo.length > 2000) {
@@ -84,7 +84,7 @@ function validarPasoActual() {
     return true;
 }
 
-// FA04
+// CU-03 FA04
 function irAPaso(destino) {
     // Solo se valida cuando se avanza (destino > actual), no al regresar.
     if (destino > pasoActual && !validarPasoActual()) {
@@ -112,7 +112,7 @@ function irAPaso(destino) {
  * Borra la seleccion del paso indicado y de todos los que siguen.
  * Ej: limpiarDesde(1) deja el wizard como recien abierto (menos el motivo escrito).
  */
-// FA04
+// CU-03 FA04
 function limpiarDesde(paso) {
     if (paso <= 1) {
         seleccion.sucursalId = null;
@@ -164,7 +164,7 @@ function actualizarIndicador(pasoDestino) {
 
 /* ---------- PASO 2: especialidades ---------- */
 
-// FB3
+// CU-03 FB3
 function cargarEspecialidades() {
     const contenedor = document.getElementById('listaEspecialidades');
     contenedor.innerHTML = '<p class="cargando">Cargando especialidades...</p>';
@@ -172,7 +172,7 @@ function cargarEspecialidades() {
     fetch(CTX + 'citas/api/especialidades?sucursalId=' + seleccion.sucursalId)
         .then(r => r.json())
         .then(lista => {
-            // FA01
+            // CU-03 FA01
             if (lista.length === 0) {
                 contenedor.innerHTML = '<p class="error">Esta sucursal no tiene especialidades disponibles.</p>';
                 return;
@@ -199,7 +199,7 @@ function cargarEspecialidades() {
 
 /* ---------- PASO 3: medicos ---------- */
 
-// FB4
+// CU-03 FB4
 function cargarMedicos() {
     const contenedor = document.getElementById('listaMedicos');
     contenedor.innerHTML = '<p class="cargando">Cargando medicos...</p>';
@@ -210,7 +210,7 @@ function cargarMedicos() {
     fetch(url)
         .then(r => r.json())
         .then(lista => {
-            // FA02
+            // CU-03 FA02
             if (lista.length === 0) {
                 contenedor.innerHTML = '<p class="error">No hay medicos disponibles para esta especialidad en esta sucursal.</p>';
                 return;
@@ -237,7 +237,7 @@ function cargarMedicos() {
 
 /* ---------- PASO 4: fecha y horarios ---------- */
 
-// FB5
+// CU-03 FB5
 function onCambioFecha(e) {
     seleccion.fecha = e.target.value;
     seleccion.hora = null;
@@ -260,7 +260,7 @@ function onCambioFecha(e) {
     fetch(url)
         .then(r => r.json())
         .then(horas => {
-            // FA02
+            // CU-03 FA02
             if (horas.length === 0) {
                 lista.innerHTML = '<p class="error">No hay horarios disponibles para esa fecha. Intente con otra.</p>';
                 return;
@@ -283,7 +283,7 @@ function onCambioFecha(e) {
 
 /* ---------- PASO 5: resumen y confirmacion ---------- */
 
-// FB6-7
+// CU-03 FB6-7
 function renderResumen() {
     const cont = document.getElementById('resumenCita');
     cont.innerHTML = `
@@ -297,7 +297,7 @@ function renderResumen() {
 
 /* ---------- PASO 6: metodo de pago y confirmacion ---------- */
 
-// FB8-9
+// CU-03 FB8-9
 function confirmarCita() {
     if (!validarPasoActual()) {
         return;
@@ -329,14 +329,13 @@ function confirmarCita() {
                 btn.innerHTML = '<i class="ti ti-calendar-check"></i> Confirmar cita';
                 return;
             }
-            // FB10
+            // CU-03 FB10
             if (resp.metodoPago === 'CAJA') {
                 // Pago en caja [CU-06]: sin temporizador, solo se muestra el numero de cita.
                 mostrarExito(resp);
                 return;
             }
             // CU-03 -> CU-04: la cita quedo PENDIENTE_PAGO, vamos al pago en linea.
-            // FB10
             window.location.href = CTX + 'citas/pago/' + resp.citaId;
         })
         .catch(() => {

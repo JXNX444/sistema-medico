@@ -9,7 +9,7 @@
         <!-- Panel navy izquierdo -->
         <div style="width:320px;flex-shrink:0;background:var(--sm-ink);padding:40px 36px;
                 display:flex;flex-direction:column;gap:16px;">
-            <!-- FA01 -->
+            <!-- CU-02 FA01 -->
             <a th:href="@{/}" style="font-size:13px;color:var(--sm-slate-300);"
                onclick="event.preventDefault();
                         Aviso.confirmar('Los datos ingresados se perderán.', {
@@ -28,18 +28,18 @@
             <div style="font-size:20px;font-weight:800;">Registro de paciente</div>
             <div style="font-size:13px;color:var(--sm-slate-500);margin-bottom:20px;">Complete sus datos para crear su cuenta</div>
 
-            <!-- FA04 -->
+            <!-- CU-02 FA04 -->
             <div th:if="${errores.get('general')}" class="sm-badge sm-badge--danger"
                  style="display:flex;padding:10px 14px;margin-bottom:16px;font-size:13px;"
                  th:text="${errores.get('general')}"></div>
 
-            <!-- FB1 FB10-12 -->
+            <!-- CU-02 FB1 FB10-12 -->
             <form th:action="@{/registro}" method="post" th:object="${form}"
                   style="display:flex;flex-direction:column;gap:14px;">
 
                 <div class="sm-field">
                     <label for="nombreCompleto">Nombre completo</label>
-                    <!-- FB2-9 -->
+                    <!-- CU-02 FB2-9 -->
                     <input class="sm-input" type="text" id="nombreCompleto" th:field="*{nombreCompleto}" placeholder="Nombres y apellidos">
                     <p class="sm-error" th:if="${errores.get('nombreCompleto')}" th:text="${errores.get('nombreCompleto')}"></p>
                 </div>
@@ -47,7 +47,7 @@
                 <div class="sm-field">
                     <label for="dpi">DPI</label>
                     <input class="sm-input" type="text" id="dpi" th:field="*{dpi}" maxlength="13" inputmode="numeric" placeholder="13 dígitos">
-                    <!-- FA02 -->
+                    <!-- CU-02 FA02 -->
                     <p class="sm-error" th:if="${errores.get('dpi')}" th:text="${errores.get('dpi')}"></p>
                 </div>
 
@@ -72,7 +72,7 @@
                 <div class="sm-field">
                     <label for="correo">Correo electrónico</label>
                     <input class="sm-input" type="text" id="correo" th:field="*{correo}" placeholder="usuario@dominio.com" autocomplete="off">
-                    <!-- FA03 -->
+                    <!-- CU-02 FA03 -->
                     <p class="sm-error" th:if="${errores.get('correo')}" th:text="${errores.get('correo')}"></p>
                 </div>
 

@@ -44,7 +44,7 @@ const $ = (id) => document.getElementById(id);
 btnModoDpi.addEventListener('click', () => cambiarModo('dpi'));
 btnModoNumero.addEventListener('click', () => cambiarModo('numero'));
 
-// FB2-3
+// CU-10 FB2-3
 function cambiarModo(nuevo) {
     modo = nuevo;
     btnModoDpi.classList.toggle('activa', modo === 'dpi');
@@ -62,7 +62,7 @@ function cambiarModo(nuevo) {
 btnBuscar.addEventListener('click', buscar);
 campoValor.addEventListener('keydown', (e) => { if (e.key === 'Enter') buscar(); });
 
-// FB2-3
+// CU-10 FB2-3
 async function buscar() {
     const valor = campoValor.value.trim();
     errorBusqueda.textContent = '';
@@ -97,7 +97,7 @@ async function buscar() {
     }
 }
 
-// FB2-3
+// CU-10 FB2-3
 function pintarOrdenes(ordenes) {
     zonaResultado.innerHTML = ordenes.map((o, i) => `
         <div class="tarjeta-cita">
@@ -131,7 +131,7 @@ function pintarOrdenes(ordenes) {
 // =====================================================================
 // Paso 5: formulario de cobro
 // =====================================================================
-// FB4-6
+// CU-10 FB4-6
 function abrirModal(orden) {
     ordenActual = orden;
     montoActual = parseFloat(orden.montoFmt.replace('Q', '')) || 0;
@@ -168,7 +168,7 @@ function restaurarBoton() {
 
 // Paso 6 + FA03: efectivo o tarjeta
 metodoPago.addEventListener('change', aplicarMetodo);
-// FB4-6
+// CU-10 FB4-6
 function aplicarMetodo() {
     const esEfectivo = metodoPago.value === '0';
     bloqueEfectivo.classList.toggle('oculto', !esEfectivo);
@@ -179,7 +179,7 @@ function aplicarMetodo() {
 
 // Paso 7: cambio en tiempo real
 montoRecibido.addEventListener('input', calcularCambio);
-// FB7
+// CU-10 FB7
 function calcularCambio() {
     if (metodoPago.value !== '0') { cajaCambio.classList.add('oculto'); return; }
     const recibido = parseFloat(montoRecibido.value);
@@ -196,7 +196,7 @@ function calcularCambio() {
 // =====================================================================
 btnConfirmarPago.addEventListener('click', confirmarPago);
 
-// FB8-9
+// CU-10 FB8-9
 async function confirmarPago() {
     errorModal.textContent = '';
     const metodo = parseInt(metodoPago.value, 10);
@@ -207,13 +207,13 @@ async function confirmarPago() {
             errorModal.textContent = 'Ingrese el monto recibido.';
             return;
         }
-        // FB7
+        // CU-10 FB7
         if (recibido < montoActual) {
             errorModal.textContent = 'El monto recibido (Q' + recibido.toFixed(2) +
                 ') es menor al monto a cobrar (Q' + montoActual.toFixed(2) + ')';
             return;
         }
-    // FA03
+    // CU-10 FA03
     } else if (!/^\d{4}$/.test(ultimos4.value.trim())) {
         errorModal.textContent = 'Ingrese los últimos 4 dígitos de la tarjeta.';
         return;
@@ -254,7 +254,7 @@ async function confirmarPago() {
 // =====================================================================
 // Pasos 10-11: comprobante
 // =====================================================================
-// FB10-11
+// CU-10 FB10-11
 function mostrarComprobante(mensaje, c) {
     $('cpMensaje').textContent     = mensaje;
     $('cpTrx').textContent         = c.numeroTransaccion;
@@ -285,10 +285,10 @@ function mostrarComprobante(mensaje, c) {
     zonaComprobante.classList.remove('oculto');
 }
 
-// FB10-11
+// CU-10 FB10-11
 btnImprimir.addEventListener('click', () => window.print());
 
-// FB10-11
+// CU-10 FB10-11
 btnNuevoCobro.addEventListener('click', () => {
     cerrarModal();
     campoValor.value = '';

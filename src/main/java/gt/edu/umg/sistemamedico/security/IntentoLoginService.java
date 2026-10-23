@@ -31,7 +31,7 @@ public class IntentoLoginService {
     }
 
     /** Se llama cuando las credenciales fallan. Devuelve intentos restantes. */
-    // FA06
+    // CU-00 FA06
     public int registrarFallo(String username) {
         Optional<Usuario> opt = usuarioRepository.findByUsername(username);
         if (opt.isEmpty()) {
@@ -51,7 +51,7 @@ public class IntentoLoginService {
         short nuevos = (short) Math.min(u.getIntentosFallidos() + 1, maxIntentos);
         u.setIntentosFallidos(nuevos);
 
-        // FA07
+        // CU-00 FA07
         if (nuevos >= maxIntentos) {
             u.setBloqueadoHasta(OffsetDateTime.now().plusMinutes(minutosBloqueo));
         }

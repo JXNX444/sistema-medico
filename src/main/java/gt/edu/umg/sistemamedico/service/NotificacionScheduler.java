@@ -31,7 +31,7 @@ public class NotificacionScheduler {
     }
 
     /** Primera vuelta 20 s despues de arrancar la app; luego cada 60 s. */
-    // FB9-10
+    // CU-12 FB9-10
     @Scheduled(initialDelay = 20_000, fixedDelay = 60_000)
     public void enviarPendientes() {
         try {

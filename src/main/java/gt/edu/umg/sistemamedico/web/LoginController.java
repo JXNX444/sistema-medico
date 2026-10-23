@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class LoginController {
 
-    // FB9
+    // CU-00 FB9
     @GetMapping("/login")
     public String login() {
         return "portal/panel-login";

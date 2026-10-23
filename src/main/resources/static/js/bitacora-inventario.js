@@ -55,7 +55,7 @@
 
     // ---------- RN-CU13-01: campos dinamicos ----------
 
-    // FB2-3
+    // CU-15 FB2-3
     function actualizarCampos() {
         const tipo = selTipo.value;
 
@@ -76,7 +76,7 @@
 
     // ---------- RN-CU13-03: panel de inventario en tiempo real ----------
 
-    // FB2-3
+    // CU-15 FB2-3
     async function cargarStock() {
         info = null;
         if (!selMedicamento.value || !selSucursal.value) {
@@ -94,7 +94,7 @@
         pintarPanel();
     }
 
-    // FB2-3
+    // CU-15 FB2-3
     function pintarPanel() {
         const hayCombinacion = selMedicamento.value && selSucursal.value;
         mostrar(panelVacio, !hayCombinacion);

@@ -92,7 +92,7 @@ public class SecurityConfig {
     }
 
     /** Login correcto: reinicia intentos y decide a donde va segun el rol y el origen. */
-    // FB10
+    // CU-00 FB10
     private void onExito(HttpServletRequest req, HttpServletResponse res,
                          Authentication auth) throws java.io.IOException {
 
@@ -148,7 +148,7 @@ public class SecurityConfig {
         // FA06: credenciales incorrectas -> registrar fallo y mostrar restantes
         int restantes = intentoLoginService.registrarFallo(username);
 
-        // FA07
+        // CU-00 FA07
         if (restantes <= 0) {
             res.sendRedirect(base + "?bloqueado");
         } else {

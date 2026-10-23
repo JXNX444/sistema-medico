@@ -71,7 +71,7 @@ public class PagoService {
     public ResultadoPago procesarPago(Integer citaId, Integer pacienteId,
                                       String numeroTarjeta, UUID idempotencyKey) {
 
-        // FB9
+        // CU-04 FB9
         // 0) Idempotencia por intento: si esta llave ya se proceso, devolver su resultado.
         Optional<Pago> previo = pagoRepository.findByIdempotencyKey(idempotencyKey);
         if (previo.isPresent()) {
@@ -120,7 +120,7 @@ public class PagoService {
         short metodo = detectarMetodo(limpio);
         String ultimos4 = limpio.length() >= 4 ? limpio.substring(limpio.length() - 4) : null;
 
-        // FB10-11
+        // CU-04 FB10-11
         // 5) Llamar a la pasarela.
         PasarelaPagoSimulada.Resultado r = pasarela.procesar(limpio);
 
@@ -141,7 +141,7 @@ public class PagoService {
 
         if (r.aprobado()) {
             pago.setEstadoPago(Pago.ESTADO_APROBADO);
-            // FB12
+            // CU-04 FB12
             pagoRepository.save(pago);
 
             // 7) Cita -> CONFIRMADA (no existe "PAGADA" en el catalogo).
@@ -187,7 +187,7 @@ public class PagoService {
 
     private void enviarComprobante(Cita cita, Pago pago) {
         try {
-            // FB13-14
+            // CU-04 FB13-14
             correoService.enviarComprobantePago(
                     cita.getPaciente().getCorreo(),
                     cita.getPaciente().getNombreCompleto(),

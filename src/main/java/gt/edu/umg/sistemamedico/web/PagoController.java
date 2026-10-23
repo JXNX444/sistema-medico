@@ -41,7 +41,7 @@ public class PagoController {
 
     // ---------- PANTALLA DE PAGO ----------
 
-    // FB1
+    // CU-04 FB1
     @GetMapping("/pago/{citaId}")
     public String pago(@PathVariable Integer citaId,
                        @AuthenticationPrincipal UsuarioDetails ud, Model model) {
@@ -74,7 +74,7 @@ public class PagoController {
 
     // ---------- PROCESAR EL PAGO ----------
 
-    // FB7-8
+    // CU-04 FB7-8
     @PostMapping("/pago/{citaId}/procesar")
     @ResponseBody
     public Map<String, Object> procesar(@PathVariable Integer citaId,
@@ -91,7 +91,7 @@ public class PagoController {
             return out;
         }
 
-        // FB9
+        // CU-04 FB9
         // Llave de idempotencia [RNF-016]; si viene mal, generamos una.
         UUID key;
         try {
@@ -116,7 +116,7 @@ public class PagoController {
 
     // ---------- Validacion FA01 (RN-CU04-01 a 04) ----------
 
-    // FB7-8
+    // CU-04 FB7-8
     private Map<String, Object> validar(PagoForm f) {
         Map<String, Object> e = new LinkedHashMap<>();
 
