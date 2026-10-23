@@ -13,6 +13,7 @@
     <div style="font-size:14px;color:var(--sm-slate-500);margin-bottom:24px;">Complete los pasos para reservar su cita médica</div>
 
     <!-- Indicador de progreso -->
+    <!-- FB1 -->
     <ol class="pasos" id="indicadorPasos">
         <li data-paso="1" class="paso-activo">Sucursal</li>
         <li data-paso="2">Especialidad</li>
@@ -25,6 +26,7 @@
     <div class="tarjeta-wizard sm-panel" style="margin-top:20px;">
 
         <!-- PASO 1 -->
+        <!-- FB1 FB2 -->
         <section class="paso" id="paso1">
             <h2>Seleccione una sucursal</h2>
             <div class="rejilla-opciones" id="listaSucursales">
@@ -45,6 +47,7 @@
             <div class="rejilla-opciones" id="listaEspecialidades"><p class="cargando">Cargando especialidades...</p></div>
             <p class="error" id="errorPaso2"></p>
             <div class="acciones-paso">
+                <!-- FA04 -->
                 <button type="button" class="boton-secundario sm-btn sm-btn--ghost" onclick="irAPaso(1)">Atrás</button>
                 <button type="button" class="boton-principal sm-btn sm-btn--primary" onclick="irAPaso(3)">Siguiente</button>
             </div>
@@ -56,6 +59,7 @@
             <div class="rejilla-opciones" id="listaMedicos"><p class="cargando">Cargando médicos...</p></div>
             <p class="error" id="errorPaso3"></p>
             <div class="acciones-paso">
+                <!-- FA04 -->
                 <button type="button" class="boton-secundario sm-btn sm-btn--ghost" onclick="irAPaso(2)">Atrás</button>
                 <button type="button" class="boton-principal sm-btn sm-btn--primary" onclick="irAPaso(4)">Siguiente</button>
             </div>
@@ -72,6 +76,7 @@
             </div>
             <p class="error" id="errorPaso4"></p>
             <div class="acciones-paso">
+                <!-- FA04 -->
                 <button type="button" class="boton-secundario sm-btn sm-btn--ghost" onclick="irAPaso(3)">Atrás</button>
                 <button type="button" class="boton-principal sm-btn sm-btn--primary" onclick="irAPaso(5)">Siguiente</button>
             </div>
@@ -81,11 +86,13 @@
         <section class="paso oculto" id="paso5">
             <h2>Confirme su cita</h2>
             <div class="resumen" id="resumenCita"></div>
+            <!-- FB6-7 -->
             <label class="etiqueta" for="motivoCita">Motivo de la consulta</label>
             <textarea id="motivoCita" class="sm-textarea" rows="4" maxlength="2000"
                       placeholder="Describa brevemente el motivo de su consulta (mínimo 10 caracteres)"></textarea>
             <p class="error" id="errorPaso5"></p>
             <div class="acciones-paso">
+                <!-- FA04 -->
                 <button type="button" class="boton-secundario sm-btn sm-btn--ghost" onclick="irAPaso(4)">Atrás</button>
                 <button type="button" class="boton-principal sm-btn sm-btn--primary" onclick="irAPaso(6)">Siguiente</button>
             </div>
@@ -112,6 +119,7 @@
             </div>
             <p class="error" id="errorPaso6"></p>
             <div class="acciones-paso">
+                <!-- FA04 -->
                 <button type="button" class="boton-secundario sm-btn sm-btn--ghost" onclick="irAPaso(5)">Atrás</button>
                 <button type="button" class="boton-principal sm-btn sm-btn--primary" id="btnConfirmar" onclick="confirmarCita()">Confirmar cita</button>
             </div>

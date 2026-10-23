@@ -30,6 +30,7 @@ public class CobroLabController {
     }
 
     // Paso 1: pantalla (se entra con el boton "Cobro Lab" del panel de caja).
+    // FB1
     @GetMapping("/laboratorio")
     public String vista(@AuthenticationPrincipal UsuarioDetails ud, Model model) {
         model.addAttribute("nombre", ud.getUsuario().getNombreCompleto());
@@ -37,6 +38,7 @@ public class CobroLabController {
     }
 
     // Pasos 2-3 + FA01: ordenes pendientes de pago por DPI o No. Orden.
+    // FB2-3
     @GetMapping("/lab/api/buscar")
     @ResponseBody
     public Map<String, Object> buscar(@RequestParam String modo,
@@ -51,6 +53,7 @@ public class CobroLabController {
     }
 
     // Pasos 6-10 + FA03/FA04: registrar el cobro.
+    // FB8-9
     @PostMapping("/lab/api/registrar")
     @ResponseBody
     public Map<String, Object> registrar(@RequestBody CobroLabForm form,

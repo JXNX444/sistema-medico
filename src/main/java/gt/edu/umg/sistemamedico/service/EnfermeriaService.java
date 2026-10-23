@@ -63,6 +63,7 @@ public class EnfermeriaService {
     }
 
     @Transactional(readOnly = true)
+    // FB1
     public PanelEnfermeria listarPacientes() {
         List<Cita> todas = fila();
 
@@ -91,6 +92,7 @@ public class EnfermeriaService {
     public record ResultadoLlamada(boolean ok, String mensaje, String anuncio, Cita cita) {}
 
     @Transactional
+    // FB1
     public ResultadoLlamada llamarPaciente(Integer citaId) {
         Cita cita = citaRepository.findById(citaId).orElse(null);
         if (cita == null) {
@@ -118,6 +120,7 @@ public class EnfermeriaService {
                                     List<String> alertas, Cita cita) {}
 
     @Transactional
+    // FB10-12
     public ResultadoRegistro registrarSignos(Integer citaId, Usuario enfermero,
                                              Short presionSistolica, Short presionDiastolica,
                                              BigDecimal temperatura, BigDecimal pesoKg, BigDecimal tallaCm,
@@ -133,6 +136,7 @@ public class EnfermeriaService {
 
         Map<String, String> errores = new java.util.LinkedHashMap<>();
 
+        // FB4-8
         // ---------- FA02: rangos de captura [RN-CU07-01 a 05] ----------
         if (presionSistolica == null || presionDiastolica == null
                 || presionSistolica < 60 || presionSistolica > 250
@@ -166,6 +170,7 @@ public class EnfermeriaService {
             return new ResultadoRegistro(false, errores, null, null, cita);
         }
 
+        // FB9
         // ---------- FA03: rangos clinicos para alertas [RN-CU07-06] ----------
         List<String> alertas = new ArrayList<>();
         if (presionSistolica < 90 || presionSistolica > 140 || presionDiastolica < 60 || presionDiastolica > 90) {
@@ -187,7 +192,9 @@ public class EnfermeriaService {
         signos.setPesoKg(pesoKg);
         signos.setTallaCm(tallaCm);
         signos.setFrecuenciaCardiaca(frecuenciaCardiaca);
+        // FA01
         signos.setEsEmergencia(esEmergencia);
+        // FA03
         signos.setTieneAlertas(!alertas.isEmpty());
         signos.setAlertas(aJson(alertas));
         signosVitalesRepository.save(signos);
@@ -195,6 +202,7 @@ public class EnfermeriaService {
         // ---------- Paso 10: la cita pasa a "En Espera" (de consulta medica) ----------
         EstadoCita enEspera = estadoCitaService.buscarPorCodigo("EN_ESPERA");
         cita.setEstadoCita(enEspera);
+        // FA01
         if (esEmergencia) {
             // [FA01] Prioridad alta: cuando exista CU-08, el medico vera esta
             // cita primero en su fila, sin inventar un salto de estado aqui.

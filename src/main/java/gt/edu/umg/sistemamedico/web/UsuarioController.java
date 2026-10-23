@@ -67,6 +67,7 @@ public class UsuarioController {
 
     // ---------- MENU ----------
 
+    // FB1-2
     @GetMapping
     public String menu() {
         return "usuarios/menu";
@@ -74,6 +75,7 @@ public class UsuarioController {
 
     // ---------- LISTADO (Paso 4: carga inicial, muestra TODOS) ----------
 
+    // FB3-4
     @GetMapping("/listado")
     public String listado(@RequestParam(defaultValue = "usuario") String campo,
                           @RequestParam(defaultValue = "0") int page,
@@ -84,6 +86,7 @@ public class UsuarioController {
 
     // ---------- BUSCAR (Paso 6: el boton de busqueda 🔍) [FA02][FA03] ----------
 
+    // FB6-7
     @GetMapping("/listado/buscar")
     public String buscar(@RequestParam(defaultValue = "usuario") String campo,
                          @RequestParam(required = false) String valor,
@@ -95,8 +98,10 @@ public class UsuarioController {
 
     // ---------- Helper compartido: arma la tabla paginada ----------
 
+    // FB3-4
     private String cargarTabla(String campo, String valor, int page, String endpoint, Model model) {
 
+        // FB5
         if (valor != null && valor.length() > 25) { // RN-CU01-01
             valor = valor.substring(0, 25);
         }
@@ -104,10 +109,12 @@ public class UsuarioController {
         Pageable pageable = PageRequest.of(page, TAM_PAGINA, Sort.by("nombreCompleto").ascending());
 
         // Muestra Activos e Inactivos; solo oculta los Eliminados (state=2).
+        // FB6-7
         Specification<Usuario> noEliminados = (root, query, cb) -> cb.notEqual(root.get("state"), ELIMINADO);
         Specification<Usuario> porCampo = UsuarioSpecifications.porCampo(campo, valor);
         Specification<Usuario> spec = (porCampo == null) ? noEliminados : noEliminados.and(porCampo);
 
+        // FA03
         Page<Usuario> usuarios = usuarioRepository.findAll(spec, pageable);
 
         model.addAttribute("usuarios", usuarios);
@@ -119,6 +126,7 @@ public class UsuarioController {
 
     // ---------- CREAR ----------
 
+    // FA01
     @GetMapping("/nuevo")
     public String nuevoFormulario(Model model) {
         UsuarioForm form = new UsuarioForm();
@@ -129,6 +137,7 @@ public class UsuarioController {
         return "usuarios/formulario";
     }
 
+    // FA01
     @PostMapping("/nuevo")
     public String crear(@ModelAttribute("form") UsuarioForm form, Model model, HttpServletRequest request) {
         Map<String, String> errores = validar(form, true);
@@ -161,6 +170,7 @@ public class UsuarioController {
 
     // ---------- EDITAR ----------
 
+    // FA04
     @GetMapping("/{id}/editar")
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Usuario usuario = usuarioRepository.findById(id)
@@ -186,6 +196,7 @@ public class UsuarioController {
         return "usuarios/formulario";
     }
 
+    // FA04
     @PostMapping("/{id}/editar")
     public String actualizar(@PathVariable Integer id,
                              @ModelAttribute("form") UsuarioForm form, Model model,
@@ -225,6 +236,7 @@ public class UsuarioController {
 
     // ---------- ELIMINAR (logico, state=2) ----------
 
+    // FA05
     @PostMapping("/{id}/eliminar")
     public String eliminar(@PathVariable Integer id, HttpServletRequest request,
                            @AuthenticationPrincipal UsuarioDetails ud) {
@@ -282,6 +294,7 @@ public class UsuarioController {
     }
 
     /** Traduce el error de la BD a un mensaje entendible para el formulario. */
+    // FA06
     private String mensajeDeBd(DataIntegrityViolationException e) {
         String msg = e.getMostSpecificCause().getMessage();
         if (msg == null) msg = "";
@@ -297,6 +310,7 @@ public class UsuarioController {
     }
 
     /** Validacion manual [RN-CU01-03 a RN-CU01-14] con los mensajes exactos del documento. */
+    // FA06
     private Map<String, String> validar(UsuarioForm form, boolean esNuevo) {
         Map<String, String> errores = new LinkedHashMap<>();
 

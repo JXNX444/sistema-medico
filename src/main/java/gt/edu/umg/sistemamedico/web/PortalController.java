@@ -34,6 +34,7 @@ public class PortalController {
      * El Model es la bolsa de datos que se le pasa a la vista.
      * El return "portal/index" apunta a templates/portal/index.html
      */
+    // FB1-2
     @GetMapping("/")
     public String index(Model model) {
 

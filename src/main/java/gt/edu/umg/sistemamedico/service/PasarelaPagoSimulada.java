@@ -23,6 +23,7 @@ public class PasarelaPagoSimulada {
     /**
      * Procesa el cobro. numeroTarjeta viene SIN espacios (solo digitos).
      */
+    // FB10-11
     public Resultado procesar(String numeroTarjeta) {
 
         // 1) Validacion Luhn: si no pasa, datos invalidos.
@@ -36,6 +37,7 @@ public class PasarelaPagoSimulada {
 
         // 2) Reglas de simulacion segun el ultimo digito.
         switch (ultimo) {
+            // FA03
             case '0':
                 return new Resultado(false, "RECHAZO_BANCARIO",
                         "La transaccion con tarjeta fue rechazada por el banco. " +
@@ -54,6 +56,7 @@ public class PasarelaPagoSimulada {
         }
     }
 
+    // FB10-11
     /** Algoritmo de Luhn. [RN-CU04-01] */
     private boolean pasaLuhn(String numero) {
         if (numero == null || !numero.matches("\\d{13,19}")) {

@@ -15,6 +15,7 @@
     </div>
 
     <!-- Mensajes de crear / actualizar / eliminar (llegan con el redirect, se ven una sola vez) -->
+    <!-- FB6-8 -->
     <div th:if="${mensajeExito}" class="sm-badge sm-badge--success"
          style="padding:10px 14px;font-size:13px;" th:text="${mensajeExito}"></div>
     <div th:if="${mensajeError}" class="sm-badge sm-badge--danger"
@@ -22,6 +23,7 @@
 
     <!-- Paso 2: filtros de busqueda + paso 3: boton Crear -->
     <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+        <!-- FB2 -->
         <form th:action="@{/catalogos/{clave}(clave=${catalogo.clave()})}" method="get"
               style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             <input class="sm-input" type="text" name="q" th:value="${q}" placeholder="Buscar por nombre" style="width:220px;">
@@ -45,6 +47,7 @@
     </div>
 
     <!-- Paso 2: tabla de registros -->
+    <!-- FB2 -->
     <div th:if="${pagina.totalElements > 0}" class="sm-panel">
         <table class="sm-table">
             <thead>
@@ -78,6 +81,7 @@
                         <div class="cat-acciones__menu">
                             <a class="cat-acciones__item"
                                th:href="@{/catalogos/{clave}/{id}/editar(clave=${catalogo.clave()}, id=${f.id()})}">Editar</a>
+                            <!-- FA03 -->
                             <button type="button" class="cat-acciones__item cat-acciones__item--peligro"
                                     th:if="${f.activo() and f.eliminable()}"
                                     th:attr="data-id=${f.id()}, data-nombre=${f.nombre()}"
@@ -96,6 +100,7 @@
                 Página 1 de 1
             </span>
             <div class="cat-pag" th:if="${pagina.totalPages > 1}">
+                <!-- FB2 -->
                 <a th:each="p : ${#numbers.sequence(0, pagina.totalPages - 1)}"
                    th:href="@{/catalogos/{clave}(clave=${catalogo.clave()}, q=${q}, estado=${estado}, page=${p})}"
                    th:text="${p + 1}"
@@ -105,6 +110,7 @@
     </div>
 </main>
 
+<!-- FA03 -->
 <!-- Formulario oculto que hace el POST de eliminar despues de confirmar -->
 <form id="formEliminar" method="post" style="display:none;"></form>
 

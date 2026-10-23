@@ -9,9 +9,11 @@
 </nav>
 
 <main style="max-width:760px;margin:0 auto;padding:40px 24px;">
+    <!-- FA04 -->
     <div style="font-size:24px;font-weight:800;margin-bottom:20px;"
          th:text="${editando} ? 'Editar Usuario' : 'Crear Usuario'">Usuario</div>
 
+    <!-- FA01 -->
     <form th:action="${editando} ? @{'/usuarios/' + ${form.id} + '/editar'} : @{/usuarios/nuevo}"
           th:object="${form}" method="post" class="sm-panel"
           style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
@@ -19,6 +21,7 @@
         <div class="sm-field" style="grid-column:1/-1;">
             <label>Nombre completo</label>
             <input class="sm-input" type="text" th:field="*{nombreCompleto}">
+            <!-- FA06 -->
             <p class="sm-error" th:if="${errores.get('nombreCompleto')} != null" th:text="${errores.get('nombreCompleto')}"></p>
         </div>
 
@@ -35,6 +38,7 @@
         </div>
 
         <div class="sm-field">
+            <!-- FA04 -->
             <label th:text="${editando} ? 'Nueva contraseña (opcional)' : 'Contraseña'"></label>
             <input class="sm-input" type="password" th:field="*{password}">
             <p class="sm-error" th:if="${errores.get('password')} != null" th:text="${errores.get('password')}"></p>
@@ -103,6 +107,7 @@
         <p class="sm-error" style="grid-column:1/-1;" th:if="${errores.get('general')} != null" th:text="${errores.get('general')}"></p>
 
         <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:12px;margin-top:8px;">
+            <!-- FA07 -->
             <a th:href="@{/usuarios/listado}" class="sm-btn sm-btn--ghost">Cancelar</a>
             <button type="submit" class="sm-btn sm-btn--primary" th:text="${editando} ? 'Actualizar' : 'Crear'"></button>
         </div>

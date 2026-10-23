@@ -102,6 +102,7 @@ public class RecepcionService {
     // ---------- RN-CU05-01: busqueda por numero de cita ----------
 
     @Transactional(readOnly = true)
+    // FB1-3
     public ResultadoBusqueda buscarPorNumeroCita(String numeroCita) {
         if (numeroCita == null || numeroCita.isBlank()) {
             return new ResultadoBusqueda(TipoResultado.SIN_PARAMETROS, null, null, null,
@@ -119,6 +120,7 @@ public class RecepcionService {
     // ---------- RN-CU05-01 + FA02 + FA03 + FA04: busqueda por DPI ----------
 
     @Transactional(readOnly = true)
+    // FB1-3
     public ResultadoBusqueda buscarPorDpi(String dpi) {
         if (dpi == null || dpi.isBlank()) {
             return new ResultadoBusqueda(TipoResultado.SIN_PARAMETROS, null, null, null,
@@ -160,6 +162,7 @@ public class RecepcionService {
      * motivo (ej: citas canceladas antes de este cambio).
      */
     @Transactional(readOnly = true)
+    // FA06
     public String motivoUltimoCambio(Integer citaId) {
         return citaHistorialEstadoRepository.findFirstByCitaIdOrderByCreatedAtDesc(citaId)
                 .map(CitaHistorialEstado::getObservacion)
@@ -171,14 +174,17 @@ public class RecepcionService {
     public record ResultadoLlegada(boolean ok, String mensaje, Cita cita, boolean fechaFutura) {}
 
     @Transactional
+    // FB6-7
     public ResultadoLlegada registrarLlegada(Integer citaId) {
         Cita cita = citaRepository.findById(citaId).orElse(null);
         if (cita == null) {
+            // FA09
             return new ResultadoLlegada(false, "Error al registrar la llegada.", null, false);
         }
 
         String codigo = cita.getEstadoCita().getCodigo();
 
+        // FA09
         if (!"CONFIRMADA".equals(codigo)) {
             return new ResultadoLlegada(false, "Operacion no permitida.", cita, false);
         }

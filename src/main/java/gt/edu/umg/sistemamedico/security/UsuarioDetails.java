@@ -59,6 +59,7 @@ public class UsuarioDetails implements UserDetails {
      * Aqui se conecta el RN-CU00-03.
      */
     @Override
+    // FA07
     public boolean isAccountNonLocked() {
         return !usuario.estaBloqueado();
     }

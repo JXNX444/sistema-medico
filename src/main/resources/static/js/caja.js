@@ -64,6 +64,7 @@ function cambiarModo(nuevo) {
 btnBuscar.addEventListener('click', buscar);
 campoValor.addEventListener('keydown', (e) => { if (e.key === 'Enter') buscar(); });
 
+// FB1-2
 async function buscar() {
     const valor = campoValor.value.trim();
     errorBusqueda.textContent = '';
@@ -96,6 +97,7 @@ async function buscar() {
     }
 }
 
+// FB1-2
 function pintarCitas(citas) {
     zonaResultado.innerHTML = citas.map((c, i) => `
         <div class="tarjeta-cita">
@@ -131,6 +133,7 @@ function pintarCitas(citas) {
 // =====================================================================
 // Modal de cobro
 // =====================================================================
+// FB3-4
 function abrirModal(cita) {
     citaActual = cita;
     montoActual = parseFloat((cita.montoFmt || 'Q0').replace('Q', '')) || 0;
@@ -161,6 +164,7 @@ function cerrarModal() {
 btnCerrarModal.addEventListener('click', cerrarModal);
 
 // Mostrar bloque segun metodo (efectivo vs tarjeta)
+// FB3-4
 metodoPago.addEventListener('change', aplicarMetodo);
 function aplicarMetodo() {
     const esEfectivo = metodoPago.value === '0';
@@ -172,6 +176,7 @@ function aplicarMetodo() {
 
 // Calcular cambio en vivo
 montoRecibido.addEventListener('input', calcularCambio);
+// FB5-7
 function calcularCambio() {
     if (metodoPago.value !== '0') { cajaCambio.classList.add('oculto'); return; }
     const recibido = parseFloat(montoRecibido.value);
@@ -189,11 +194,13 @@ function calcularCambio() {
 // =====================================================================
 btnRegistrarPago.addEventListener('click', registrarPago);
 
+// FB8
 async function registrarPago() {
     errorModal.textContent = '';
     const metodo = parseInt(metodoPago.value, 10);
 
     // Validacion en el navegador (el backend vuelve a validar)
+    // FB5-7
     if (metodo === 0) {
         const recibido = parseFloat(montoRecibido.value);
         if (isNaN(recibido)) {
@@ -206,6 +213,7 @@ async function registrarPago() {
             return;
         }
     } else {
+        // FA01
         if (!/^\d{4}$/.test(ultimos4.value.trim())) {
             errorModal.textContent = 'Ingrese los ultimos 4 digitos de la tarjeta.';
             return;
@@ -232,6 +240,7 @@ async function registrarPago() {
         if (data.ok && data.comprobante) {
             mostrarComprobante(data.comprobante);
         } else {
+            // FA04
             // VALIDACION / RECHAZADO / YA_PAGADA / ERROR
             errorModal.textContent = data.mensaje || 'No se pudo registrar el pago.';
             // Nuevo intento -> nueva llave, para que un reintento no choque con idempotencia.
@@ -249,6 +258,7 @@ async function registrarPago() {
 // =====================================================================
 // Comprobante
 // =====================================================================
+// FB9-10
 function mostrarComprobante(c) {
     document.getElementById('cpTrx').textContent          = c.numeroTransaccion;
     document.getElementById('cpPaciente').textContent     = c.pacienteNombre;
@@ -277,6 +287,7 @@ function mostrarComprobante(c) {
     zonaComprobante.classList.remove('oculto');
 }
 
+// FB9-10
 btnImprimir.addEventListener('click', () => window.print());
 
 btnNuevoCobro.addEventListener('click', () => {

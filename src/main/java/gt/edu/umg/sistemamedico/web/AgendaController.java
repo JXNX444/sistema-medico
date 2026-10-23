@@ -48,6 +48,7 @@ public class AgendaController {
 
     // ---------- Paso 1: la pagina ----------
 
+    // FB1-2
     @GetMapping
     public String agenda(@AuthenticationPrincipal UsuarioDetails ud, Model model) {
         model.addAttribute("nombre", ud.getUsuario().getNombreCompleto());
@@ -61,6 +62,7 @@ public class AgendaController {
      * el rango visible en start y end (ej. "2026-10-01T00:00:00-06:00").
      * Devuelve eventos (violeta) y citas (color de su estado) en un solo arreglo.
      */
+    // FB1-2
     @GetMapping("/api/calendario")
     @ResponseBody
     public List<Map<String, Object>> calendario(@RequestParam String start, @RequestParam String end,
@@ -80,6 +82,7 @@ public class AgendaController {
 
     // ---------- Eventos ----------
 
+    // FB5-9
     @PostMapping("/api/eventos")
     @ResponseBody
     public Map<String, Object> crearEvento(@RequestBody AgendaService.DatosEvento datos,
@@ -87,6 +90,7 @@ public class AgendaController {
         return respuesta(agendaService.crearEvento(ud.getUsuario().getId(), datos));
     }
 
+    // FA07
     @PostMapping("/api/eventos/{id}")
     @ResponseBody
     public Map<String, Object> editarEvento(@PathVariable Integer id,
@@ -95,6 +99,7 @@ public class AgendaController {
         return respuesta(agendaService.editarEvento(ud.getUsuario().getId(), id, datos));
     }
 
+    // FA04
     @PostMapping("/api/eventos/{id}/eliminar")
     @ResponseBody
     public Map<String, Object> eliminarEvento(@PathVariable Integer id,
@@ -104,6 +109,7 @@ public class AgendaController {
 
     // ---------- FA06: tareas ----------
 
+    // FB10
     @GetMapping("/api/tareas")
     @ResponseBody
     public List<Map<String, Object>> tareas(@RequestParam String dia,

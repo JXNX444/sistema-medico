@@ -16,6 +16,7 @@
 
     <!-- Paso 1: un acceso por catalogo (tabla 2.3) -->
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;">
+        <!-- FB1 -->
         <a th:each="c : ${catalogos}" th:href="@{/catalogos/{clave}(clave=${c.clave()})}"
            class="sm-panel sm-feature" style="text-decoration:none;">
             <div class="sm-feature__icon">

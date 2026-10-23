@@ -39,6 +39,7 @@ public class SedeEspecialidadController {
      *           /sedes-especialidades?id=12
      *           /sedes-especialidades?page=1
      */
+    // FB2-3
     @GetMapping
     public String listado(@RequestParam(required = false) String id,
                           @RequestParam(defaultValue = "0") int page,
@@ -64,6 +65,7 @@ public class SedeEspecialidadController {
 
     // ---------- Pasos 4-5: formulario ----------
 
+    // FB4-5
     @GetMapping("/nuevo")
     public String nuevo(Model model) {
         cargarListas(model, null, null);
@@ -72,6 +74,7 @@ public class SedeEspecialidadController {
 
     // ---------- Pasos 6-9 + FA03 + FA05: asignar ----------
 
+    // FB6-9
     @PostMapping("/nuevo")
     public String asignar(@RequestParam(required = false) Integer sucursalId,
                           @RequestParam(required = false) Integer especialidadId,
@@ -107,6 +110,7 @@ public class SedeEspecialidadController {
 
     // ---------- Helpers ----------
 
+    // FB4-5
     private void cargarListas(Model model, Integer sucursalId, Integer especialidadId) {
         model.addAttribute("sedes", service.sedesActivas());
         model.addAttribute("especialidades", service.especialidadesActivas());

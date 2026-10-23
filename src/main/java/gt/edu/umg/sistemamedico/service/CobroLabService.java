@@ -66,6 +66,7 @@ public class CobroLabService {
      * @param modo "numero" = por No. Orden; cualquier otro valor = por DPI.
      */
     @Transactional(readOnly = true)
+    // FB2-3
     public ResultadoBusqueda buscar(String modo, String valor) {
         boolean porNumero = "numero".equalsIgnoreCase(modo);
         String criterio = valor == null ? "" : valor.trim();
@@ -134,6 +135,7 @@ public class CobroLabService {
     }
 
     @Transactional
+    // FB8-9
     public ResultadoCobro registrarCobro(Integer ordenId, Short metodoPago,
                                          BigDecimal montoRecibido, String ultimos4,
                                          Integer cajeroId, UUID idempotencyKey) {
@@ -186,6 +188,7 @@ public class CobroLabService {
         pago.setState((short) 1);
 
         if (metodoPago == Pago.METODO_EFECTIVO) {
+            // FB7
             // ---- Paso 7: efectivo ----
             if (montoRecibido == null) {
                 return ResultadoCobro.error("VALIDACION", "Debe ingresar el monto recibido.");
@@ -233,6 +236,7 @@ public class CobroLabService {
         orden.setUpdatedAt(OffsetDateTime.now());
         ordenRepository.save(orden);
 
+        // FB10-11
         // Paso 10: comprobante.
         return new ResultadoCobro(true, "APROBADO",
                 "¡Pago de laboratorio registrado exitosamente! Paciente: " +

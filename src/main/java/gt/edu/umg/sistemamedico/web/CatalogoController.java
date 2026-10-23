@@ -44,6 +44,7 @@ public class CatalogoController {
 
     // ---------- Paso 1: menu ----------
 
+    // FB1
     @GetMapping
     public String menu(Model model) {
         model.addAttribute("catalogos", catalogos.values());
@@ -52,6 +53,7 @@ public class CatalogoController {
 
     // ---------- Paso 2: listado [FA01] ----------
 
+    // FB2
     @GetMapping("/{clave}")
     public String listado(@PathVariable String clave,
                           @RequestParam(defaultValue = "") String q,
@@ -68,6 +70,7 @@ public class CatalogoController {
 
     // ---------- Pasos 3-8: crear ----------
 
+    // FB3-5
     @GetMapping("/{clave}/nuevo")
     public String nuevo(@PathVariable String clave, Model model) {
         Catalogo catalogo = buscar(clave);
@@ -76,6 +79,7 @@ public class CatalogoController {
         return formulario(model, catalogo, null, valores, Map.of());
     }
 
+    // FB6-8
     @PostMapping("/{clave}/nuevo")
     public String crear(@PathVariable String clave,
                         @RequestParam Map<String, String> datos,
@@ -158,6 +162,7 @@ public class CatalogoController {
      */
     private Resultado guardarSeguro(Catalogo catalogo, Integer id, Map<String, String> datos) {
         try {
+            // FA05
             return catalogo.guardar(id, datos);
         } catch (DataIntegrityViolationException e) {
             return Resultado.error("general", "No se pudo guardar: el registro ya existe o algún dato no es válido.");

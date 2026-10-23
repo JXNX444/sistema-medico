@@ -52,6 +52,7 @@ public class ReservaExpiradaScheduler {
     }
 
     /** Corre cada 30 segundos: suficientemente frecuente para un timer de 5 minutos. */
+    // CU-03 FA03
     @Scheduled(fixedRate = 30_000)
     @Transactional
     public void cancelarReservasExpiradas() {
@@ -85,6 +86,7 @@ public class ReservaExpiradaScheduler {
      * Si llega la hora de la cita mas la tolerancia y siguen sin pagarse, se cancelan
      * para que no bloqueen el horario del medico para siempre.
      */
+    // CU-06 FA03
     @Scheduled(fixedRate = 300_000)
     @Transactional
     public void cancelarCitasSinPagoVencidas() {

@@ -37,6 +37,7 @@ public class RegistroController {
 
     // ---------- MOSTRAR FORMULARIO ----------
 
+    // FB1
     @GetMapping("/registro")
     public String mostrarFormulario(Model model) {
         model.addAttribute("form", new RegistroForm());
@@ -46,6 +47,7 @@ public class RegistroController {
 
     // ---------- PROCESAR REGISTRO ----------
 
+    // FB10-12
     @PostMapping("/registro")
     public String registrar(@ModelAttribute("form") RegistroForm form, Model model) {
 
@@ -84,8 +86,10 @@ public class RegistroController {
         } catch (DataIntegrityViolationException e) {
             // Respaldo por si el citext o una carrera dejan pasar un duplicado
             String msg = e.getMostSpecificCause().getMessage();
+            // FA03
             if (msg != null && msg.contains("correo")) {
                 errores.put("correo", "Ya existe una cuenta registrada con este correo electronico.");
+            // FA02
             } else if (msg != null && msg.contains("dpi")) {
                 errores.put("dpi", "Ya existe una cuenta registrada con este numero de DPI.");
             } else if (msg != null && msg.contains("username")) {
@@ -99,14 +103,17 @@ public class RegistroController {
         }
 
         // Paso 14: correo de bienvenida (tolerante a fallos)
+        // FB13-15
         correoService.enviarBienvenida(paciente.getCorreo(), paciente.getNombreCompleto(), paciente.getUsername());
 
         // Paso 15: redirige al login con mensaje de exito
+        // FB13-15
         return "redirect:/login?registrado";
     }
 
     // ---------- Validacion manual (mensajes exactos del documento) ----------
 
+    // FB2-9
     private Map<String, String> validar(RegistroForm form) {
         Map<String, String> errores = new LinkedHashMap<>();
 

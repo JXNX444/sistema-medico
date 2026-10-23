@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// FB1-3 FA02
 function cambiarModo(modo) {
     modoActual = modo;
     document.getElementById('btnModoDpi').classList.toggle('activa', modo === 'dpi');
@@ -33,6 +34,7 @@ function cambiarModo(modo) {
 
 /* ---------- RN-CU05-01: buscar por DPI o numero de cita ---------- */
 
+// FB1-3
 async function buscar() {
     const valor = document.getElementById('campoValor').value.trim();
     const error = document.getElementById('errorBusqueda');
@@ -58,6 +60,7 @@ function ocultarResultado() {
     document.getElementById('zonaResultado').innerHTML = '';
 }
 
+// FB4-5
 function renderResultado(data) {
     const zona = document.getElementById('zonaResultado');
     const error = document.getElementById('errorBusqueda');
@@ -68,6 +71,7 @@ function renderResultado(data) {
             error.textContent = data.mensaje;
             break;
 
+        // FA03
         case 'PACIENTE_NO_EXISTE':
             zona.innerHTML = `
 <div class="tarjeta-resultado">
@@ -79,6 +83,7 @@ function renderResultado(data) {
 </div>`;
             break;
 
+        // FA04
         case 'SIN_CITAS':
             zona.innerHTML = `
 <div class="tarjeta-resultado">
@@ -147,6 +152,7 @@ function irAPagina(pagina) {
 }
 
 /** Dibuja solo las tarjetas de la pagina actual y los botones de pagina. */
+// FB4-5
 function renderListaCitas() {
     const lista = document.getElementById('listaCitas');
     if (!lista) return;
@@ -196,14 +202,17 @@ function paginador(totalPaginas) {
 
 /* ---------- Arma el HTML de una tarjeta de cita, segun su estado y su fecha ---------- */
 
+// FB4-5
 function tarjetaCita(c) {
     let mensaje = '';
     let accion = '';
 
+    // FA05
     if (c.estadoCodigo === 'PENDIENTE_PAGO') {
         mensaje = `<div class="resultado-mensaje tono-ambar">
             La cita del paciente tiene estado "Pendiente de pago". Debe realizar el pago en caja antes de ser atendido.
 </div>`;
+    // FA06
     } else if (c.estadoCodigo === 'CANCELADA') {
         const motivo = c.motivoEstado || 'La cita fue cancelada.';
         mensaje = `<div class="resultado-mensaje tono-rojo">${motivo}</div>`;
@@ -265,6 +274,7 @@ function tarjetaCita(c) {
     }
 
     const emergencia = c.esEmergencia
+        // FA08
         ? `<span class="badge-emergencia"><i class="ti ti-alert-triangle"></i> EMERGENCIA</span>`
         : '';
 
@@ -290,6 +300,7 @@ function tarjetaCita(c) {
 
 /* ---------- Paso 6-7 flujo normal: registrar llegada ---------- */
 
+// FB6-7 FA09
 async function registrarLlegada(citaId) {
     try {
         const resp = await fetch(`${CTX}recepcion/api/registrar-llegada`, {
@@ -415,6 +426,7 @@ function reemplazarTarjeta(cita) {
     }
 }
 
+// FB6-7
 function mostrarExito(mensaje) {
     document.getElementById('zonaResultado').innerHTML = `
 <div class="exito-llegada">

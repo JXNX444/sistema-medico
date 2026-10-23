@@ -50,6 +50,7 @@ public class CobroController {
 
     // ---------- RN-CU06-01: busqueda de citas pendientes de pago ----------
 
+    // FB1-2
     @GetMapping("/api/buscar")
     @ResponseBody
     public Map<String, Object> buscarApi(@RequestParam String modo,
@@ -68,6 +69,7 @@ public class CobroController {
 
     // ---------- Paso 6-9: registrar el cobro ----------
 
+    // FB8
     @PostMapping("/api/registrar")
     @ResponseBody
     public Map<String, Object> registrar(@RequestBody CobroForm form,

@@ -79,6 +79,7 @@ public class RecepcionController {
 
     // ---------- RN-CU05-01: busqueda por DPI o numero de cita ----------
 
+    // FB1-3
     @GetMapping("/api/buscar")
     @ResponseBody
     public Map<String, Object> buscarApi(@RequestParam String modo, @RequestParam(required = false) String valor) {
@@ -92,6 +93,7 @@ public class RecepcionController {
         respuesta.put("mensaje", resultado.mensaje());
         respuesta.put("subMensaje", resultado.subMensaje());
 
+        // FB4-5
         if (resultado.cita() != null) {
             respuesta.put("cita", mapearCita(resultado.cita()));
         }
@@ -109,6 +111,7 @@ public class RecepcionController {
 
     public record RegistrarLlegadaRequest(Integer citaId) {}
 
+    // FB6-7
     @PostMapping("/api/registrar-llegada")
     @ResponseBody
     public Map<String, Object> registrarLlegada(@RequestBody RegistrarLlegadaRequest req) {

@@ -45,6 +45,7 @@ public class EnfermeriaController {
 
     // ---------- Paso 1 flujo normal: lista de pacientes ----------
 
+    // FB1
     @GetMapping("/api/pacientes")
     @ResponseBody
     public Map<String, Object> listarPacientes() {
@@ -60,6 +61,7 @@ public class EnfermeriaController {
 
     public record LlamarRequest(Integer citaId) {}
 
+    // FB1
     @PostMapping("/api/llamar")
     @ResponseBody
     public Map<String, Object> llamar(@RequestBody LlamarRequest req) {
@@ -82,6 +84,7 @@ public class EnfermeriaController {
             BigDecimal temperatura, BigDecimal pesoKg, BigDecimal tallaCm,
             Short frecuenciaCardiaca, boolean esEmergencia) {}
 
+    // FB10-12
     @PostMapping("/api/registrar-signos")
     @ResponseBody
     public Map<String, Object> registrarSignos(@RequestBody RegistrarSignosRequest req,
@@ -115,6 +118,7 @@ public class EnfermeriaController {
      * traduce aqui en un endpoint liviano que el frontend llama cada vez
      * que el usuario termina de escribir un campo, sin esperar a guardar.
      */
+    // FB9
     @PostMapping("/api/chequear-alertas")
     @ResponseBody
     public List<String> chequearAlertas(@RequestBody ChequearAlertasRequest req) {

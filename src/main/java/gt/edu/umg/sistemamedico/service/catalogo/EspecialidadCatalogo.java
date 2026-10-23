@@ -42,6 +42,7 @@ public class EspecialidadCatalogo extends CatalogoBase {
     @Override public List<String> columnas() { return List.of("Nombre", "Descripción"); }
 
     @Override
+    // FB3-5
     public List<Campo> campos(Integer id) {
         return List.of(
                 texto("nombre", "Nombre", 200, true),
@@ -51,6 +52,7 @@ public class EspecialidadCatalogo extends CatalogoBase {
 
     @Override
     @Transactional(readOnly = true)
+    // FB2
     public Page<Fila> listar(String texto, String estado, int pagina) {
         return repository.findByNombreContainingIgnoreCaseAndStateIn(filtro(texto), estados(estado), pagina(pagina, "nombre"))
                 .map(e -> new Fila(e.getId(), e.getNombre(),
@@ -68,6 +70,7 @@ public class EspecialidadCatalogo extends CatalogoBase {
 
     @Override
     @Transactional
+    // FB6-8
     public Resultado guardar(Integer id, Map<String, String> datos) {
         Especialidad e = id == null ? new Especialidad() : repository.findById(id).orElse(null);
         if (e == null) return Resultado.error("general", NO_EXISTE);
@@ -101,6 +104,7 @@ public class EspecialidadCatalogo extends CatalogoBase {
 
     @Override
     @Transactional
+    // FA03
     public Resultado eliminar(Integer id) {
         Especialidad e = repository.findById(id).orElse(null);
         if (e == null || !e.estaActivo()) return Resultado.error("general", NO_EXISTE);

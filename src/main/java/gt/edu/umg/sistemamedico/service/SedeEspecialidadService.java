@@ -40,6 +40,7 @@ public class SedeEspecialidadService {
 
     private static final String MSG_SIN_SEDE = "Debe seleccionar una sede.";
     private static final String MSG_SIN_ESPECIALIDAD = "Debe seleccionar una especialidad.";
+    // FA05
     private static final String MSG_DUPLICADO = "La asignación ya existe.";
 
     private final SucursalEspecialidadRepository repository;
@@ -74,6 +75,7 @@ public class SedeEspecialidadService {
      * @param pagina   pagina pedida, empieza en 0
      */
     @Transactional(readOnly = true)
+    // FB2-3
     public Page<SucursalEspecialidad> listar(Integer filtroId, int pagina) {
         Pageable pageable = PageRequest.of(Math.max(pagina, 0), TAM_PAGINA, Sort.by("id").ascending());
         if (filtroId != null) {
@@ -95,6 +97,7 @@ public class SedeEspecialidadService {
     // ---------- Pasos 6-9 + FA03 + FA05: asignar ----------
 
     @Transactional
+    // FB6-9
     public Resultado asignar(Integer sucursalId, Integer especialidadId) {
 
         // FA03: campos obligatorios [RN-CU12-01]
@@ -113,6 +116,7 @@ public class SedeEspecialidadService {
             return new Resultado(false, null, errores);
         }
 
+        // FA05
         SucursalEspecialidad existente = repository
                 .findBySucursalIdAndEspecialidadId(sucursalId, especialidadId)
                 .orElse(null);
