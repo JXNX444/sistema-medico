@@ -2,9 +2,11 @@ package gt.edu.umg.sistemamedico.service;
 
 import gt.edu.umg.sistemamedico.domain.Cita;
 import gt.edu.umg.sistemamedico.domain.EstadoCita;
+import gt.edu.umg.sistemamedico.domain.MetodoPago;
 import gt.edu.umg.sistemamedico.domain.Pago;
 import gt.edu.umg.sistemamedico.domain.Usuario;
 import gt.edu.umg.sistemamedico.repository.CitaRepository;
+import gt.edu.umg.sistemamedico.repository.MetodoPagoRepository;
 import gt.edu.umg.sistemamedico.repository.PagoRepository;
 import gt.edu.umg.sistemamedico.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,9 @@ import java.util.UUID;
  *   - metodo EFECTIVO -> se llenan montoRecibido y cambio.
  *   - metodo tarjeta  -> se llena ultimos4 y puede rechazarse (FA04).
  *
+ * El metodo de pago se valida y se nombra con el catalogo his.metodo_pago
+ * [CU-14 Metodos de Pago].
+ *
  * Al aprobar el pago, la cita pasa a CONFIRMADA (igual que en linea:
  * no existe estado "PAGADA" en el catalogo).
  */
@@ -44,19 +49,24 @@ public class CobroService {
     private static final DateTimeFormatter FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", new Locale("es", "GT"));
 
+    private static final short ACTIVO = 1;
+
     private final CitaRepository citaRepository;
     private final UsuarioRepository usuarioRepository;
     private final PagoRepository pagoRepository;
     private final EstadoCitaService estadoCitaService;
+    private final MetodoPagoRepository metodoPagoRepository;
 
     public CobroService(CitaRepository citaRepository,
                         UsuarioRepository usuarioRepository,
                         PagoRepository pagoRepository,
-                        EstadoCitaService estadoCitaService) {
+                        EstadoCitaService estadoCitaService,
+                        MetodoPagoRepository metodoPagoRepository) {
         this.citaRepository = citaRepository;
         this.usuarioRepository = usuarioRepository;
         this.pagoRepository = pagoRepository;
         this.estadoCitaService = estadoCitaService;
+        this.metodoPagoRepository = metodoPagoRepository;
     }
 
     // =====================================================================
@@ -159,7 +169,7 @@ public class CobroService {
      * Procesa el cobro presencial de una cita.
      *
      * @param citaId        cita a cobrar (debe estar PENDIENTE_PAGO).
-     * @param metodoPago    0=Efectivo, 1=Visa, 2=Mastercard, 3=Debito.
+     * @param metodoPago    id del catalogo his.metodo_pago: 0=Efectivo, 1=Visa, 2=Mastercard, 3=Debito.
      * @param montoRecibido solo efectivo: lo que entrego el paciente.
      * @param ultimos4      solo tarjeta: ultimos 4 digitos como referencia.
      * @param cajeroId      usuario cajero que realiza el cobro.
@@ -220,6 +230,11 @@ public class CobroService {
             return ResultadoCobro.error("VALIDACION", "Debe seleccionar un metodo de pago.");
         }
 
+        // [CU-14 Metodos de Pago] el metodo debe existir y estar activo en el catalogo.
+        if (!metodoActivo(metodoPago)) {
+            return ResultadoCobro.error("VALIDACION", "Metodo de pago no valido.");
+        }
+
         if (metodoPago == Pago.METODO_EFECTIVO) {
             // ---- FLUJO EFECTIVO: paso 6-7 ----
             if (montoRecibido == null) {
@@ -265,6 +280,7 @@ public class CobroService {
             pago.setEstadoPago(Pago.ESTADO_APROBADO);
 
         } else {
+            // Metodo nuevo del catalogo que la caja todavia no sabe cobrar.
             return ResultadoCobro.error("VALIDACION", "Metodo de pago no valido.");
         }
 
@@ -313,15 +329,19 @@ public class CobroService {
         );
     }
 
+    /** [CU-14 Metodos de Pago] true si el metodo existe en his.metodo_pago y esta activo. */
+    private boolean metodoActivo(Short metodo) {
+        return metodoPagoRepository.findById(metodo)
+                .map(m -> m.getState() != null && m.getState() == ACTIVO)
+                .orElse(false);
+    }
+
+    /** [CU-14 Metodos de Pago] nombre del metodo tomado del catalogo his.metodo_pago. */
     private String nombreMetodo(Short metodo) {
         if (metodo == null) return "Desconocido";
-        return switch (metodo) {
-            case 0 -> "Efectivo";
-            case 1 -> "Tarjeta Visa";
-            case 2 -> "Tarjeta Mastercard";
-            case 3 -> "Tarjeta de Debito";
-            default -> "Desconocido";
-        };
+        return metodoPagoRepository.findById(metodo)
+                .map(MetodoPago::getNombre)
+                .orElse("Desconocido");
     }
 
     /**

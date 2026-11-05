@@ -1,8 +1,10 @@
 package gt.edu.umg.sistemamedico.service;
 
+import gt.edu.umg.sistemamedico.domain.MetodoPago;
 import gt.edu.umg.sistemamedico.domain.OrdenLaboratorio;
 import gt.edu.umg.sistemamedico.domain.OrdenLaboratorioDetalle;
 import gt.edu.umg.sistemamedico.domain.Pago;
+import gt.edu.umg.sistemamedico.repository.MetodoPagoRepository;
 import gt.edu.umg.sistemamedico.repository.OrdenLaboratorioRepository;
 import gt.edu.umg.sistemamedico.repository.PagoRepository;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,9 @@ import java.util.UUID;
  * no externa), registra el pago en his.pago con tipo_pago = 1 y orden_id,
  * y pasa la orden a EN PROCESO (order_status = 1) para que el laboratorio
  * pueda registrar resultados [CU-09, RN-CU09-01].
+ *
+ * El metodo de pago se valida y se nombra con el catalogo his.metodo_pago
+ * [CU-14 Metodos de Pago].
  */
 @Service
 public class CobroLabService {
@@ -33,17 +38,22 @@ public class CobroLabService {
     public static final short ORDEN_PENDIENTE = 0;
     public static final short ORDEN_EN_PROCESO = 1;
 
+    private static final short ACTIVO = 1;
+
     private static final ZoneId ZONA_GT = ZoneId.of("America/Guatemala");
     private static final DateTimeFormatter FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", new Locale("es", "GT"));
 
     private final OrdenLaboratorioRepository ordenRepository;
     private final PagoRepository pagoRepository;
+    private final MetodoPagoRepository metodoPagoRepository;
 
     public CobroLabService(OrdenLaboratorioRepository ordenRepository,
-                           PagoRepository pagoRepository) {
+                           PagoRepository pagoRepository,
+                           MetodoPagoRepository metodoPagoRepository) {
         this.ordenRepository = ordenRepository;
         this.pagoRepository = pagoRepository;
+        this.metodoPagoRepository = metodoPagoRepository;
     }
 
     // =====================================================================
@@ -171,6 +181,11 @@ public class CobroLabService {
             return ResultadoCobro.error("VALIDACION", "Debe seleccionar un metodo de pago.");
         }
 
+        // [CU-14 Metodos de Pago] el metodo debe existir y estar activo en el catalogo.
+        if (!metodoActivo(metodoPago)) {
+            return ResultadoCobro.error("VALIDACION", "Metodo de pago no valido.");
+        }
+
         BigDecimal monto = orden.getMontoTotal().setScale(2, RoundingMode.HALF_UP);
 
         Pago pago = new Pago();
@@ -224,6 +239,7 @@ public class CobroLabService {
             pago.setEstadoPago(Pago.ESTADO_APROBADO);
 
         } else {
+            // Metodo nuevo del catalogo que la caja todavia no sabe cobrar.
             return ResultadoCobro.error("VALIDACION", "Metodo de pago no valido.");
         }
 
@@ -270,15 +286,19 @@ public class CobroLabService {
         );
     }
 
+    /** [CU-14 Metodos de Pago] true si el metodo existe en his.metodo_pago y esta activo. */
+    private boolean metodoActivo(Short metodo) {
+        return metodoPagoRepository.findById(metodo)
+                .map(m -> m.getState() != null && m.getState() == ACTIVO)
+                .orElse(false);
+    }
+
+    /** [CU-14 Metodos de Pago] nombre del metodo tomado del catalogo his.metodo_pago. */
     private String nombreMetodo(Short metodo) {
         if (metodo == null) return "Desconocido";
-        return switch (metodo) {
-            case 0 -> "Efectivo";
-            case 1 -> "Tarjeta Visa";
-            case 2 -> "Tarjeta Mastercard";
-            case 3 -> "Tarjeta de Debito";
-            default -> "Desconocido";
-        };
+        return metodoPagoRepository.findById(metodo)
+                .map(MetodoPago::getNombre)
+                .orElse("Desconocido");
     }
 
     private String formato(BigDecimal monto) {
