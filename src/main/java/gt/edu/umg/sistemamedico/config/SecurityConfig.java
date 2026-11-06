@@ -43,6 +43,7 @@ import org.springframework.security.web.SecurityFilterChain;
  * /bitacora-inventario/** -> Farmaceutico y Administrador. [CU-15]
  *                    El Administrador solo registra ajustes (Ajuste+ / Ajuste-);
  *                    eso lo controla BitacoraInventarioService.
+ * /reportes/**    -> solo rol Administrador. [Reporteria: pantalla, PDF y Excel]
  */
 @Configuration
 public class SecurityConfig {
@@ -72,6 +73,7 @@ public class SecurityConfig {
                         .requestMatchers("/sedes-especialidades/**").hasRole("Administrador")
                         .requestMatchers("/catalogos/**").hasRole("Administrador")
                         .requestMatchers("/bitacora-inventario/**").hasAnyRole("Farmaceutico", "Administrador")
+                        .requestMatchers("/reportes/**").hasRole("Administrador")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
