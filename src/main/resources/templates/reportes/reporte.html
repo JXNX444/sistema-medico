@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${tipo.titulo} + ' · Reportes', null)}"></head>
+<body>
+
+<!--
+  Reporteria (solo Administrador).
+  Una sola plantilla para todos los reportes del enum TipoReporte:
+    1. Selector de reporte
+    2. Filtros (fechas, sede, Top N)  -> GET /reportes/{slug}?desde&hasta&sucursal&top
+    3. Indicadores (KPIs)
+    4. Dos graficas con Chart.js (static/js/reportes.js)
+    5. Tabla de detalle con total
+    6. Descargas PDF y Excel con los mismos filtros
+-->
+<style>
+    .rp-tabs { display:flex; flex-wrap:wrap; gap:8px; }
+    .rp-tab { padding:8px 14px; border-radius:var(--sm-r-pill); border:1px solid var(--sm-border);
+        background:#fff; color:var(--sm-slate-600); font-size:13px; font-weight:600; text-decoration:none; }
+    .rp-tab:hover { border-color:var(--sm-cyan); color:var(--sm-cyan-dark); }
+    .rp-tab.is-active { background:var(--sm-ink); border-color:var(--sm-ink); color:#fff; }
+
+    .rp-filtros { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; align-items:end; }
+    .rp-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; }
+    .rp-kpi-sub { font-size:12px; color:var(--sm-slate-500); margin-top:2px;
+        white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .rp-graficas { display:grid; grid-template-columns:3fr 2fr; gap:16px; }
+    @media (max-width: 900px) { .rp-graficas { grid-template-columns:1fr; } }
+    .rp-grafica { position:relative; height:340px; }
+
+    .rp-tabla { width:100%; border-collapse:collapse; font-size:14px; }
+    .rp-tabla th { background:var(--sm-ink); color:#fff; text-align:left; padding:10px 12px; font-size:12px;
+        font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+    .rp-tabla td { padding:10px 12px; border-bottom:1px solid var(--sm-border); color:var(--sm-ink); }
+    .rp-tabla tbody tr:nth-child(even) td { background:var(--sm-panel); }
+    .rp-tabla tbody tr:hover td { background:var(--sm-cyan-25); }
+    .rp-tabla .num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .rp-tabla tfoot td { background:var(--sm-border); font-weight:800; }
+    .rp-barra { display:inline-block; vertical-align:middle; height:6px; border-radius:3px;
+        background:var(--sm-cyan-dark); margin-right:8px; }
+    .rp-meta { font-size:12px; color:var(--sm-slate-500); }
+</style>
+
+<nav class="sm-navbar">
+    <div th:replace="~{fragments/layout :: brand('HOSPITAL SAN RAFAEL','')}"></div>
+    <a th:href="@{/panel/inicio}" class="sm-btn sm-btn--ghost sm-btn--sm">← Volver al panel</a>
+</nav>
+
+<main style="max-width:1280px;margin:0 auto;padding:32px 24px;display:flex;flex-direction:column;gap:18px;">
+
+    <!-- 1. Selector de reporte (conserva los filtros actuales) -->
+    <div class="rp-tabs">
+        <a th:each="t : ${tipos}"
+           th:href="@{/reportes/{s}(s=${t.slug})} + ${query}"
+           th:text="${t.titulo}"
+           class="rp-tab" th:classappend="${t == tipo} ? 'is-active'">Reporte</a>
+    </div>
+
+    <!-- Titulo + descargas -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+        <div>
+            <div style="font-size:26px;font-weight:800;" th:text="${tipo.titulo}">Reporte</div>
+            <div style="font-size:14px;color:var(--sm-slate-500);" th:text="${tipo.descripcion}">Descripción</div>
+        </div>
+        <div th:if="${resultado != null and !resultado.vacio}" style="display:flex;gap:8px;">
+            <a th:href="@{/reportes/{s}/pdf(s=${tipo.slug})} + ${query}" class="sm-btn sm-btn--dark sm-btn--sm">
+                Descargar PDF
+            </a>
+            <a th:href="@{/reportes/{s}/excel(s=${tipo.slug})} + ${query}" class="sm-btn sm-btn--ghost sm-btn--sm">
+                Descargar Excel
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. Filtros -->
+    <form class="sm-panel rp-filtros" method="get" th:action="@{/reportes/{s}(s=${tipo.slug})}">
+        <div class="sm-field">
+            <label for="desde">Desde</label>
+            <input id="desde" name="desde" type="date" class="sm-input" required
+                   th:value="${filtros.desdeIso}">
+        </div>
+        <div class="sm-field">
+            <label for="hasta">Hasta</label>
+            <input id="hasta" name="hasta" type="date" class="sm-input" required
+                   th:value="${filtros.hastaIso}">
+        </div>
+        <div class="sm-field">
+            <label for="sucursal">Sede</label>
+            <select id="sucursal" name="sucursal" class="sm-select">
+                <option value="0" th:selected="${filtros.sucursalId() == 0}">Todas las sedes</option>
+                <option th:each="s : ${sucursales}" th:value="${s.id}" th:text="${s.nombre}"
+                        th:selected="${s.id == filtros.sucursalId()}">Sede</option>
+            </select>
+        </div>
+        <div class="sm-field" th:if="${tipo.usaTop}">
+            <label for="top">Mostrar Top</label>
+            <input id="top" name="top" type="number" min="1" max="50" class="sm-input"
+                   th:value="${filtros.top()}">
+        </div>
+        <button type="submit" class="sm-btn sm-btn--primary">Generar reporte</button>
+    </form>
+
+    <!-- Error de validacion -->
+    <div th:if="${error}" class="sm-badge sm-badge--danger"
+         style="padding:12px 14px;font-size:14px;" th:text="${error}">Error</div>
+
+    <th:block th:if="${resultado != null}">
+
+        <div class="rp-meta"
+             th:text="'Período: ' + ${resultado.filtros().rangoTexto} + '  ·  Sede: ' + ${resultado.filtros().sucursalNombre()}
+                      + '  ·  Generado por ' + ${resultado.generadoPor()} + ' el ' + ${resultado.generadoEnTexto}">
+            Período
+        </div>
+
+        <!-- Sin datos -->
+        <div th:if="${resultado.vacio}" class="sm-empty">
+            <div class="sm-empty__icon">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3v18h18"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>
+            </div>
+            <div class="sm-empty__title">No hay datos para estos filtros</div>
+            <div class="sm-empty__desc">Probá con otro rango de fechas o con todas las sedes.</div>
+        </div>
+
+        <th:block th:unless="${resultado.vacio}">
+
+            <!-- 3. Indicadores -->
+            <div class="rp-kpis">
+                <div class="sm-stat">
+                    <div class="sm-stat__label" th:text="'Total ' + ${tipo.columnaValor}">Total</div>
+                    <div class="sm-stat__value" th:text="${resultado.totalTexto}">0</div>
+                </div>
+                <div class="sm-stat">
+                    <div class="sm-stat__label">Registros</div>
+                    <div class="sm-stat__value" th:text="${resultado.cantidad}">0</div>
+                </div>
+                <div class="sm-stat">
+                    <div class="sm-stat__label">Promedio por registro</div>
+                    <div class="sm-stat__value" th:text="${resultado.promedioTexto}">0</div>
+                </div>
+                <div class="sm-stat">
+                    <div class="sm-stat__label">Mayor</div>
+                    <div class="sm-stat__value" th:text="${resultado.formatear(resultado.mayor().valor())}">0</div>
+                    <div class="rp-kpi-sub" th:text="${resultado.mayor().etiqueta()}"
+                         th:title="${resultado.mayor().etiqueta()}">Nombre</div>
+                </div>
+            </div>
+
+            <!-- 4. Graficas (las dibuja static/js/reportes.js con Chart.js) -->
+            <div class="rp-graficas">
+                <div class="sm-panel">
+                    <div style="font-size:14px;font-weight:700;margin-bottom:10px;" th:text="${tipo.titulo}">Gráfica</div>
+                    <div class="rp-grafica"><canvas id="graficaPrincipal" role="img"
+                                                    th:aria-label="'Gráfica: ' + ${tipo.titulo}"></canvas></div>
+                </div>
+                <div class="sm-panel">
+                    <div style="font-size:14px;font-weight:700;margin-bottom:10px;"
+                         th:text="${tipo.graficaSecundaria().name() == 'DONA'} ? 'Participación (% del total)' : 'Comparación'">Gráfica</div>
+                    <div class="rp-grafica"><canvas id="graficaSecundaria" role="img"
+                                                    aria-label="Gráfica secundaria"></canvas></div>
+                </div>
+            </div>
+
+            <!-- 5. Tabla de detalle -->
+            <div class="sm-panel" style="padding:0;overflow:hidden;">
+                <table class="rp-tabla">
+                    <thead>
+                    <tr>
+                        <th style="width:50px;text-align:center;">#</th>
+                        <th th:text="${tipo.columnaEtiqueta}">Etiqueta</th>
+                        <th th:if="${tipo.tieneDetalle}" th:text="${tipo.columnaDetalle}">Detalle</th>
+                        <th class="num" th:text="${tipo.columnaValor}">Valor</th>
+                        <th class="num" style="width:190px;">% del total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="f : ${resultado.filas()}">
+                        <td style="text-align:center;color:var(--sm-slate-500);" th:text="${f.posicion()}">1</td>
+                        <td style="font-weight:600;" th:text="${f.etiqueta()}">Etiqueta</td>
+                        <td th:if="${tipo.tieneDetalle}" th:text="${f.detalle() != null ? f.detalle() : '—'}">Detalle</td>
+                        <td class="num" th:text="${resultado.formatear(f.valor())}">0</td>
+                        <td class="num">
+                            <span class="rp-barra" th:style="'width:' + ${f.porcentaje()} + 'px'"></span>
+                            <span th:text="${resultado.formatearPorcentaje(f.porcentaje())}">0 %</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td th:colspan="${tipo.tieneDetalle} ? 3 : 2">TOTAL</td>
+                        <td class="num" th:text="${resultado.totalTexto}">0</td>
+                        <td class="num">100.0 %</td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Datos para las graficas -->
+            <script th:inline="javascript">
+                window.REPORTE = {
+                    grafica: /*[[${tipo.grafica.name()}]]*/ 'BARRAS',
+                    graficaSecundaria: /*[[${tipo.graficaSecundaria().name()}]]*/ 'DONA',
+                    moneda: /*[[${tipo.moneda}]]*/ false,
+                    columnaValor: /*[[${tipo.columnaValor}]]*/ 'Valor',
+                    etiquetas: /*[[${resultado.etiquetas}]]*/ [],
+                    valores: /*[[${resultado.valores}]]*/ []
+                };
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+            <script th:src="@{/js/reportes.js}"></script>
+        </th:block>
+    </th:block>
+
+</main>
+
+</body>
+</html>
