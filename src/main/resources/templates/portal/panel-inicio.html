@@ -27,7 +27,7 @@
 
 <!--
   Accesos: cada tarjeta solo la ve el actor de su CU.
-    Administrador -> CU-01, CU-13, CU-14, CU-15 (ajustes)
+    Administrador -> CU-01, CU-13, CU-14, CU-15 (ajustes), Reportes
     Recepcionista -> CU-05 | Cajero -> CU-06, CU-10 | Enfermero -> CU-07
     Medico -> CU-08, CU-16 (+ resultados de CU-09 en solo lectura)
     Laboratorista -> CU-09 | Farmaceutico -> CU-11, CU-15
@@ -179,6 +179,17 @@
             </div>
             <div class="sm-feature__title">Catálogos del Sistema</div>
             <div class="sm-feature__desc">Especialidades, sucursales, estados de cita, laboratorios, exámenes, medicamentos, roles e inventario.</div>
+        </a>
+
+        <!-- Reporteria: reportes con graficas, PDF y Excel -->
+        <a th:if="${rol == 'Administrador'}" th:href="@{/reportes}"
+           class="sm-panel sm-feature" style="text-decoration:none;">
+            <div class="sm-feature__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3v18h18"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>
+            </div>
+            <div class="sm-feature__title">Reportes</div>
+            <div class="sm-feature__desc">Médicos que más atienden, ingresos, especialidades, diagnósticos y más, con gráficas, PDF y Excel.</div>
         </a>
 
     </div>
