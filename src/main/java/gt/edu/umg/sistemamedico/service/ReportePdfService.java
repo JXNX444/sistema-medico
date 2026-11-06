@@ -29,6 +29,7 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.CenterTextMode;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.RingPlot;
 import org.jfree.chart.renderer.category.BarRenderer;
@@ -36,6 +37,7 @@ import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.springframework.stereotype.Service;
@@ -236,28 +238,47 @@ public class ReportePdfService {
                 datos.setValue(recortar(f.etiqueta(), 35), f.valor());
             }
             JFreeChart chart = ChartFactory.createRingChart(null, datos, true, false, false);
+            chart.setBackgroundPaint(Color.WHITE);
+
             RingPlot plot = (RingPlot) chart.getPlot();
             plot.setBackgroundPaint(Color.WHITE);
             plot.setOutlineVisible(false);
             plot.setShadowPaint(null);
-            plot.setSectionDepth(0.40);
+            plot.setSectionDepth(0.38);
             plot.setSeparatorsVisible(false);
             plot.setSectionOutlinesVisible(true);
             plot.setDefaultSectionOutlinePaint(Color.WHITE);
-            plot.setDefaultSectionOutlineStroke(new BasicStroke(3f));
-            plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{2}"));
-            plot.setLabelBackgroundPaint(Color.WHITE);
-            plot.setLabelOutlinePaint(null);
-            plot.setLabelShadowPaint(null);
-            plot.setLabelFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 20));
+            plot.setDefaultSectionOutlineStroke(new BasicStroke(4f));
+            plot.setInteriorGap(0.04);
             for (int i = 0; i < filas.size(); i++) {
                 plot.setSectionPaint(recortar(filas.get(i).etiqueta(), 35), CATEGORIAS[i % CATEGORIAS.length]);
             }
+
+            // Sin etiquetas con lineas alrededor de la dona (se amontonan en las rebanadas chicas):
+            // el porcentaje y el valor van en la leyenda, alineados en lista.
+            plot.setLabelGenerator(null);
+            DecimalFormatSymbols simbolos = DecimalFormatSymbols.getInstance(Locale.US);
+            plot.setLegendLabelGenerator(new StandardPieSectionLabelGenerator(
+                    "{0}   {2}   ({1})",
+                    formatoNumero(r.tipo().isMoneda()),
+                    new DecimalFormat("0.0%", simbolos)));
+            // cuadritos de color de la leyenda mas visibles
+            plot.setLegendItemShape(new java.awt.geom.Ellipse2D.Double(-8, -8, 16, 16));
+
+            // Total al centro de la dona
+            plot.setCenterTextMode(CenterTextMode.FIXED);
+            plot.setCenterText(formatoNumero(r.tipo().isMoneda()).format(r.total()));
+            plot.setCenterTextFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 32));
+            plot.setCenterTextColor(TINTA);
+
             LegendTitle leyenda = chart.getLegend();
             leyenda.setPosition(RectangleEdge.RIGHT);
-            leyenda.setItemFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 20));
+            leyenda.setItemFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 21));
+            leyenda.setItemPaint(TINTA);
             leyenda.setFrame(org.jfree.chart.block.BlockBorder.NONE);
-            chart.setBackgroundPaint(Color.WHITE);
+            leyenda.setBackgroundPaint(Color.WHITE);
+            leyenda.setItemLabelPadding(new RectangleInsets(6, 6, 6, 6));
+            leyenda.setMargin(new RectangleInsets(0, 0, 0, 30));
             return chart;
         }
 
